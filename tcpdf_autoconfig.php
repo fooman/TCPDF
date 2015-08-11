@@ -208,10 +208,6 @@ if (!defined('HEAD_MAGNIFICATION')) {
 	define('HEAD_MAGNIFICATION', 1.1);
 }
 
-if (!defined('K_CELL_HEIGHT_RATIO')) {
-	define('K_CELL_HEIGHT_RATIO', 1.25);
-}
-
 if (!defined('K_TITLE_MAGNIFICATION')) {
 	define('K_TITLE_MAGNIFICATION', 1.3);
 }

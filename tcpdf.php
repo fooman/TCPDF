@@ -911,7 +911,7 @@ class TCPDF {
 	 * @protected
 	 * @since 3.0.014 (2008-05-23)
 	 */
-	protected $cell_height_ratio = K_CELL_HEIGHT_RATIO;
+	protected $cell_height_ratio = 1.25;
 
 	/**
 	 * PDF viewer preferences.
