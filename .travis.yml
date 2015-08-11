@@ -6,3 +6,4 @@ php:
 
 before_script:
     - printf "\n" | pecl install imagick
+    - composer install --prefer-source --no-interaction --dev
