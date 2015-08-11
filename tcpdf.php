@@ -107,9 +107,6 @@
  * @version 6.2.8
  */
 
-// TCPDF configuration
-require_once(dirname(__FILE__).'/tcpdf_autoconfig.php');
-
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 /**
@@ -1826,6 +1823,9 @@ class TCPDF {
 	 * @see getPageSizeFromFormat(), setPageFormat()
 	 */
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
+		// TCPDF configuration
+		require_once(dirname(__FILE__).'/tcpdf_autoconfig.php');
+
 		/* Set internal character encoding to ASCII */
 		if (function_exists('mb_internal_encoding') AND mb_internal_encoding()) {
 			$this->internal_encoding = mb_internal_encoding();
