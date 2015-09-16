@@ -1,6 +1,6 @@
 {
 	"name": "fooman/tcpdf",
-	"version": "6.2.11",
+	"version": "6.2.12",
 	"homepage": "http://www.tcpdf.org/",
 	"type": "library",
 	"description": "Trimmed down version of TCPDF (no examples, tools and minimal fonts). TCPDF is a PHP class for generating PDF documents and barcodes.",
