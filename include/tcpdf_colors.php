@@ -323,7 +323,7 @@ class TCPDF_COLORS {
 			$codes = str_replace(')', '', $codes);
 			$returncolor = explode(',', $codes);
 			foreach ($returncolor as $key => $val) {
-				if (strpos($val, '%') > 0) {
+				if (strpos($val, '%') !== false) {
 					// percentage
 					$returncolor[$key] = (255 * intval($val) / 100);
 				} else {

@@ -187,7 +187,7 @@ class TCPDF_PARSER {
 			$this->Error('Unable to find startxref');
 		}
 		// check xref position
-		if (strpos($this->pdfdata, 'xref', $startxref) == $startxref) {
+		if (strpos($this->pdfdata, 'xref', $startxref) === $startxref) {
 			// Cross-Reference
 			$xref = $this->decodeXref($startxref, $xref);
 		} else {
@@ -683,7 +683,7 @@ class TCPDF_PARSER {
 		$objref = $obj[0].' '.$obj[1].' obj';
 		// ignore leading zeros
 		$offset += strspn($this->pdfdata, '0', $offset);
-		if (strpos($this->pdfdata, $objref, $offset) != $offset) {
+		if (strpos($this->pdfdata, $objref, $offset) !== $offset) {
 			// an indirect reference to an undefined object shall be considered a reference to the null object
 			return array('null', 'null', $offset);
 		}

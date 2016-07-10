@@ -40,22 +40,6 @@
  * @version 1.1.1
  */
 
-// DOCUMENT_ROOT fix for IIS Webserver
-if ((!isset($_SERVER['DOCUMENT_ROOT'])) OR (empty($_SERVER['DOCUMENT_ROOT']))) {
-	if(isset($_SERVER['SCRIPT_FILENAME'])) {
-		$_SERVER['DOCUMENT_ROOT'] = str_replace( '\\', '/', substr($_SERVER['SCRIPT_FILENAME'], 0, 0-strlen($_SERVER['PHP_SELF'])));
-	} elseif(isset($_SERVER['PATH_TRANSLATED'])) {
-		$_SERVER['DOCUMENT_ROOT'] = str_replace( '\\', '/', substr(str_replace('\\\\', '\\', $_SERVER['PATH_TRANSLATED']), 0, 0-strlen($_SERVER['PHP_SELF'])));
-	} else {
-		// define here your DOCUMENT_ROOT path if the previous fails (e.g. '/var/www')
-		$_SERVER['DOCUMENT_ROOT'] = '/';
-	}
-}
-$_SERVER['DOCUMENT_ROOT'] = str_replace('//', '/', $_SERVER['DOCUMENT_ROOT']);
-if (substr($_SERVER['DOCUMENT_ROOT'], -1) != '/') {
-	$_SERVER['DOCUMENT_ROOT'] .= '/';
-}
-
 // Load main configuration file only if the K_TCPDF_EXTERNAL_CONFIG constant is set to false.
 if (!defined('K_TCPDF_EXTERNAL_CONFIG') OR !K_TCPDF_EXTERNAL_CONFIG) {
 	// define a list of default config files in order of priority
@@ -78,15 +62,6 @@ if (!defined('K_PATH_FONTS')) {
 
 if (!defined('K_PATH_URL')) {
 	$k_path_url = K_PATH_MAIN; // default value for console mode
-	if (isset($_SERVER['HTTP_HOST']) AND (!empty($_SERVER['HTTP_HOST']))) {
-		if(isset($_SERVER['HTTPS']) AND (!empty($_SERVER['HTTPS'])) AND (strtolower($_SERVER['HTTPS']) != 'off')) {
-			$k_path_url = 'https://';
-		} else {
-			$k_path_url = 'http://';
-		}
-		$k_path_url .= $_SERVER['HTTP_HOST'];
-		$k_path_url .= str_replace( '\\', '/', substr(K_PATH_MAIN, (strlen($_SERVER['DOCUMENT_ROOT']) - 1)));
-	}
 	define ('K_PATH_URL', $k_path_url);
 }
 

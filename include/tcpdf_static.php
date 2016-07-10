@@ -343,10 +343,6 @@ class TCPDF_STATIC {
 	 * @public static
 	 */
 	public static function sendOutputData($data, $length) {
-		if (!isset($_SERVER['HTTP_ACCEPT_ENCODING']) OR empty($_SERVER['HTTP_ACCEPT_ENCODING'])) {
-			// the content length may vary if the server is using compression
-			header('Content-Length: '.$length);
-		}
 		echo $data;
 	}
 
@@ -417,7 +413,7 @@ class TCPDF_STATIC {
 				$rnd .= uniqid('', true);
 			}
 		}
-		return $rnd.$seed.__FILE__.serialize($_SERVER).microtime(true);
+		return $rnd.$seed.__FILE__.microtime(true);
 	}
 
 	/**
@@ -1093,7 +1089,7 @@ class TCPDF_STATIC {
 		}
 		// split groups of selectors (comma-separated list of selectors)
 		foreach ($cssblocks as $key => $block) {
-			if (strpos($block[0], ',') > 0) {
+			if (strpos($block[0], ',') !== false) {
 				$selectors = explode(',', $block[0]);
 				foreach ($selectors as $sel) {
 					$cssblocks[] = array(0 => trim($sel), 1 => $block[1]);
@@ -1865,56 +1861,6 @@ class TCPDF_STATIC {
 	 */
 	public static function fileGetContents($file) {
 		$alt = array($file);
-		//
-		if ((strlen($file) > 1)
-		    && ($file[0] === '/')
-		    && ($file[1] !== '/')
-		    && !empty($_SERVER['DOCUMENT_ROOT'])
-		    && ($_SERVER['DOCUMENT_ROOT'] !== '/')
-		) {
-		    $findroot = strpos($file, $_SERVER['DOCUMENT_ROOT']);
-		    if (($findroot === false) || ($findroot > 1)) {
-			$alt[] = htmlspecialchars_decode(urldecode($_SERVER['DOCUMENT_ROOT'].$file));
-		    }
-		}
-		//
-		$protocol = 'http';
-		if (!empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) != 'off')) {
-		    $protocol .= 's';
-		}
-		//
-		$url = $file;
-		if (preg_match('%^//%', $url) && !empty($_SERVER['HTTP_HOST'])) {
-			$url = $protocol.':'.str_replace(' ', '%20', $url);
-		}
-		$url = htmlspecialchars_decode($url);
-		$alt[] = $url;
-		//
-		if (preg_match('%^(https?)://%', $url)
-		    && empty($_SERVER['HTTP_HOST'])
-		    && empty($_SERVER['DOCUMENT_ROOT'])
-		) {
-			$urldata = parse_url($url);
-			if (empty($urldata['query'])) {
-				$host = $protocol.'://'.$_SERVER['HTTP_HOST'];
-				if (strpos($url, $host) === 0) {
-				    // convert URL to full server path
-				    $tmp = str_replace($host, $_SERVER['DOCUMENT_ROOT'], $url);
-				    $alt[] = htmlspecialchars_decode(urldecode($tmp));
-				}
-			}
-		}
-		//
-		if (isset($_SERVER['SCRIPT_URI'])
-		    && !preg_match('%^(https?|ftp)://%', $file)
-		    && !preg_match('%^//%', $file)
-		) {
-		    $urldata = @parse_url($_SERVER['SCRIPT_URI']);
-		    return $urldata['scheme'].'://'.$urldata['host'].(($file[0] == '/') ? '' : '/').$file;
-		}
-		//
-		$alt = array_unique($alt);
-		//var_dump($alt);exit;//DEBUG
 		foreach ($alt as $path) {
 			$ret = @file_get_contents($path);
 			if ($ret !== false) {

@@ -12503,7 +12503,7 @@ class TCPDF {
 		if ($this->pdfa_mode OR (empty($this->javascript) AND empty($this->js_objects))) {
 			return;
 		}
-		if (strpos($this->javascript, 'this.addField') > 0) {
+		if (strpos($this->javascript, 'this.addField') !== FALSE) {
 			if (!$this->ur['enabled']) {
 				//$this->setUserRights();
 			}
@@ -24175,16 +24175,6 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 						if (!TCPDF_STATIC::empty_string($this->svgdir) AND (($img[0] == '.') OR (basename($img) == $img))) {
 							// replace relative path with full server path
 							$img = $this->svgdir.'/'.$img;
-						}
-						if (($img[0] == '/') AND !empty($_SERVER['DOCUMENT_ROOT']) AND ($_SERVER['DOCUMENT_ROOT'] != '/')) {
-							$findroot = strpos($img, $_SERVER['DOCUMENT_ROOT']);
-							if (($findroot === false) OR ($findroot > 1)) {
-								if (substr($_SERVER['DOCUMENT_ROOT'], -1) == '/') {
-									$img = substr($_SERVER['DOCUMENT_ROOT'], 0, -1).$img;
-								} else {
-									$img = $_SERVER['DOCUMENT_ROOT'].$img;
-								}
-							}
 						}
 						$img = urldecode($img);
 						$testscrtype = @parse_url($img);
