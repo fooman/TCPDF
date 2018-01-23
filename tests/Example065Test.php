@@ -9,7 +9,6 @@ class Example065Test extends Common
 
     public function testPdfOutput()
     {
-        $this->markTestIncomplete('Repository excludes pdfahelvetica font.');
 
 // create new PDF document
         $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false, true);
@@ -70,7 +69,12 @@ EOD;
 
 // ---------------------------------------------------------
 
-        $this->comparePdfs($pdf);
+        //$this->comparePdfs($pdf); we don't use the same font so visual difference is quite big
 
+        $this->tmpFileName = sprintf(__DIR__ . '/example_%s_%s.pdf', static::EXAMPLE_NR, uniqid());
+        $this->expectedPdf = sprintf(__DIR__ . '/_expected_pdfs/example_%s.pdf', static::EXAMPLE_NR);
+
+        $pdf->Output($this->tmpFileName, 'F');
+        $this->assertFileExists($this->tmpFileName);
     }
 }
