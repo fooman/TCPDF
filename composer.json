@@ -22,7 +22,6 @@
 	},
 	"autoload": {
 		"classmap": [
-		"config",
 		"include",
 		"tcpdf.php",
 		"tcpdf_parser.php",
