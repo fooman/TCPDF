@@ -19,8 +19,8 @@ class Common extends \PHPUnit\Framework\TestCase
 
     protected function setUp()
     {
-        $this->tmpFileName = sprintf(__DIR__ . '/example_%s_%s.pdf', static::EXAMPLE_NR, uniqid());
-        $this->expectedPdf = sprintf(__DIR__ . '/_expected_pdfs/example_%s.pdf', static::EXAMPLE_NR);
+        $this->tmpFileName = sprintf(sys_get_temp_dir() . '/example_%s_%s.pdf', static::EXAMPLE_NR, uniqid());
+        $this->expectedPdf = sprintf(sys_get_temp_dir() . '/_expected_pdfs/example_%s.pdf', static::EXAMPLE_NR);
     }
 
 
