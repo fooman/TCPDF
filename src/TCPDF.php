@@ -12804,7 +12804,7 @@ class TCPDF
         $k = $this->k;
         $this->javascript .= sprintf("f".$name."=this.addField('%s','%s',%u,[%F,%F,%F,%F]);", $name, $type, $this->PageNo()-1, $x*$k, ($this->h-$y)*$k+1, ($x+$w)*$k, ($this->h-$y-$h)*$k+1)."\n";
         $this->javascript .= 'f'.$name.'.textSize='.$this->FontSizePt.";\n";
-        foreach ($prop as $key => val) {
+        foreach ($prop as $key => $val) {
             if (strcmp(substr($key, -5), 'Color') == 0) {
                 $val = COLORS::_JScolor($val);
             } else {
