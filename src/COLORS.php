@@ -30,6 +30,7 @@
 // Description : Array of WEB safe colors
 //
 //============================================================+
+namespace TCPDF;
 
 /**
  * @file
@@ -39,13 +40,13 @@
  */
 
 /**
- * @class TCPDF_COLORS
+ * @class TCPDF\COLORS
  * PHP color class for TCPDF
  * @package com.tecnick.tcpdf
  * @version 1.0.004
  * @author Nicola Asuni - info@tecnick.com
  */
-class TCPDF_COLORS
+class COLORS
 {
 
     /**
@@ -208,13 +209,28 @@ class TCPDF_COLORS
      * Array of valid JavaScript color names
      * @public static
      */
-    public static $jscolor =  ['transparent', 'black', 'white', 'red', 'green', 'blue', 'cyan', 'magenta', 'yellow', 'dkGray', 'gray', 'ltGray'];
+    public static $jscolor = [
+        'transparent',
+        'black',
+        'white',
+        'red',
+        'green',
+        'blue',
+        'cyan',
+        'magenta',
+        'yellow',
+        'dkGray',
+        'gray',
+        'ltGray'
+    ];
 
     /**
      * Array of Spot colors (C,M,Y,K,name)
      * Color keys must be in lowercase and without spaces.
-     * As long as no open standard for spot colours exists, you have to buy a colour book by one of the colour manufacturers and insert the values and names of spot colours directly.
+     * As long as no open standard for spot colours exists, you have to buy a colour book by one of the colour
+     * manufacturers and insert the values and names of spot colours directly.
      * Common industry standard spot colors are: ANPA-COLOR, DIC, FOCOLTONE, GCMI, HKS, PANTONE, TOYO, TRUMATCH.
+     *
      * @public static
      */
     public static $spotcolor =  [
@@ -257,7 +273,14 @@ class TCPDF_COLORS
         if (isset(self::$spotcolor[$color])) {
             if (!isset($spotc[$name])) {
                 $i = (1 + count($spotc));
-                $spotc[$name] = ['C' => self::$spotcolor[$color][0], 'M' => self::$spotcolor[$color][1], 'Y' => self::$spotcolor[$color][2], 'K' => self::$spotcolor[$color][3], 'name' => self::$spotcolor[$color][4], 'i' => $i];
+                $spotc[$name] = [
+                    'C' => self::$spotcolor[$color][0],
+                    'M' => self::$spotcolor[$color][1],
+                    'Y' => self::$spotcolor[$color][2],
+                    'K' => self::$spotcolor[$color][3],
+                    'name' => self::$spotcolor[$color][4],
+                    'i' => $i
+                ];
             }
             return $spotc[self::$spotcolor[$color][4]];
         }
@@ -265,10 +288,13 @@ class TCPDF_COLORS
     }
 
     /**
-     * Returns an array (RGB or CMYK) from an html color name, or a six-digit (i.e. #3FE5AA), or three-digit (i.e. #7FF) hexadecimal color, or a javascript color array, or javascript color name.
+     * Returns an array (RGB or CMYK) from an html color name, or a six-digit (i.e. #3FE5AA),
+     * or three-digit (i.e. #7FF) hexadecimal color, or a javascript color array, or javascript color name.
+     *
      * @param $hcolor (string) HTML color.
      * @param $spotc (array) Reference to an array of spot colors.
      * @param $defcol (array) Color to return in case of error.
+     *
      * @return array RGB or CMYK color, or false in case of error.
      * @public static
      */
@@ -281,35 +307,37 @@ class TCPDF_COLORS
             if (preg_match('/[\[][\"\'](t|g|rgb|cmyk)[\"\'][\,]?([0-9\.]*)[\,]?([0-9\.]*)[\,]?([0-9\.]*)[\,]?([0-9\.]*)[\]]/', $color, $m) > 0) {
                 $returncolor = [];
                 switch ($m[1]) {
-                    case 'cmyk': {
+                    case 'cmyk':
                         // RGB
                         $returncolor['C'] = max(0, min(100, (floatval($m[2]) * 100)));
                         $returncolor['M'] = max(0, min(100, (floatval($m[3]) * 100)));
                         $returncolor['Y'] = max(0, min(100, (floatval($m[4]) * 100)));
                         $returncolor['K'] = max(0, min(100, (floatval($m[5]) * 100)));
                         break;
-                    }
-                    case 'rgb': {
+
+                    case 'rgb':
                         // RGB
                         $returncolor['R'] = max(0, min(255, (floatval($m[2]) * 255)));
                         $returncolor['G'] = max(0, min(255, (floatval($m[3]) * 255)));
                         $returncolor['B'] = max(0, min(255, (floatval($m[4]) * 255)));
                         break;
-                    }
-                    case 'g': {
+
+                    case 'g':
                         // grayscale
                         $returncolor['G'] = max(0, min(255, (floatval($m[2]) * 255)));
                         break;
-                    }
+
                     case 't':
-                        default: {
-                            // transparent (empty array)
+                    default:
+                        // transparent (empty array)
                         break;
-                        }
                 }
                 return $returncolor;
             }
-        } elseif ((substr($color, 0, 4) != 'cmyk') and (substr($color, 0, 3) != 'rgb') and (($dotpos = strpos($color, '.')) !== false)) {
+        } elseif ((substr($color, 0, 4) != 'cmyk') and (substr($color, 0, 3) != 'rgb') and (($dotpos = strpos(
+            $color,
+            '.'
+        )) !== false)) {
             // remove class parent (i.e.: color.red)
             $color = substr($color, ($dotpos + 1));
             if ($color == 'transparent') {
@@ -372,7 +400,7 @@ class TCPDF_COLORS
         }
         // HEXADECIMAL REPRESENTATION
         switch (strlen($color_code)) {
-            case 3: {
+            case 3:
                 // 3-digit RGB hexadecimal representation
                 $r = substr($color_code, 0, 1);
                 $g = substr($color_code, 1, 1);
@@ -382,16 +410,16 @@ class TCPDF_COLORS
                 $returncolor['G'] = max(0, min(255, hexdec($g.$g)));
                 $returncolor['B'] = max(0, min(255, hexdec($b.$b)));
                 break;
-            }
-            case 6: {
+
+            case 6:
                 // 6-digit RGB hexadecimal representation
                 $returncolor = [];
                 $returncolor['R'] = max(0, min(255, hexdec(substr($color_code, 0, 2))));
                 $returncolor['G'] = max(0, min(255, hexdec(substr($color_code, 2, 2))));
                 $returncolor['B'] = max(0, min(255, hexdec(substr($color_code, 4, 2))));
                 break;
-            }
-            case 8: {
+
+            case 8:
                 // 8-digit CMYK hexadecimal representation
                 $returncolor = [];
                 $returncolor['C'] = max(0, min(100, round(hexdec(substr($color_code, 0, 2)) / 2.55)));
@@ -399,11 +427,10 @@ class TCPDF_COLORS
                 $returncolor['Y'] = max(0, min(100, round(hexdec(substr($color_code, 4, 2)) / 2.55)));
                 $returncolor['K'] = max(0, min(100, round(hexdec(substr($color_code, 6, 2)) / 2.55)));
                 break;
-            }
-            default: {
+
+            default:
                 $returncolor = $defcol;
                 break;
-            }
         }
         return $returncolor;
     }
@@ -420,21 +447,31 @@ class TCPDF_COLORS
         $c = array_values($c);
         $color = '[';
         switch (count($c)) {
-            case 4: {
+            case 4:
                 // CMYK
-                $color .= sprintf('%F %F %F %F', (max(0, min(100, floatval($c[0]))) / 100), (max(0, min(100, floatval($c[1]))) / 100), (max(0, min(100, floatval($c[2]))) / 100), (max(0, min(100, floatval($c[3]))) / 100));
+                $color .= sprintf(
+                    '%F %F %F %F',
+                    (max(0, min(100, floatval($c[0]))) / 100),
+                    (max(0, min(100, floatval($c[1]))) / 100),
+                    (max(0, min(100, floatval($c[2]))) / 100),
+                    (max(0, min(100, floatval($c[3]))) / 100)
+                );
                 break;
-            }
-            case 3: {
+
+            case 3:
                 // RGB
-                $color .= sprintf('%F %F %F', (max(0, min(255, floatval($c[0]))) / 255), (max(0, min(255, floatval($c[1]))) / 255), (max(0, min(255, floatval($c[2]))) / 255));
+                $color .= sprintf(
+                    '%F %F %F',
+                    (max(0, min(255, floatval($c[0]))) / 255),
+                    (max(0, min(255, floatval($c[1]))) / 255),
+                    (max(0, min(255, floatval($c[2]))) / 255)
+                );
                 break;
-            }
-            case 1: {
+
+            case 1:
                 // grayscale
                 $color .= sprintf('%F', (max(0, min(255, floatval($c[0]))) / 255));
                 break;
-            }
         }
         $color .= ']';
         return $color;
@@ -450,15 +487,20 @@ class TCPDF_COLORS
     public static function _JScolor($color)
     {
         if (substr($color, 0, 1) == '#') {
-            return sprintf("['RGB',%F,%F,%F]", (hexdec(substr($color, 1, 2)) / 255), (hexdec(substr($color, 3, 2)) / 255), (hexdec(substr($color, 5, 2)) / 255));
+            return sprintf(
+                "['RGB',%F,%F,%F]",
+                (hexdec(substr($color, 1, 2)) / 255),
+                (hexdec(substr($color, 3, 2)) / 255),
+                (hexdec(substr($color, 5, 2)) / 255)
+            );
         }
         if (!in_array($color, self::$jscolor)) {
             // default transparent color
-            $color = $jscolor[0];
+            $color = self::$jscolor[0];
         }
         return 'color.'.$color;
     }
-} // END OF TCPDF_COLORS CLASS
+} // END OF COLORS CLASS
 
 //============================================================+
 // END OF FILE

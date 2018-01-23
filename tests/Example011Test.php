@@ -65,7 +65,7 @@ class Example011Test extends Common
 }
 
 // extend TCPF with custom functions
-class MYPDF011 extends TCPDF {
+class MYPDF011 extends TCPDF\TCPDF {
 
     // Load table data from file
     public function LoadData($file) {

@@ -32,16 +32,16 @@
 // Class to create DataMatrix ECC 200 barcode arrays for TCPDF class.
 // DataMatrix (ISO/IEC 16022:2006) is a 2-dimensional bar code.
 //============================================================+
-
+namespace TCPDF\Barcodes;
 /**
-* @file
-* Class to create DataMatrix ECC 200 barcode arrays for TCPDF class.
-* DataMatrix (ISO/IEC 16022:2006) is a 2-dimensional bar code.
-*
-* @package com.tecnick.tcpdf
-* @author Nicola Asuni
-* @version 1.0.008
-*/
+ * @file
+ * Class to create DataMatrix ECC 200 barcode arrays for TCPDF class.
+ * DataMatrix (ISO/IEC 16022:2006) is a 2-dimensional bar code.
+ *
+ * @package com.tecnick.tcpdf
+ * @author Nicola Asuni
+ * @version 1.0.008
+ */
 
 // custom definitions
 if (!defined('DATAMATRIXDEFS')) {
@@ -51,7 +51,6 @@ if (!defined('DATAMATRIXDEFS')) {
     define('DATAMATRIXDEFS', true);
 
     // -----------------------------------------------------
-
 } // end of custom definitions
 
 // #*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#
@@ -98,14 +97,14 @@ define('ENC_ASCII_EXT', 6);
 define('ENC_ASCII_NUM', 7);
 
 /**
-* @class Datamatrix
-* Class to create DataMatrix ECC 200 barcode arrays for TCPDF class.
-* DataMatrix (ISO/IEC 16022:2006) is a 2-dimensional bar code.
-*
-* @package com.tecnick.tcpdf
-* @author Nicola Asuni
-* @version 1.0.004
-*/
+ * @class Datamatrix
+ * Class to create DataMatrix ECC 200 barcode arrays for TCPDF class.
+ * DataMatrix (ISO/IEC 16022:2006) is a 2-dimensional bar code.
+ *
+ * @package com.tecnick.tcpdf
+ * @author Nicola Asuni
+ * @version 1.0.004
+ */
 class Datamatrix
 {
 

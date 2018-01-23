@@ -10,7 +10,7 @@ class Example055Test extends Common
     public function testPdfOutput()
     {
 // create new PDF document
-        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $pdf = new TCPDF\TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set document information
         $pdf->SetCreator(PDF_CREATOR);
@@ -75,7 +75,7 @@ class Example055Test extends Common
                 if (($i > 0) AND (($i % 16) == 0)) {
                     $pdf->Ln();
                 }
-                $pdf->Cell(11.25, 11.25, TCPDF_FONTS::unichr($i), 1, 0, 'C', false, '', 0, false, 'T', 'M');
+                $pdf->Cell(11.25, 11.25, \TCPDF\FONTS::unichr($i), 1, 0, 'C', false, '', 0, false, 'T', 'M');
             }
 
             $pdf->Ln(20);

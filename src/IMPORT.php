@@ -32,6 +32,7 @@
 //               import existing PDF documents.
 //
 //============================================================+
+namespace TCPDF;
 
 /**
  * @file
@@ -42,13 +43,8 @@
  * @version 1.0.001
  */
 
-// include the TCPDF class
-require_once(dirname(__FILE__).'/tcpdf.php');
-// include PDF parser class
-require_once(dirname(__FILE__).'/tcpdf_parser.php');
-
 /**
- * @class TCPDF_IMPORT
+ * @class TCPDF\IMPORT
  * !!! THIS CLASS IS UNDER DEVELOPMENT !!!
  * PHP class extension of the TCPDF (http://www.tcpdf.org) library to import existing PDF documents.<br>
  * @package com.tecnick.tcpdf
@@ -56,7 +52,7 @@ require_once(dirname(__FILE__).'/tcpdf_parser.php');
  * @version 1.0.001
  * @author Nicola Asuni - info@tecnick.com
  */
-class TCPDF_IMPORT extends TCPDF
+class IMPORT extends TCPDF
 {
 
     /**
@@ -79,22 +75,17 @@ class TCPDF_IMPORT extends TCPDF
             'ignore_filter_decoding_errors' => true,
             'ignore_missing_filter_decoders' => true,
         ];
-        try {
-            // parse PDF data
-            $pdf = new TCPDF_PARSER($rawdata, $cfg);
-        } catch (Exception $e) {
-            die($e->getMessage());
-        }
+
+        // parse PDF data
+        $pdf = new PARSER($rawdata, $cfg);
+
         // get the parsed data
         $data = $pdf->getParsedData();
         // release some memory
         unset($rawdata);
 
         // ...
-
-
         print_r($data); // DEBUG
-
 
         unset($pdf);
     }

@@ -32,7 +32,7 @@
 //   Static methods used by the TCPDF class.
 //
 //============================================================+
-
+namespace TCPDF;
 /**
  * @file
  * This is a PHP class that contains static methods for the TCPDF class.<br>
@@ -42,21 +42,21 @@
  */
 
 /**
- * @class TCPDF_STATIC
+ * @class TCPDFSTATIC
  * Static methods used by the TCPDF class.
  * @package com.tecnick.tcpdf
  * @brief PHP class for generating PDF documents without requiring external extensions.
  * @version 1.1.1
  * @author Nicola Asuni - info@tecnick.com
  */
-class TCPDF_STATIC
+class TCPDFSTATIC
 {
 
     /**
      * Current TCPDF version.
      * @private static
      */
-    private static $tcpdf_version = '6.2.12';
+    private static $tcpdf_version = '7.0.0';
 
     /**
      * String alias for total number of pages.
@@ -303,7 +303,7 @@ class TCPDF_STATIC
      */
     public static function getObjFilename($type = 'tmp', $file_id = '')
     {
-        return tempnam(K_PATH_CACHE, '__tcpdf_'.$file_id.'_'.$type.'_'.md5(TCPDF_STATIC::getRandomSeed()).'_');
+        return tempnam(K_PATH_CACHE, '__tcpdf_'.$file_id.'_'.$type.'_'.md5(TCPDFSTATIC::getRandomSeed()).'_');
     }
 
     /**
@@ -319,10 +319,10 @@ class TCPDF_STATIC
     }
 
     /**
-    * Escape some special characters (&lt; &gt; &amp;) for XML output.
-    * @param $str (string) Input string to convert.
-    * @return converted string
-    * @since 5.9.121 (2011-09-28)
+     * Escape some special characters (&lt; &gt; &amp;) for XML output.
+     * @param $str (string) Input string to convert.
+     * @return converted string
+     * @since 5.9.121 (2011-09-28)
      * @public static
      */
     public static function _escapeXML($str)
@@ -846,7 +846,7 @@ class TCPDF_STATIC
             if (is_array($prop['fillColor'])) {
                 $opt['mk']['bg'] = $prop['fillColor'];
             } else {
-                $opt['mk']['bg'] = TCPDF_COLORS::convertHTMLColorToDec($prop['fillColor'], $spot_colors);
+                $opt['mk']['bg'] = COLORS::convertHTMLColorToDec($prop['fillColor'], $spot_colors);
             }
         }
         // strokeColor: Specifies the stroke color for a field that is used to stroke the rectangle of the field with a line as large as the line width.
@@ -854,7 +854,7 @@ class TCPDF_STATIC
             if (is_array($prop['strokeColor'])) {
                 $opt['mk']['bc'] = $prop['strokeColor'];
             } else {
-                $opt['mk']['bc'] = TCPDF_COLORS::convertHTMLColorToDec($prop['strokeColor'], $spot_colors);
+                $opt['mk']['bc'] = COLORS::convertHTMLColorToDec($prop['strokeColor'], $spot_colors);
             }
         }
         // rotation: The rotation of a widget in counterclockwise increments.
@@ -1317,7 +1317,7 @@ class TCPDF_STATIC
                                         default: {
                                             $valid = true;
                                         }
-                                    }
+                                        }
                                 }
                             }
                             break;
@@ -1568,7 +1568,7 @@ class TCPDF_STATIC
         // create new language array of patterns
         $patterns = [];
         foreach ($patterns_array as $val) {
-            if (!TCPDF_STATIC::empty_string($val)) {
+            if (!TCPDFSTATIC::empty_string($val)) {
                 $val = trim($val);
                 $val = str_replace('\'', '\\\'', $val);
                 $key = preg_replace('/[0-9]+/', '', $val);
@@ -1666,8 +1666,8 @@ class TCPDF_STATIC
                     $op = '';
                 }
             }
-        }
-        return $op;
+            }
+            return $op;
     }
 
     /**
@@ -2559,8 +2559,8 @@ class TCPDF_STATIC
             default: {
                 $layout_mode = 'SinglePage';
             }
-        }
-        return $layout_mode;
+            }
+            return $layout_mode;
     }
 
     /**
@@ -2599,10 +2599,10 @@ class TCPDF_STATIC
             default: {
                 $page_mode = 'UseNone';
             }
-        }
-        return $page_mode;
+            }
+            return $page_mode;
     }
-} // END OF TCPDF_STATIC CLASS
+} // END OF TCPDFSTATIC CLASS
 
 //============================================================+
 // END OF FILE

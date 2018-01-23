@@ -66,6 +66,7 @@
 //  * Layers and object visibility.
 //	* PDF/A-1b support
 //============================================================+
+namespace TCPDF;
 
 /**
  * @file
@@ -1826,7 +1827,7 @@ class TCPDF
     public function __construct($orientation = 'P', $unit = 'mm', $format = 'A4', $unicode = true, $encoding = 'UTF-8', $diskcache = false, $pdfa = false)
     {
         // TCPDF configuration
-        require_once(dirname(__FILE__).'/tcpdf_autoconfig.php');
+        require_once(__DIR__.'/tcpdf_autoconfig.php');
 
         /* Set internal character encoding to ASCII */
         if (function_exists('mb_internal_encoding') and mb_internal_encoding()) {
@@ -1835,7 +1836,7 @@ class TCPDF
         }
         // set file ID for trailer
         $serformat = (is_array($format) ? json_encode($format) : $format);
-        $this->file_id = md5(TCPDF_STATIC::getRandomSeed('TCPDF'.$orientation.$unit.$serformat.$encoding));
+        $this->file_id = md5(TCPDFSTATIC::getRandomSeed('TCPDF'.$orientation.$unit.$serformat.$encoding));
         $this->font_obj_ids = [];
         $this->page_obj_id = [];
         $this->form_obj_id = [];
@@ -1949,7 +1950,7 @@ class TCPDF
         // set default JPEG quality
         $this->jpeg_quality = 75;
         // initialize some settings
-        TCPDF_FONTS::utf8Bidi([''], '', false, $this->isunicode, $this->CurrentFont);
+        FONTS::utf8Bidi([''], '', false, $this->isunicode, $this->CurrentFont);
         // set default font
         $this->SetFont($this->FontFamily, $this->FontStyle, $this->FontSizePt);
         $this->setHeaderFont([$this->FontFamily, $this->FontStyle, $this->FontSizePt]);
@@ -2008,30 +2009,29 @@ class TCPDF
         switch ($unit) {
             // points
             case 'px':
-            case 'pt': {
+            case 'pt':
                 $this->k = 1;
                 break;
-            }
+
             // millimeters
-            case 'mm': {
+            case 'mm':
                 $this->k = $this->dpi / 25.4;
                 break;
-            }
+
             // centimeters
-            case 'cm': {
+            case 'cm':
                 $this->k = $this->dpi / 2.54;
                 break;
-            }
+
             // inches
-            case 'in': {
+            case 'in':
                 $this->k = $this->dpi;
                 break;
-            }
+
             // unsupported unit
-            default : {
+            default :
                 $this->Error('Incorrect unit: '.$unit);
                 break;
-            }
         }
         $this->pdfunit = $unit;
         if (isset($this->CurOrientation)) {
@@ -2102,13 +2102,13 @@ class TCPDF
         }
         if (is_string($format)) {
             // get page measures from format name
-            $pf = TCPDF_STATIC::getPageSizeFromFormat($format);
+            $pf = TCPDFSTATIC::getPageSizeFromFormat($format);
             $this->fwPt = $pf[0];
             $this->fhPt = $pf[1];
         } else {
             // the boundaries of the physical medium on which the page shall be displayed or printed
             if (isset($format['MediaBox'])) {
-                $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'MediaBox', $format['MediaBox']['llx'], $format['MediaBox']['lly'], $format['MediaBox']['urx'], $format['MediaBox']['ury'], false, $this->k, $this->pagedim);
+                $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'MediaBox', $format['MediaBox']['llx'], $format['MediaBox']['lly'], $format['MediaBox']['urx'], $format['MediaBox']['ury'], false, $this->k, $this->pagedim);
                 $this->fwPt = (($format['MediaBox']['urx'] - $format['MediaBox']['llx']) * $this->k);
                 $this->fhPt = (($format['MediaBox']['ury'] - $format['MediaBox']['lly']) * $this->k);
             } else {
@@ -2119,27 +2119,27 @@ class TCPDF
                         // default value
                         $format['format'] = 'A4';
                     }
-                    $pf = TCPDF_STATIC::getPageSizeFromFormat($format['format']);
+                    $pf = TCPDFSTATIC::getPageSizeFromFormat($format['format']);
                 }
                 $this->fwPt = $pf[0];
                 $this->fhPt = $pf[1];
-                $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'MediaBox', 0, 0, $this->fwPt, $this->fhPt, true, $this->k, $this->pagedim);
+                $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'MediaBox', 0, 0, $this->fwPt, $this->fhPt, true, $this->k, $this->pagedim);
             }
             // the visible region of default user space
             if (isset($format['CropBox'])) {
-                $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'CropBox', $format['CropBox']['llx'], $format['CropBox']['lly'], $format['CropBox']['urx'], $format['CropBox']['ury'], false, $this->k, $this->pagedim);
+                $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'CropBox', $format['CropBox']['llx'], $format['CropBox']['lly'], $format['CropBox']['urx'], $format['CropBox']['ury'], false, $this->k, $this->pagedim);
             }
             // the region to which the contents of the page shall be clipped when output in a production environment
             if (isset($format['BleedBox'])) {
-                $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'BleedBox', $format['BleedBox']['llx'], $format['BleedBox']['lly'], $format['BleedBox']['urx'], $format['BleedBox']['ury'], false, $this->k, $this->pagedim);
+                $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'BleedBox', $format['BleedBox']['llx'], $format['BleedBox']['lly'], $format['BleedBox']['urx'], $format['BleedBox']['ury'], false, $this->k, $this->pagedim);
             }
             // the intended dimensions of the finished page after trimming
             if (isset($format['TrimBox'])) {
-                $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'TrimBox', $format['TrimBox']['llx'], $format['TrimBox']['lly'], $format['TrimBox']['urx'], $format['TrimBox']['ury'], false, $this->k, $this->pagedim);
+                $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'TrimBox', $format['TrimBox']['llx'], $format['TrimBox']['lly'], $format['TrimBox']['urx'], $format['TrimBox']['ury'], false, $this->k, $this->pagedim);
             }
             // the page's meaningful content (including potential white space)
             if (isset($format['ArtBox'])) {
-                $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'ArtBox', $format['ArtBox']['llx'], $format['ArtBox']['lly'], $format['ArtBox']['urx'], $format['ArtBox']['ury'], false, $this->k, $this->pagedim);
+                $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'ArtBox', $format['ArtBox']['llx'], $format['ArtBox']['lly'], $format['ArtBox']['urx'], $format['ArtBox']['ury'], false, $this->k, $this->pagedim);
             }
             // specify the colours and other visual characteristics that should be used in displaying guidelines on the screen for the various page boundaries
             if (isset($format['BoxColorInfo'])) {
@@ -2213,23 +2213,23 @@ class TCPDF
     {
         if (!isset($this->pagedim[$this->page]['MediaBox'])) {
             // the boundaries of the physical medium on which the page shall be displayed or printed
-            $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'MediaBox', 0, 0, $this->fwPt, $this->fhPt, true, $this->k, $this->pagedim);
+            $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'MediaBox', 0, 0, $this->fwPt, $this->fhPt, true, $this->k, $this->pagedim);
         }
         if (!isset($this->pagedim[$this->page]['CropBox'])) {
             // the visible region of default user space
-            $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'CropBox', $this->pagedim[$this->page]['MediaBox']['llx'], $this->pagedim[$this->page]['MediaBox']['lly'], $this->pagedim[$this->page]['MediaBox']['urx'], $this->pagedim[$this->page]['MediaBox']['ury'], true, $this->k, $this->pagedim);
+            $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'CropBox', $this->pagedim[$this->page]['MediaBox']['llx'], $this->pagedim[$this->page]['MediaBox']['lly'], $this->pagedim[$this->page]['MediaBox']['urx'], $this->pagedim[$this->page]['MediaBox']['ury'], true, $this->k, $this->pagedim);
         }
         if (!isset($this->pagedim[$this->page]['BleedBox'])) {
             // the region to which the contents of the page shall be clipped when output in a production environment
-            $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'BleedBox', $this->pagedim[$this->page]['CropBox']['llx'], $this->pagedim[$this->page]['CropBox']['lly'], $this->pagedim[$this->page]['CropBox']['urx'], $this->pagedim[$this->page]['CropBox']['ury'], true, $this->k, $this->pagedim);
+            $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'BleedBox', $this->pagedim[$this->page]['CropBox']['llx'], $this->pagedim[$this->page]['CropBox']['lly'], $this->pagedim[$this->page]['CropBox']['urx'], $this->pagedim[$this->page]['CropBox']['ury'], true, $this->k, $this->pagedim);
         }
         if (!isset($this->pagedim[$this->page]['TrimBox'])) {
             // the intended dimensions of the finished page after trimming
-            $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'TrimBox', $this->pagedim[$this->page]['CropBox']['llx'], $this->pagedim[$this->page]['CropBox']['lly'], $this->pagedim[$this->page]['CropBox']['urx'], $this->pagedim[$this->page]['CropBox']['ury'], true, $this->k, $this->pagedim);
+            $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'TrimBox', $this->pagedim[$this->page]['CropBox']['llx'], $this->pagedim[$this->page]['CropBox']['lly'], $this->pagedim[$this->page]['CropBox']['urx'], $this->pagedim[$this->page]['CropBox']['ury'], true, $this->k, $this->pagedim);
         }
         if (!isset($this->pagedim[$this->page]['ArtBox'])) {
             // the page's meaningful content (including potential white space)
-            $this->pagedim = TCPDF_STATIC::setPageBoxes($this->page, 'ArtBox', $this->pagedim[$this->page]['CropBox']['llx'], $this->pagedim[$this->page]['CropBox']['lly'], $this->pagedim[$this->page]['CropBox']['urx'], $this->pagedim[$this->page]['CropBox']['ury'], true, $this->k, $this->pagedim);
+            $this->pagedim = TCPDFSTATIC::setPageBoxes($this->page, 'ArtBox', $this->pagedim[$this->page]['CropBox']['llx'], $this->pagedim[$this->page]['CropBox']['lly'], $this->pagedim[$this->page]['CropBox']['urx'], $this->pagedim[$this->page]['CropBox']['ury'], true, $this->k, $this->pagedim);
         }
         if (!isset($this->pagedim[$this->page]['Rotate'])) {
             // The number of degrees by which the page shall be rotated clockwise when displayed or printed. The value shall be a multiple of 90.
@@ -2263,18 +2263,18 @@ class TCPDF
         }
         if ((abs($this->pagedim[$this->page]['MediaBox']['urx'] - $this->hPt) < $this->feps) and (abs($this->pagedim[$this->page]['MediaBox']['ury'] - $this->wPt) < $this->feps)) {
             // swap X and Y coordinates (change page orientation)
-            $this->pagedim = TCPDF_STATIC::swapPageBoxCoordinates($this->page, $this->pagedim);
+            $this->pagedim = TCPDFSTATIC::swapPageBoxCoordinates($this->page, $this->pagedim);
         }
         $this->w = ($this->wPt / $this->k);
         $this->h = ($this->hPt / $this->k);
-        if (TCPDF_STATIC::empty_string($autopagebreak)) {
+        if (TCPDFSTATIC::empty_string($autopagebreak)) {
             if (isset($this->AutoPageBreak)) {
                 $autopagebreak = $this->AutoPageBreak;
             } else {
                 $autopagebreak = true;
             }
         }
-        if (TCPDF_STATIC::empty_string($bottommargin)) {
+        if (TCPDFSTATIC::empty_string($bottommargin)) {
             if (isset($this->bMargin)) {
                 $bottommargin = $this->bMargin;
             } else {
@@ -2375,24 +2375,24 @@ class TCPDF
         $newmode = false;
         switch (strtoupper($mode)) {
             case 'LTR':
-            case 'L': {
+            case 'L':
                 if ($this->rtl) {
                     $newmode = 'L';
                 }
                 break;
-            }
+
             case 'RTL':
-            case 'R': {
+            case 'R':
                 if (!$this->rtl) {
                     $newmode = 'R';
                 }
                 break;
-            }
+
             case false:
-                default: {
+            default:
                     $newmode = false;
                 break;
-                }
+
         }
         $this->tmprtl = $newmode;
     }
@@ -2770,19 +2770,19 @@ class TCPDF
             }
             $adj = 0; // line width inside the cell
             switch ($mode) {
-                case 'ext': {
+                case 'ext':
                     $adj = 0;
                     break;
-                }
-                case 'int': {
+
+                case 'int':
                     $adj = $line_width;
                     break;
-                }
+
                 case 'normal':
-                    default: {
+                default:
                         $adj = ($line_width / 2);
                     break;
-                    }
+
             }
             // correct internal cell padding if required to avoid overlap between text and lines
             if ((strpos($border, 'T') !== false) and ($this->cell_padding['T'] < $adj)) {
@@ -2842,8 +2842,8 @@ class TCPDF
         } else {
             $this->Error('Incorrect zoom display mode: '.$zoom);
         }
-        $this->LayoutMode = TCPDF_STATIC::getPageLayoutMode($layout);
-        $this->PageMode = TCPDF_STATIC::getPageMode($mode);
+        $this->LayoutMode = TCPDFSTATIC::getPageLayoutMode($layout);
+        $this->PageMode = TCPDFSTATIC::getPageMode($mode);
     }
 
     /**
@@ -2946,7 +2946,7 @@ class TCPDF
     }
 
     /**
-     * Throw an exception or print an error message and die if the K_TCPDF_PARSER_THROW_EXCEPTION_ERROR constant is set to true.
+     * Throw an exception or print an error message
      * @param $msg (string) The error message
      * @public
      * @since 1.0
@@ -2955,11 +2955,7 @@ class TCPDF
     {
         // unset all class variables
         $this->_destroy(true);
-        if (defined('K_TCPDF_THROW_EXCEPTION_ERROR') and !K_TCPDF_THROW_EXCEPTION_ERROR) {
-            die('<strong>TCPDF ERROR: </strong>'.$msg);
-        } else {
-            throw new Exception('TCPDF ERROR: '.$msg);
-        }
+        throw new Exception('TCPDF ERROR: '.$msg);
     }
 
     /**
@@ -3463,7 +3459,7 @@ class TCPDF
                 $this->x = $this->original_lMargin;
             }
             if (($headerdata['logo']) and ($headerdata['logo'] != K_BLANK_IMAGE)) {
-                $imgtype = TCPDF_IMAGES::getImageFileType(K_PATH_IMAGES.$headerdata['logo']);
+                $imgtype = IMAGES::getImageFileType(K_PATH_IMAGES.$headerdata['logo']);
                 if (($imgtype == 'eps') or ($imgtype == 'ai')) {
                     $this->ImageEps(K_PATH_IMAGES.$headerdata['logo'], '', '', $headerdata['logo_width']);
                 } elseif ($imgtype == 'svg') {
@@ -3696,7 +3692,7 @@ class TCPDF
             $this->pagedim[$this->page]['tm'] = $this->tMargin;
             $this->y = $this->tMargin;
         }
-        if (!TCPDF_STATIC::empty_string($this->thead) and (!$this->inthead)) {
+        if (!TCPDFSTATIC::empty_string($this->thead) and (!$this->inthead)) {
             // set margins
             $prev_lMargin = $this->lMargin;
             $prev_rMargin = $this->rMargin;
@@ -3800,31 +3796,30 @@ class TCPDF
      */
     public function setSpotColor($type, $name, $tint = 100)
     {
-        $spotcolor = TCPDF_COLORS::getSpotColor($name, $this->spot_colors);
+        $spotcolor = COLORS::getSpotColor($name, $this->spot_colors);
         if ($spotcolor === false) {
             $this->Error('Undefined spot color: '.$name.', you must add it using the AddSpotColor() method.');
         }
         $tint = (max(0, min(100, $tint)) / 100);
         $pdfcolor = sprintf('/CS%d ', $this->spot_colors[$name]['i']);
         switch ($type) {
-            case 'draw': {
+            case 'draw':
                 $pdfcolor .= sprintf('CS %F SCN', $tint);
                 $this->DrawColor = $pdfcolor;
                 $this->strokecolor = $spotcolor;
                 break;
-            }
-            case 'fill': {
+
+            case 'fill':
                 $pdfcolor .= sprintf('cs %F scn', $tint);
                 $this->FillColor = $pdfcolor;
                 $this->bgcolor = $spotcolor;
                 break;
-            }
-            case 'text': {
+
+            case 'text':
                 $pdfcolor .= sprintf('cs %F scn', $tint);
                 $this->TextColor = $pdfcolor;
                 $this->fgcolor = $spotcolor;
                 break;
-            }
         }
         $this->ColorFlag = ($this->FillColor != $this->TextColor);
         if ($this->state == 2) {
@@ -4015,24 +4010,23 @@ class TCPDF
             }
         }
         switch ($type) {
-            case 'draw': {
+            case 'draw':
                 $pdfcolor .= strtoupper($suffix);
                 $this->DrawColor = $pdfcolor;
                 $this->strokecolor = $intcolor;
                 break;
-            }
-            case 'fill': {
+
+            case 'fill':
                 $pdfcolor .= $suffix;
                 $this->FillColor = $pdfcolor;
                 $this->bgcolor = $intcolor;
                 break;
-            }
-            case 'text': {
+
+            case 'text':
                 $pdfcolor .= $suffix;
                 $this->TextColor = $pdfcolor;
                 $this->fgcolor = $intcolor;
                 break;
-            }
         }
         $this->ColorFlag = ($this->FillColor != $this->TextColor);
         if (($type != 'text') and ($this->state == 2)) {
@@ -4112,7 +4106,7 @@ class TCPDF
      */
     public function GetStringWidth($s, $fontname = '', $fontstyle = '', $fontsize = 0, $getarray = false)
     {
-        return $this->GetArrStringWidth(TCPDF_FONTS::utf8Bidi(TCPDF_FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $fontsize, $getarray);
+        return $this->GetArrStringWidth(FONTS::utf8Bidi(FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $fontsize, $getarray);
     }
 
     /**
@@ -4130,7 +4124,7 @@ class TCPDF
     public function GetArrStringWidth($sa, $fontname = '', $fontstyle = '', $fontsize = 0, $getarray = false)
     {
         // store current values
-        if (!TCPDF_STATIC::empty_string($fontname)) {
+        if (!TCPDFSTATIC::empty_string($fontname)) {
             $prev_FontFamily = $this->FontFamily;
             $prev_FontStyle = $this->FontStyle;
             $prev_FontSizePt = $this->FontSizePt;
@@ -4138,7 +4132,7 @@ class TCPDF
         }
         // convert UTF-8 array to Latin1 if required
         if ($this->isunicode and (!$this->isUnicodeFont())) {
-            $sa = TCPDF_FONTS::UTF8ArrToLatin1Arr($sa);
+            $sa = FONTS::UTF8ArrToLatin1Arr($sa);
         }
         $w = 0; // total width
         $wa = []; // array of characters widths
@@ -4149,7 +4143,7 @@ class TCPDF
             $w += $cw;
         }
         // restore previous values
-        if (!TCPDF_STATIC::empty_string($fontname)) {
+        if (!TCPDFSTATIC::empty_string($fontname)) {
             $this->SetFont($prev_FontFamily, $prev_FontStyle, $prev_FontSizePt, '', 'default', false);
         }
         if ($getarray) {
@@ -4220,7 +4214,7 @@ class TCPDF
     public function GetNumChars($s)
     {
         if ($this->isUnicodeFont()) {
-            return count(TCPDF_FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont));
+            return count(FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont));
         }
         return strlen($s);
     }
@@ -4232,7 +4226,7 @@ class TCPDF
      */
     protected function getFontsList()
     {
-        if (($fontsdir = opendir(TCPDF_FONTS::_getfontpath())) !== false) {
+        if (($fontsdir = opendir(FONTS::_getfontpath())) !== false) {
             while (($file = readdir($fontsdir)) !== false) {
                 if (substr($file, -4) == '.php') {
                     array_push($this->fontlist, strtolower(basename($file, '.php')));
@@ -4249,8 +4243,11 @@ class TCPDF
      * @param $family (string) Font family. The name can be chosen arbitrarily. If it is a standard family name, it will override the corresponding font.
      * @param $style (string) Font style. Possible values are (case insensitive):<ul><li>empty string: regular (default)</li><li>B: bold</li><li>I: italic</li><li>BI or IB: bold italic</li></ul>
      * @param $fontfile (string) The font definition file. By default, the name is built from the family and style, in lower case with no spaces.
+     *
      * @return array containing the font data, or false in case of error.
+     *
      * @param $subset (mixed) if true embedd only a subset of the font (stores only the information related to the used characters); if false embedd full font; if 'default' uses the default value set using setFontSubsetting(). This option is valid only for TrueTypeUnicode fonts. If you want to enable users to change the document, set this parameter to false. If you subset the font, the person who receives your PDF would need to have your same font in order to make changes to your PDF. The file size of the PDF would also be smaller because you are embedding only part of a font.
+     *
      * @public
      * @since 1.5
      * @see SetFont(), setFontSubsetting()
@@ -4263,8 +4260,8 @@ class TCPDF
         if ($this->pdfa_mode) {
             $subset = false;
         }
-        if (TCPDF_STATIC::empty_string($family)) {
-            if (!TCPDF_STATIC::empty_string($this->FontFamily)) {
+        if (TCPDFSTATIC::empty_string($family)) {
+            if (!TCPDFSTATIC::empty_string($this->FontFamily)) {
                 $family = $this->FontFamily;
             } else {
                 $this->Error('Empty font family');
@@ -4334,9 +4331,9 @@ class TCPDF
         }
         // get specified font directory (if any)
         $fontdir = false;
-        if (!TCPDF_STATIC::empty_string($fontfile)) {
+        if (!TCPDFSTATIC::empty_string($fontfile)) {
             $fontdir = dirname($fontfile);
-            if (TCPDF_STATIC::empty_string($fontdir) or ($fontdir == '.')) {
+            if (TCPDFSTATIC::empty_string($fontdir) or ($fontdir == '.')) {
                 $fontdir = '';
             } else {
                 $fontdir .= '/';
@@ -4345,19 +4342,19 @@ class TCPDF
         // true when the font style variation is missing
         $missing_style = false;
         // search and include font file
-        if (TCPDF_STATIC::empty_string($fontfile) or (!@file_exists($fontfile))) {
+        if (TCPDFSTATIC::empty_string($fontfile) or (!@file_exists($fontfile))) {
             // build a standard filenames for specified font
             $tmp_fontfile = str_replace(' ', '', $family).strtolower($style).'.php';
-            $fontfile = TCPDF_FONTS::getFontFullPath($tmp_fontfile, $fontdir);
-            if (TCPDF_STATIC::empty_string($fontfile)) {
+            $fontfile = FONTS::getFontFullPath($tmp_fontfile, $fontdir);
+            if (TCPDFSTATIC::empty_string($fontfile)) {
                 $missing_style = true;
                 // try to remove the style part
                 $tmp_fontfile = str_replace(' ', '', $family).'.php';
-                $fontfile = TCPDF_FONTS::getFontFullPath($tmp_fontfile, $fontdir);
+                $fontfile = FONTS::getFontFullPath($tmp_fontfile, $fontdir);
             }
         }
         // include font file
-        if (!TCPDF_STATIC::empty_string($fontfile) and (@file_exists($fontfile))) {
+        if (!TCPDFSTATIC::empty_string($fontfile) and (@file_exists($fontfile))) {
             include($fontfile);
         } else {
             $this->Error('Could not include font definition file: '.$family.'');
@@ -4367,32 +4364,32 @@ class TCPDF
             $this->Error('The font definition file has a bad format: '.$fontfile.'');
         }
         // SET default parameters
-        if (!isset($file) or TCPDF_STATIC::empty_string($file)) {
+        if (!isset($file) or TCPDFSTATIC::empty_string($file)) {
             $file = '';
         }
-        if (!isset($enc) or TCPDF_STATIC::empty_string($enc)) {
+        if (!isset($enc) or TCPDFSTATIC::empty_string($enc)) {
             $enc = '';
         }
-        if (!isset($cidinfo) or TCPDF_STATIC::empty_string($cidinfo)) {
+        if (!isset($cidinfo) or TCPDFSTATIC::empty_string($cidinfo)) {
             $cidinfo = ['Registry'=>'Adobe', 'Ordering'=>'Identity', 'Supplement'=>0];
             $cidinfo['uni2cid'] = [];
         }
-        if (!isset($ctg) or TCPDF_STATIC::empty_string($ctg)) {
+        if (!isset($ctg) or TCPDFSTATIC::empty_string($ctg)) {
             $ctg = '';
         }
-        if (!isset($desc) or TCPDF_STATIC::empty_string($desc)) {
+        if (!isset($desc) or TCPDFSTATIC::empty_string($desc)) {
             $desc = [];
         }
-        if (!isset($up) or TCPDF_STATIC::empty_string($up)) {
+        if (!isset($up) or TCPDFSTATIC::empty_string($up)) {
             $up = -100;
         }
-        if (!isset($ut) or TCPDF_STATIC::empty_string($ut)) {
+        if (!isset($ut) or TCPDFSTATIC::empty_string($ut)) {
             $ut = 50;
         }
-        if (!isset($cw) or TCPDF_STATIC::empty_string($cw)) {
+        if (!isset($cw) or TCPDFSTATIC::empty_string($cw)) {
             $cw = [];
         }
-        if (!isset($dw) or TCPDF_STATIC::empty_string($dw)) {
+        if (!isset($dw) or TCPDFSTATIC::empty_string($dw)) {
             // set default width
             if (isset($desc['MissingWidth']) and ($desc['MissingWidth'] > 0)) {
                 $dw = $desc['MissingWidth'];
@@ -4477,7 +4474,7 @@ class TCPDF
             }
             $this->setFontSubBuffer($fontkey, 'diff', $d);
         }
-        if (!TCPDF_STATIC::empty_string($file)) {
+        if (!TCPDFSTATIC::empty_string($file)) {
             if (!isset($this->FontFiles[$file])) {
                 if ((strcasecmp($type, 'TrueType') == 0) or (strcasecmp($type, 'TrueTypeUnicode') == 0)) {
                     $this->FontFiles[$file] = ['length1' => $originalsize, 'fontdir' => $fontdir, 'subset' => $subset, 'fontkeys' => [$fontkey]];
@@ -4704,11 +4701,11 @@ class TCPDF
     {
         if (is_string($char)) {
             // get character code
-            $char = TCPDF_FONTS::UTF8StringToArray($char, $this->isunicode, $this->CurrentFont);
+            $char = FONTS::UTF8StringToArray($char, $this->isunicode, $this->CurrentFont);
             $char = $char[0];
         }
-        if (TCPDF_STATIC::empty_string($font)) {
-            if (TCPDF_STATIC::empty_string($style)) {
+        if (TCPDFSTATIC::empty_string($font)) {
+            if (TCPDFSTATIC::empty_string($style)) {
                 return (isset($this->CurrentFont['cw'][intval($char)]));
             }
             $font = $this->FontFamily;
@@ -4733,12 +4730,12 @@ class TCPDF
         if (empty($subs)) {
             return $text;
         }
-        if (TCPDF_STATIC::empty_string($font)) {
+        if (TCPDFSTATIC::empty_string($font)) {
             $font = $this->FontFamily;
         }
         $fontdata = $this->AddFont($font, $style);
         $fontinfo = $this->getFontBuffer($fontdata['fontkey']);
-        $uniarr = TCPDF_FONTS::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
+        $uniarr = FONTS::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
         foreach ($uniarr as $k => $chr) {
             if (!isset($fontinfo['cw'][$chr])) {
                 // this character is missing on the selected font
@@ -4757,7 +4754,7 @@ class TCPDF
                 }
             }
         }
-        return TCPDF_FONTS::UniArrSubString(TCPDF_FONTS::UTF8ArrayToUniArray($uniarr, $this->isunicode));
+        return FONTS::UniArrSubString(FONTS::UTF8ArrayToUniArray($uniarr, $this->isunicode));
     }
 
     /**
@@ -4910,8 +4907,8 @@ class TCPDF
         }
         $this->PageAnnots[$page][] = ['n' => ++$this->n, 'x' => $x, 'y' => $y, 'w' => $w, 'h' => $h, 'txt' => $text, 'opt' => $opt, 'numspaces' => $spaces];
         if (!$this->pdfa_mode) {
-            if ((($opt['Subtype'] == 'FileAttachment') or ($opt['Subtype'] == 'Sound')) and (!TCPDF_STATIC::empty_string($opt['FS']))
-                and (@file_exists($opt['FS']) or TCPDF_STATIC::isValidURL($opt['FS']))
+            if ((($opt['Subtype'] == 'FileAttachment') or ($opt['Subtype'] == 'Sound')) and (!TCPDFSTATIC::empty_string($opt['FS']))
+                and (@file_exists($opt['FS']) or TCPDFSTATIC::isValidURL($opt['FS']))
                 and (!isset($this->embeddedfiles[basename($opt['FS'])]))) {
                 $this->embeddedfiles[basename($opt['FS'])] = ['f' => ++$this->n, 'n' => ++$this->n, 'file' => $opt['FS']];
             }
@@ -4942,7 +4939,7 @@ class TCPDF
         }
         reset($this->embeddedfiles);
         foreach ($this->embeddedfiles as $filename => $filedata) {
-            $data = TCPDF_STATIC::fileGetContents($filedata['file']);
+            $data = TCPDFSTATIC::fileGetContents($filedata['file']);
             if ($data !== false) {
                 $rawsize = strlen($data);
                 if ($rawsize > 0) {
@@ -5044,7 +5041,7 @@ class TCPDF
      */
     protected function checkPageBreak($h = 0, $y = '', $addpage = true)
     {
-        if (TCPDF_STATIC::empty_string($y)) {
+        if (TCPDFSTATIC::empty_string($y)) {
             $y = $this->y;
         }
         $current_page = $this->page;
@@ -5170,10 +5167,10 @@ class TCPDF
     protected function getCellCode($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = false, $link = '', $stretch = 0, $ignore_min_height = false, $calign = 'T', $valign = 'M')
     {
         // replace 'NO-BREAK SPACE' (U+00A0) character with a simple space
-        $txt = str_replace(TCPDF_FONTS::unichr(160, $this->isunicode), ' ', $txt);
+        $txt = str_replace(FONTS::unichr(160, $this->isunicode), ' ', $txt);
         $prev_cell_margin = $this->cell_margin;
         $prev_cell_padding = $this->cell_padding;
-        $txt = TCPDF_STATIC::removeSHY($txt, $this->isunicode);
+        $txt = TCPDFSTATIC::removeSHY($txt, $this->isunicode);
         $rs = ''; //string to be returned
         $this->adjustCellPadding($border);
         if (!$ignore_min_height) {
@@ -5198,111 +5195,106 @@ class TCPDF
             case 'A': {
                 // font top
                 switch ($valign) {
-                    case 'T': {
+                    case 'T':
                         // top
                         $y -= $this->cell_padding['T'];
                         break;
-                    }
-                    case 'B': {
+
+                    case 'B':
                         // bottom
                         $y -= ($h - $this->cell_padding['B'] - $this->FontAscent - $this->FontDescent);
                         break;
-                    }
+
                     default:
                     case 'C':
-                    case 'M': {
+                    case 'M':
                         // center
                         $y -= (($h - $this->FontAscent - $this->FontDescent) / 2);
                         break;
-                    }
                 }
                 break;
             }
             case 'L': {
                 // font baseline
                 switch ($valign) {
-                    case 'T': {
+                    case 'T':
                         // top
                         $y -= ($this->cell_padding['T'] + $this->FontAscent);
                         break;
-                    }
-                    case 'B': {
+
+                    case 'B':
                         // bottom
                         $y -= ($h - $this->cell_padding['B'] - $this->FontDescent);
                         break;
-                    }
+
                     default:
                     case 'C':
-                    case 'M': {
+                    case 'M':
                         // center
                         $y -= (($h + $this->FontAscent - $this->FontDescent) / 2);
                         break;
-                    }
                 }
                 break;
             }
             case 'D': {
                 // font bottom
                 switch ($valign) {
-                    case 'T': {
+                    case 'T':
                         // top
                         $y -= ($this->cell_padding['T'] + $this->FontAscent + $this->FontDescent);
                         break;
-                    }
-                    case 'B': {
+
+                    case 'B':
                         // bottom
                         $y -= ($h - $this->cell_padding['B']);
                         break;
-                    }
+
                     default:
                     case 'C':
-                    case 'M': {
+                    case 'M':
                         // center
                         $y -= (($h + $this->FontAscent + $this->FontDescent) / 2);
                         break;
-                    }
                 }
                 break;
             }
-            case 'B': {
+            case 'B':
                 // cell bottom
                 $y -= $h;
                 break;
-            }
+
             case 'C':
-            case 'M': {
+            case 'M':
                 // cell center
                 $y -= ($h / 2);
                 break;
-            }
+
             default:
-            case 'T': {
+            case 'T':
                 // cell top
                 break;
-            }
         }
         // text vertical alignment
         switch ($valign) {
-            case 'T': {
+            case 'T':
                 // top
                 $yt = $y + $this->cell_padding['T'];
                 break;
-            }
-            case 'B': {
+
+            case 'B':
                 // bottom
                 $yt = $y + $h - $this->cell_padding['B'] - $this->FontAscent - $this->FontDescent;
                 break;
-            }
+
             default:
             case 'C':
-            case 'M': {
+            case 'M':
                 // center
                 $yt = $y + (($h - $this->FontAscent - $this->FontDescent) / 2);
                 break;
-            }
         }
         $basefonty = $yt + $this->FontAscent;
-        if (TCPDF_STATIC::empty_string($w) or ($w <= 0)) {
+        if (TCPDFSTATIC::empty_string($w) or ($w <= 0)) {
             if ($this->rtl) {
                 $w = $x - $this->lMargin;
             } else {
@@ -5334,10 +5326,10 @@ class TCPDF
             $txt2 = $txt;
             if ($this->isunicode) {
                 if (($this->CurrentFont['type'] == 'core') or ($this->CurrentFont['type'] == 'TrueType') or ($this->CurrentFont['type'] == 'Type1')) {
-                    $txt2 = TCPDF_FONTS::UTF8ToLatin1($txt2, $this->isunicode, $this->CurrentFont);
+                    $txt2 = FONTS::UTF8ToLatin1($txt2, $this->isunicode, $this->CurrentFont);
                 } else {
-                    $unicode = TCPDF_FONTS::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont); // array of UTF-8 unicode values
-                    $unicode = TCPDF_FONTS::utf8Bidi($unicode, '', $this->tmprtl, $this->isunicode, $this->CurrentFont);
+                    $unicode = FONTS::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont); // array of UTF-8 unicode values
+                    $unicode = FONTS::utf8Bidi($unicode, '', $this->tmprtl, $this->isunicode, $this->CurrentFont);
                     // replace thai chars (if any)
                     if (defined('K_THAI_TOPCHARS') and (K_THAI_TOPCHARS == true)) {
                         // number of chars
@@ -5429,10 +5421,10 @@ class TCPDF
                         // update font subsetchars
                         $this->setFontSubBuffer($this->CurrentFont['fontkey'], 'subsetchars', $this->CurrentFont['subsetchars']);
                     } // end of K_THAI_TOPCHARS
-                    $txt2 = TCPDF_FONTS::arrUTF8ToUTF16BE($unicode, false);
+                    $txt2 = FONTS::arrUTF8ToUTF16BE($unicode, false);
                 }
             }
-            $txt2 = TCPDF_STATIC::_escape($txt2);
+            $txt2 = TCPDFSTATIC::_escape($txt2);
             // get current text width (considering general font stretching and spacing)
             $txwidth = $this->GetStringWidth($txt);
             $width = $txwidth;
@@ -5507,35 +5499,35 @@ class TCPDF
             // replace carriage return characters
             $txt2 = str_replace("\r", ' ', $txt2);
             switch ($align) {
-                case 'C': {
+                case 'C':
                     $dx = ($w - $width) / 2;
                     break;
-                }
-                case 'R': {
+
+                case 'R':
                     if ($this->rtl) {
                         $dx = $this->cell_padding['R'];
                     } else {
                         $dx = $w - $width - $this->cell_padding['R'];
                     }
                     break;
-                }
-                case 'L': {
+
+                case 'L':
                     if ($this->rtl) {
                         $dx = $w - $width - $this->cell_padding['L'];
                     } else {
                         $dx = $this->cell_padding['L'];
                     }
                     break;
-                }
+
                 case 'J':
-                    default: {
+                default:
                         if ($this->rtl) {
                             $dx = $this->cell_padding['R'];
                         } else {
                             $dx = $this->cell_padding['L'];
                         }
                     break;
-                    }
+
             }
             if ($this->rtl) {
                 $xdx = $x - $dx - $width;
@@ -5560,8 +5552,8 @@ class TCPDF
                         $xshift += $this->GetArrStringWidth($uniarr); // + shift justification
                     } else {
                         // character to print
-                        $topchr = TCPDF_FONTS::arrUTF8ToUTF16BE($uniarr, false);
-                        $topchr = TCPDF_STATIC::_escape($topchr);
+                        $topchr = FONTS::arrUTF8ToUTF16BE($uniarr, false);
+                        $topchr = TCPDFSTATIC::_escape($topchr);
                         $s .= sprintf(' BT %F %F Td [(%s)] TJ ET', ($xdk + ($xshift * $k)), $ty, $topchr);
                     }
                 }
@@ -5706,7 +5698,7 @@ class TCPDF
                 $s .= $this->SetLineStyle($style, true)."\n";
             }
             switch ($mode) {
-                case 'ext': {
+                case 'ext':
                     $off = (($this->LineWidth / 2) * $k);
                     $xL = $xeL - $off;
                     $xR = $xeR + $off;
@@ -5719,8 +5711,8 @@ class TCPDF
                     $w += $this->LineWidth;
                     $h += $this->LineWidth;
                     break;
-                }
-                case 'int': {
+
+                case 'int':
                     $off = ($this->LineWidth / 2) * $k;
                     $xL = $xeL + $off;
                     $xR = $xeR - $off;
@@ -5733,9 +5725,9 @@ class TCPDF
                     $w -= $this->LineWidth;
                     $h -= $this->LineWidth;
                     break;
-                }
+
                 case 'normal':
-                    default: {
+                default:
                         $xL = $xeL;
                         $xT = $xeT;
                         $xB = $xeB;
@@ -5745,7 +5737,6 @@ class TCPDF
                         $yB = $yeB;
                         $yR = $yeR;
                     break;
-                    }
             }
             // draw borders by case
             if (strlen($border) == 4) {
@@ -5875,11 +5866,11 @@ class TCPDF
         $this->cell_padding['T'] = 0;
         $this->cell_padding['B'] = 0;
         $this->setCellMargins(0, 0, 0, 0);
-        if (TCPDF_STATIC::empty_string($this->lasth) or $reseth) {
+        if (TCPDFSTATIC::empty_string($this->lasth) or $reseth) {
             // reset row height
             $this->resetLastH();
         }
-        if (!TCPDF_STATIC::empty_string($y)) {
+        if (!TCPDFSTATIC::empty_string($y)) {
             $this->SetY($y);
         } else {
             $y = $this->GetY();
@@ -5895,7 +5886,7 @@ class TCPDF
         $startpage = $this->page;
         // get current column
         $startcolumn = $this->current_column;
-        if (!TCPDF_STATIC::empty_string($x)) {
+        if (!TCPDFSTATIC::empty_string($x)) {
             $this->SetX($x);
         } else {
             $x = $this->GetX();
@@ -5912,7 +5903,7 @@ class TCPDF
         $this->x = $ox;
         $this->y = $oy;
         // set width
-        if (TCPDF_STATIC::empty_string($w) or ($w <= 0)) {
+        if (TCPDFSTATIC::empty_string($w) or ($w <= 0)) {
             if ($this->rtl) {
                 $w = ($this->x - $this->lMargin - $mc_margin['L']);
             } else {
@@ -6032,9 +6023,9 @@ class TCPDF
         $check_page_regions = $this->check_page_regions;
         $this->check_page_regions = false;
         // get border modes
-        $border_start = TCPDF_STATIC::getBorderMode($border, $position = 'start', $this->opencell);
-        $border_end = TCPDF_STATIC::getBorderMode($border, $position = 'end', $this->opencell);
-        $border_middle = TCPDF_STATIC::getBorderMode($border, $position = 'middle', $this->opencell);
+        $border_start = TCPDFSTATIC::getBorderMode($border, $position = 'start', $this->opencell);
+        $border_end = TCPDFSTATIC::getBorderMode($border, $position = 'end', $this->opencell);
+        $border_middle = TCPDFSTATIC::getBorderMode($border, $position = 'middle', $this->opencell);
         // design borders around HTML cells.
         for ($page = $startpage; $page <= $endpage; ++$page) { // for each page
             $ccode = '';
@@ -6244,7 +6235,7 @@ class TCPDF
             $this->cell_padding = $cellpadding;
         }
         $this->adjustCellPadding($border);
-        if (TCPDF_STATIC::empty_string($w) or ($w <= 0)) {
+        if (TCPDFSTATIC::empty_string($w) or ($w <= 0)) {
             if ($this->rtl) {
                 $w = $this->x - $this->lMargin;
             } else {
@@ -6258,7 +6249,7 @@ class TCPDF
         }
         $lines = 1;
         $sum = 0;
-        $chars = TCPDF_FONTS::utf8Bidi(TCPDF_FONTS::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont), $txt, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+        $chars = FONTS::utf8Bidi(FONTS::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont), $txt, $this->tmprtl, $this->isunicode, $this->CurrentFont);
         $charsWidth = $this->GetArrStringWidth($chars, '', '', 0, true);
         $length = count($chars);
         $lastSeparator = -1;
@@ -6267,11 +6258,11 @@ class TCPDF
             $charWidth = $charsWidth[$i];
             if (($c != 160)
                     and (($c == 173)
-                        or preg_match($this->re_spaces, TCPDF_FONTS::unichr($c, $this->isunicode))
+                        or preg_match($this->re_spaces, FONTS::unichr($c, $this->isunicode))
                         or (($c == 45)
                             and ($i > 0) and ($i < ($length - 1))
-                            and @preg_match('/[\p{L}]/'.$this->re_space['m'], TCPDF_FONTS::unichr($chars[($i - 1)], $this->isunicode))
-                            and @preg_match('/[\p{L}]/'.$this->re_space['m'], TCPDF_FONTS::unichr($chars[($i + 1)], $this->isunicode))
+                            and @preg_match('/[\p{L}]/'.$this->re_space['m'], FONTS::unichr($chars[($i - 1)], $this->isunicode))
+                            and @preg_match('/[\p{L}]/'.$this->re_space['m'], FONTS::unichr($chars[($i + 1)], $this->isunicode))
                         )
                     )
                 ) {
@@ -6397,13 +6388,13 @@ class TCPDF
         // remove carriage returns
         $s = str_replace("\r", '', $txt);
         // check if string contains arabic text
-        if (preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_ARABIC, $s)) {
+        if (preg_match(FONT\DATA::$uni_RE_PATTERN_ARABIC, $s)) {
             $arabic = true;
         } else {
             $arabic = false;
         }
         // check if string contains RTL text
-        if ($arabic or ($this->tmprtl == 'R') or preg_match(TCPDF_FONT_DATA::$uni_RE_PATTERN_RTL, $s)) {
+        if ($arabic or ($this->tmprtl == 'R') or preg_match(FONT\DATA::$uni_RE_PATTERN_RTL, $s)) {
             $rtlmode = true;
         } else {
             $rtlmode = false;
@@ -6411,18 +6402,18 @@ class TCPDF
         // get a char width
         $chrwidth = $this->GetCharWidth(46); // dot character
         // get array of unicode values
-        $chars = TCPDF_FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont);
+        $chars = FONTS::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont);
         // calculate maximum width for a single character on string
         $chrw = $this->GetArrStringWidth($chars, '', '', 0, true);
         array_walk($chrw, [$this, 'getRawCharWidth']);
         $maxchwidth = max($chrw);
         // get array of chars
-        $uchars = TCPDF_FONTS::UTF8ArrayToUniArray($chars, $this->isunicode);
+        $uchars = FONTS::UTF8ArrayToUniArray($chars, $this->isunicode);
         // get the number of characters
         $nb = count($chars);
         // replacement for SHY character (minus symbol)
         $shy_replacement = 45;
-        $shy_replacement_char = TCPDF_FONTS::unichr($shy_replacement, $this->isunicode);
+        $shy_replacement_char = FONTS::unichr($shy_replacement, $this->isunicode);
         // widht for SHY replacement
         $shy_replacement_width = $this->GetCharWidth($shy_replacement);
         // page width
@@ -6475,12 +6466,12 @@ class TCPDF
                 } else {
                     $talign = $align;
                 }
-                $tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, $i);
+                $tmpstr = FONTS::UniArrSubString($uchars, $j, $i);
                 if ($firstline) {
                     $startx = $this->x;
                     $tmparr = array_slice($chars, $j, ($i - $j));
                     if ($rtlmode) {
-                        $tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+                        $tmparr = FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
                     }
                     $linew = $this->GetArrStringWidth($tmparr);
                     unset($tmparr);
@@ -6505,7 +6496,7 @@ class TCPDF
                 unset($tmpstr);
                 if ($firstline) {
                     $this->cell_padding = $tmpcellpadding;
-                    return (TCPDF_FONTS::UniArrSubString($uchars, $i));
+                    return (FONTS::UniArrSubString($uchars, $i));
                 }
                 ++$nl;
                 $j = $i + 1;
@@ -6534,11 +6525,11 @@ class TCPDF
                 // \p{Lo} is needed because Chinese characters are packed next to each other without spaces in between.
                 if (($c != 160)
                     and (($c == 173)
-                        or preg_match($this->re_spaces, TCPDF_FONTS::unichr($c, $this->isunicode))
+                        or preg_match($this->re_spaces, FONTS::unichr($c, $this->isunicode))
                         or (($c == 45)
                             and ($i < ($nb - 1))
-                            and @preg_match('/[\p{L}]/'.$this->re_space['m'], TCPDF_FONTS::unichr($pc, $this->isunicode))
-                            and @preg_match('/[\p{L}]/'.$this->re_space['m'], TCPDF_FONTS::unichr($chars[($i + 1)], $this->isunicode))
+                            and @preg_match('/[\p{L}]/'.$this->re_space['m'], FONTS::unichr($pc, $this->isunicode))
+                            and @preg_match('/[\p{L}]/'.$this->re_space['m'], FONTS::unichr($chars[($i + 1)], $this->isunicode))
                         )
                     )
                 ) {
@@ -6564,7 +6555,7 @@ class TCPDF
                 if ($this->isUnicodeFont() and ($arabic)) {
                     // with bidirectional algorithm some chars may be changed affecting the line length
                     // *** very slow ***
-                    $l = $this->GetArrStringWidth(TCPDF_FONTS::utf8Bidi(array_slice($chars, $j, ($i - $j)), '', $this->tmprtl, $this->isunicode, $this->CurrentFont));
+                    $l = $this->GetArrStringWidth(FONTS::utf8Bidi(array_slice($chars, $j, ($i - $j)), '', $this->tmprtl, $this->isunicode, $this->CurrentFont));
                 } else {
                     $l += $this->GetCharWidth($c);
                 }
@@ -6582,16 +6573,16 @@ class TCPDF
                             $this->Cell($w, $h, '', 0, 1);
                             $linebreak = true;
                             if ($firstline) {
-                                return (TCPDF_FONTS::UniArrSubString($uchars, $j));
+                                return (FONTS::UniArrSubString($uchars, $j));
                             }
                         } else {
                             // truncate the word because do not fit on column
-                            $tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, $i);
+                            $tmpstr = FONTS::UniArrSubString($uchars, $j, $i);
                             if ($firstline) {
                                 $startx = $this->x;
                                 $tmparr = array_slice($chars, $j, ($i - $j));
                                 if ($rtlmode) {
-                                    $tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+                                    $tmparr = FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
                                 }
                                 $linew = $this->GetArrStringWidth($tmparr);
                                 unset($tmparr);
@@ -6613,7 +6604,7 @@ class TCPDF
                             unset($tmpstr);
                             if ($firstline) {
                                 $this->cell_padding = $tmpcellpadding;
-                                return (TCPDF_FONTS::UniArrSubString($uchars, $i));
+                                return (FONTS::UniArrSubString($uchars, $i));
                             }
                             $j = $i;
                             --$i;
@@ -6626,16 +6617,16 @@ class TCPDF
                             $endspace = 0;
                         }
                         // check the length of the next string
-                        $strrest = TCPDF_FONTS::UniArrSubString($uchars, ($sep + $endspace));
-                        $nextstr = TCPDF_STATIC::pregSplit('/'.$this->re_space['p'].'/', $this->re_space['m'], $this->stringTrim($strrest));
+                        $strrest = FONTS::UniArrSubString($uchars, ($sep + $endspace));
+                        $nextstr = TCPDFSTATIC::pregSplit('/'.$this->re_space['p'].'/', $this->re_space['m'], $this->stringTrim($strrest));
                         if (isset($nextstr[0]) and ($this->GetStringWidth($nextstr[0]) > $pw)) {
                             // truncate the word because do not fit on a full page width
-                            $tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, $i);
+                            $tmpstr = FONTS::UniArrSubString($uchars, $j, $i);
                             if ($firstline) {
                                 $startx = $this->x;
                                 $tmparr = array_slice($chars, $j, ($i - $j));
                                 if ($rtlmode) {
-                                    $tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+                                    $tmparr = FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
                                 }
                                 $linew = $this->GetArrStringWidth($tmparr);
                                 unset($tmparr);
@@ -6657,7 +6648,7 @@ class TCPDF
                             unset($tmpstr);
                             if ($firstline) {
                                 $this->cell_padding = $tmpcellpadding;
-                                return (TCPDF_FONTS::UniArrSubString($uchars, $i));
+                                return (FONTS::UniArrSubString($uchars, $i));
                             }
                             $j = $i;
                             --$i;
@@ -6678,12 +6669,12 @@ class TCPDF
                                 $shy_char_left = '';
                                 $shy_char_right = '';
                             }
-                            $tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, ($sep + $endspace));
+                            $tmpstr = FONTS::UniArrSubString($uchars, $j, ($sep + $endspace));
                             if ($firstline) {
                                 $startx = $this->x;
                                 $tmparr = array_slice($chars, $j, (($sep + $endspace) - $j));
                                 if ($rtlmode) {
-                                    $tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+                                    $tmparr = FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
                                 }
                                 $linew = $this->GetArrStringWidth($tmparr);
                                 unset($tmparr);
@@ -6710,7 +6701,7 @@ class TCPDF
                                 }
                                 // return the remaining text
                                 $this->cell_padding = $tmpcellpadding;
-                                return (TCPDF_FONTS::UniArrSubString($uchars, ($sep + $endspace)));
+                                return (FONTS::UniArrSubString($uchars, ($sep + $endspace)));
                             }
                             $i = $sep;
                             $sep = -1;
@@ -6747,37 +6738,36 @@ class TCPDF
         if ($l > 0) {
             switch ($align) {
                 case 'J':
-                case 'C': {
+                case 'C':
                     $w = $w;
                     break;
-                    }
-                case 'L': {
+
+                case 'L':
                     if ($this->rtl) {
                         $w = $w;
                     } else {
                         $w = $l;
                     }
                     break;
-                }
-                case 'R': {
+
+                case 'R':
                     if ($this->rtl) {
                         $w = $l;
                     } else {
                         $w = $w;
                     }
                     break;
-                }
-                default: {
+
+                default:
                     $w = $l;
                     break;
-                }
             }
-            $tmpstr = TCPDF_FONTS::UniArrSubString($uchars, $j, $nb);
+            $tmpstr = FONTS::UniArrSubString($uchars, $j, $nb);
             if ($firstline) {
                 $startx = $this->x;
                 $tmparr = array_slice($chars, $j, ($nb - $j));
                 if ($rtlmode) {
-                    $tmparr = TCPDF_FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+                    $tmparr = FONTS::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
                 }
                 $linew = $this->GetArrStringWidth($tmparr);
                 unset($tmparr);
@@ -6799,7 +6789,7 @@ class TCPDF
             unset($tmpstr);
             if ($firstline) {
                 $this->cell_padding = $tmpcellpadding;
-                return (TCPDF_FONTS::UniArrSubString($uchars, $nb));
+                return (FONTS::UniArrSubString($uchars, $nb));
             }
             ++$nl;
         }
@@ -6970,15 +6960,15 @@ class TCPDF
                     $info = $this->getImageBuffer($file);
                     $imsize = [$info['w'], $info['h']];
                 } elseif (strpos($file, '__tcpdf_'.$this->file_id.'_img') === false) {
-                    $imgdata = TCPDF_STATIC::fileGetContents($file);
+                    $imgdata = TCPDFSTATIC::fileGetContents($file);
                 }
             }
         }
         if (!empty($imgdata)) {
             // copy image to cache
             $original_file = $file;
-            $file = TCPDF_STATIC::getObjFilename('img', $this->file_id);
-            $fp = TCPDF_STATIC::fopenLocal($file, 'w');
+            $file = TCPDFSTATIC::getObjFilename('img', $this->file_id);
+            $fp = TCPDFSTATIC::fopenLocal($file, 'w');
             if (!$fp) {
                 $this->Error('Unable to write file: '.$file);
             }
@@ -7029,17 +7019,16 @@ class TCPDF
                 $hdiff = ($oldh - $h);
                 // vertical alignment
                 switch (strtoupper($fitbox[1])) {
-                    case 'T': {
+                    case 'T':
                         break;
-                    }
-                    case 'M': {
+
+                    case 'M':
                         $y += ($hdiff / 2);
                         break;
-                    }
-                    case 'B': {
+
+                    case 'B':
                         $y += $hdiff;
                         break;
-                    }
                 }
             } else {
                 // store current width
@@ -7050,26 +7039,25 @@ class TCPDF
                 $wdiff = ($oldw - $w);
                 // horizontal alignment
                 switch (strtoupper($fitbox[0])) {
-                    case 'L': {
+                    case 'L':
                         if ($this->rtl) {
                             $x -= $wdiff;
                         }
                         break;
-                    }
-                    case 'C': {
+
+                    case 'C':
                         if ($this->rtl) {
                             $x -= ($wdiff / 2);
                         } else {
                             $x += ($wdiff / 2);
                         }
                         break;
-                    }
-                    case 'R': {
+
+                    case 'R':
                         if (!$this->rtl) {
                             $x += $wdiff;
                         }
                         break;
-                    }
                 }
             }
         }
@@ -7125,12 +7113,12 @@ class TCPDF
             //First use of image, get info
             $type = strtolower($type);
             if ($type == '') {
-                $type = TCPDF_IMAGES::getImageFileType($file, $imsize);
+                $type = IMAGES::getImageFileType($file, $imsize);
             } elseif ($type == 'jpg') {
                 $type = 'jpeg';
             }
-            $mqr = TCPDF_STATIC::get_mqr();
-            TCPDF_STATIC::set_mqr(false);
+            $mqr = TCPDFSTATIC::get_mqr();
+            TCPDFSTATIC::set_mqr(false);
             // Specific image handlers (defined on TCPDF_IMAGES CLASS)
             $mtd = '_parse'.$type;
             // GD image handler function
@@ -7138,7 +7126,7 @@ class TCPDF
             $info = false;
             if ((method_exists('TCPDF_IMAGES', $mtd)) and (!($resize and (function_exists($gdfunction) or extension_loaded('imagick'))))) {
                 // TCPDF image functions
-                $info = TCPDF_IMAGES::$mtd($file);
+                $info = IMAGES::$mtd($file);
                 if (($ismask === false) and ($imgmask === false) and (strpos($file, '__tcpdf_'.$this->file_id.'_imgmask_') === false)
                     and (($info === 'pngalpha') or (isset($info['trns']) and !empty($info['trns'])))) {
                     return $this->ImagePngAlpha($file, $x, $y, $pixw, $pixh, $w, $h, 'PNG', $link, $align, $resize, $dpi, $palign, $filehash);
@@ -7152,15 +7140,15 @@ class TCPDF
                         if ($resize) {
                             $imgr = imagecreatetruecolor($neww, $newh);
                             if (($type == 'gif') or ($type == 'png')) {
-                                $imgr = TCPDF_IMAGES::setGDImageTransparency($imgr, $img);
+                                $imgr = IMAGES::setGDImageTransparency($imgr, $img);
                             }
                             imagecopyresampled($imgr, $img, 0, 0, 0, 0, $neww, $newh, $pixw, $pixh);
                             $img = $imgr;
                         }
                         if (($type == 'gif') or ($type == 'png')) {
-                            $info = TCPDF_IMAGES::_toPNG($img, TCPDF_STATIC::getObjFilename('img', $this->file_id));
+                            $info = IMAGES::_toPNG($img, TCPDFSTATIC::getObjFilename('img', $this->file_id));
                         } else {
-                            $info = TCPDF_IMAGES::_toJPEG($img, $this->jpeg_quality, TCPDF_STATIC::getObjFilename('img', $this->file_id));
+                            $info = IMAGES::_toJPEG($img, $this->jpeg_quality, TCPDFSTATIC::getObjFilename('img', $this->file_id));
                         }
                     }
                 } catch (Exception $e) {
@@ -7177,7 +7165,7 @@ class TCPDF
                             $svgimg = substr($file, 1);
                         } else {
                             // get SVG file content
-                            $svgimg = TCPDF_STATIC::fileGetContents($file);
+                            $svgimg = TCPDFSTATIC::fileGetContents($file);
                         }
                         if ($svgimg !== false) {
                             // get width and height
@@ -7219,9 +7207,9 @@ class TCPDF
                     }
                     $img->setCompressionQuality($this->jpeg_quality);
                     $img->setImageFormat('jpeg');
-                    $tempname = TCPDF_STATIC::getObjFilename('img', $this->file_id);
+                    $tempname = TCPDFSTATIC::getObjFilename('img', $this->file_id);
                     $img->writeImage($tempname);
-                    $info = TCPDF_IMAGES::_parsejpeg($tempname);
+                    $info = IMAGES::_parsejpeg($tempname);
                     unlink($tempname);
                     $img->destroy();
                 } catch (Exception $e) {
@@ -7232,7 +7220,7 @@ class TCPDF
                 // unable to process image
                 return;
             }
-            TCPDF_STATIC::set_mqr($mqr);
+            TCPDFSTATIC::set_mqr($mqr);
             if ($ismask) {
                 // force grayscale
                 $info['cs'] = 'DeviceGray';
@@ -7300,28 +7288,27 @@ class TCPDF
         }
         // set pointer to align the next text/objects
         switch ($align) {
-            case 'T': {
+            case 'T':
                 $this->y = $y;
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'M': {
+
+            case 'M':
                 $this->y = $y + round($h/2);
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'B': {
+
+            case 'B':
                 $this->y = $this->img_rb_y;
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'N': {
+
+            case 'N':
                 $this->SetY($this->img_rb_y);
                 break;
-            }
-            default:{
+
+            default:
                 break;
-            }
         }
         $this->endlinex = $this->img_rb_x;
         if ($this->inxobj) {
@@ -7371,7 +7358,7 @@ class TCPDF
                 $img = new Imagick();
                 $img->readImage($file);
                 // clone image object
-                $imga = TCPDF_STATIC::objclone($img);
+                $imga = TCPDFSTATIC::objclone($img);
                 // extract alpha channel
                 if (method_exists($img, 'setImageAlphaChannel') and defined('Imagick::ALPHACHANNEL_EXTRACT')) {
                     $img->setImageAlphaChannel(Imagick::ALPHACHANNEL_EXTRACT);
@@ -7697,21 +7684,21 @@ class TCPDF
             // remove last newline
             $pdfdoc = substr($pdfdoc, 0, -1);
             // remove filler space
-            $byterange_string_len = strlen(TCPDF_STATIC::$byterange_string);
+            $byterange_string_len = strlen(TCPDFSTATIC::$byterange_string);
             // define the ByteRange
             $byte_range = [];
             $byte_range[0] = 0;
-            $byte_range[1] = strpos($pdfdoc, TCPDF_STATIC::$byterange_string) + $byterange_string_len + 10;
+            $byte_range[1] = strpos($pdfdoc, TCPDFSTATIC::$byterange_string) + $byterange_string_len + 10;
             $byte_range[2] = $byte_range[1] + $this->signature_max_length + 2;
             $byte_range[3] = strlen($pdfdoc) - $byte_range[2];
             $pdfdoc = substr($pdfdoc, 0, $byte_range[1]).substr($pdfdoc, $byte_range[2]);
             // replace the ByteRange
             $byterange = sprintf('/ByteRange[0 %u %u %u]', $byte_range[1], $byte_range[2], $byte_range[3]);
             $byterange .= str_repeat(' ', ($byterange_string_len - strlen($byterange)));
-            $pdfdoc = str_replace(TCPDF_STATIC::$byterange_string, $byterange, $pdfdoc);
+            $pdfdoc = str_replace(TCPDFSTATIC::$byterange_string, $byterange, $pdfdoc);
             // write the document to a temporary folder
-            $tempdoc = TCPDF_STATIC::getObjFilename('doc', $this->file_id);
-            $f = TCPDF_STATIC::fopenLocal($tempdoc, 'wb');
+            $tempdoc = TCPDFSTATIC::getObjFilename('doc', $this->file_id);
+            $f = TCPDFSTATIC::fopenLocal($tempdoc, 'wb');
             if (!$f) {
                 $this->Error('Unable to create temporary file: '.$tempdoc);
             }
@@ -7719,7 +7706,7 @@ class TCPDF
             fwrite($f, $pdfdoc, $pdfdoc_length);
             fclose($f);
             // get digital signature via openssl library
-            $tempsign = TCPDF_STATIC::getObjFilename('sig', $this->file_id);
+            $tempsign = TCPDFSTATIC::getObjFilename('sig', $this->file_id);
             if (empty($this->signature_data['extracerts'])) {
                 openssl_pkcs7_sign($tempdoc, $tempsign, $this->signature_data['signcert'], [$this->signature_data['privkey'], $this->signature_data['password']], [], PKCS7_BINARY | PKCS7_DETACHED);
             } else {
@@ -7744,7 +7731,7 @@ class TCPDF
             $this->bufferlen = strlen($this->buffer);
         }
         switch ($dest) {
-            case 'I': {
+            case 'I':
                 // Send PDF to the standard output
                 if (ob_get_contents()) {
                     $this->Error('Some data has already been output, can\'t send PDF file');
@@ -7761,13 +7748,13 @@ class TCPDF
                     header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
                     header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
                     header('Content-Disposition: inline; filename="'.basename($name).'"');
-                    TCPDF_STATIC::sendOutputData($this->getBuffer(), $this->bufferlen);
+                    TCPDFSTATIC::sendOutputData($this->getBuffer(), $this->bufferlen);
                 } else {
                     echo $this->getBuffer();
                 }
                 break;
-            }
-            case 'D': {
+
+            case 'D':
                 // download PDF as file
                 if (ob_get_contents()) {
                     $this->Error('Some data has already been output, can\'t send PDF file');
@@ -7793,14 +7780,14 @@ class TCPDF
                 // use the Content-Disposition header to supply a recommended filename
                 header('Content-Disposition: attachment; filename="'.basename($name).'"');
                 header('Content-Transfer-Encoding: binary');
-                TCPDF_STATIC::sendOutputData($this->getBuffer(), $this->bufferlen);
+                TCPDFSTATIC::sendOutputData($this->getBuffer(), $this->bufferlen);
                 break;
-            }
+
             case 'F':
             case 'FI':
-            case 'FD': {
+            case 'FD':
                 // save PDF to a local file
-                $f = TCPDF_STATIC::fopenLocal($name, 'wb');
+                $f = TCPDFSTATIC::fopenLocal($name, 'wb');
                 if (!$f) {
                     $this->Error('Unable to create output file: '.$name);
                 }
@@ -7815,7 +7802,7 @@ class TCPDF
                     header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
                     header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
                     header('Content-Disposition: inline; filename="'.basename($name).'"');
-                    TCPDF_STATIC::sendOutputData(file_get_contents($name), filesize($name));
+                    TCPDFSTATIC::sendOutputData(file_get_contents($name), filesize($name));
                 } elseif ($dest == 'FD') {
                     // send headers to browser
                     if (ob_get_contents()) {
@@ -7841,11 +7828,11 @@ class TCPDF
                     // use the Content-Disposition header to supply a recommended filename
                     header('Content-Disposition: attachment; filename="'.basename($name).'"');
                     header('Content-Transfer-Encoding: binary');
-                    TCPDF_STATIC::sendOutputData(file_get_contents($name), filesize($name));
+                    TCPDFSTATIC::sendOutputData(file_get_contents($name), filesize($name));
                 }
                 break;
-            }
-            case 'E': {
+
+            case 'E':
                 // return PDF as base64 mime multi-part email attachment (RFC 2045)
                 $retval = 'Content-Type: application/pdf;'."\r\n";
                 $retval .= ' name="'.$name.'"'."\r\n";
@@ -7854,14 +7841,13 @@ class TCPDF
                 $retval .= ' filename="'.$name.'"'."\r\n\r\n";
                 $retval .= chunk_split(base64_encode($this->getBuffer()), 76, "\r\n");
                 return $retval;
-            }
-            case 'S': {
+
+            case 'S':
                 // returns PDF as a string
                 return $this->getBuffer();
-            }
-            default: {
+
+            default:
                 $this->Error('Incorrect output destination: '.$dest);
-            }
         }
         return '';
     }
@@ -7933,14 +7919,14 @@ class TCPDF
         // build array of Unicode + ASCII variants (the order is important)
         $alias = ['u' => [], 'a' => []];
         $u = '{'.$a.'}';
-        $alias['u'][] = TCPDF_STATIC::_escape($u);
+        $alias['u'][] = TCPDFSTATIC::_escape($u);
         if ($this->isunicode) {
-            $alias['u'][] = TCPDF_STATIC::_escape(TCPDF_FONTS::UTF8ToLatin1($u, $this->isunicode, $this->CurrentFont));
-            $alias['u'][] = TCPDF_STATIC::_escape(TCPDF_FONTS::utf8StrRev($u, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
-            $alias['a'][] = TCPDF_STATIC::_escape(TCPDF_FONTS::UTF8ToLatin1($a, $this->isunicode, $this->CurrentFont));
-            $alias['a'][] = TCPDF_STATIC::_escape(TCPDF_FONTS::utf8StrRev($a, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
+            $alias['u'][] = TCPDFSTATIC::_escape(FONTS::UTF8ToLatin1($u, $this->isunicode, $this->CurrentFont));
+            $alias['u'][] = TCPDFSTATIC::_escape(FONTS::utf8StrRev($u, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
+            $alias['a'][] = TCPDFSTATIC::_escape(FONTS::UTF8ToLatin1($a, $this->isunicode, $this->CurrentFont));
+            $alias['a'][] = TCPDFSTATIC::_escape(FONTS::utf8StrRev($a, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
         }
-        $alias['a'][] = TCPDF_STATIC::_escape($a);
+        $alias['a'][] = TCPDFSTATIC::_escape($a);
         return $alias;
     }
 
@@ -7951,7 +7937,7 @@ class TCPDF
      */
     protected function getAllInternalPageNumberAliases()
     {
-        $basic_alias = [TCPDF_STATIC::$alias_tot_pages, TCPDF_STATIC::$alias_num_page, TCPDF_STATIC::$alias_group_tot_pages, TCPDF_STATIC::$alias_group_num_page, TCPDF_STATIC::$alias_right_shift];
+        $basic_alias = [TCPDFSTATIC::$alias_tot_pages, TCPDFSTATIC::$alias_num_page, TCPDFSTATIC::$alias_group_tot_pages, TCPDFSTATIC::$alias_group_num_page, TCPDFSTATIC::$alias_right_shift];
         $pnalias = [];
         foreach ($basic_alias as $k => $a) {
             $pnalias[$k] = $this->getInternalPageNumberAliases($a);
@@ -7987,7 +7973,7 @@ class TCPDF
                     if ($type == 'u') {
                         $chrdiff = floor(($diff + 12) * $ratio);
                         $shift = str_repeat(' ', $chrdiff);
-                        $shift = TCPDF_FONTS::UTF8ToUTF16BE($shift, false, $this->isunicode, $this->CurrentFont);
+                        $shift = FONTS::UTF8ToUTF16BE($shift, false, $this->isunicode, $this->CurrentFont);
                     } else {
                         $chrdiff = floor(($diff + 11) * $ratio);
                         $shift = str_repeat(' ', $chrdiff);
@@ -8008,7 +7994,7 @@ class TCPDF
     {
         $this->page_boxes = [];
         foreach ($boxes as $box) {
-            if (in_array($box, TCPDF_STATIC::$pageboxes)) {
+            if (in_array($box, TCPDFSTATIC::$pageboxes)) {
                 $this->page_boxes[] = $box;
             }
         }
@@ -8024,8 +8010,8 @@ class TCPDF
         // get internal aliases for page numbers
         $pnalias = $this->getAllInternalPageNumberAliases();
         $num_pages = $this->numpages;
-        $ptpa = TCPDF_STATIC::formatPageNumber(($this->starting_page_number + $num_pages - 1));
-        $ptpu = TCPDF_FONTS::UTF8ToUTF16BE($ptpa, false, $this->isunicode, $this->CurrentFont);
+        $ptpa = TCPDFSTATIC::formatPageNumber(($this->starting_page_number + $num_pages - 1));
+        $ptpu = FONTS::UTF8ToUTF16BE($ptpa, false, $this->isunicode, $this->CurrentFont);
         $ptp_num_chars = $this->GetNumChars($ptpa);
         $pagegroupnum = 0;
         $groupnum = 0;
@@ -8037,8 +8023,8 @@ class TCPDF
             $temppage = $this->getPageBuffer($n);
             $pagelen = strlen($temppage);
             // set replacements for total pages number
-            $pnpa = TCPDF_STATIC::formatPageNumber(($this->starting_page_number + $n - 1));
-            $pnpu = TCPDF_FONTS::UTF8ToUTF16BE($pnpa, false, $this->isunicode, $this->CurrentFont);
+            $pnpa = TCPDFSTATIC::formatPageNumber(($this->starting_page_number + $n - 1));
+            $pnpu = FONTS::UTF8ToUTF16BE($pnpa, false, $this->isunicode, $this->CurrentFont);
             $pnp_num_chars = $this->GetNumChars($pnpa);
             $pdiff = 0; // difference used for right shift alignment of page numbers
             $gdiff = 0; // difference used for right shift alignment of page group numbers
@@ -8046,13 +8032,13 @@ class TCPDF
                 if (isset($this->newpagegroup[$n])) {
                     $pagegroupnum = 0;
                     ++$groupnum;
-                    $ptga = TCPDF_STATIC::formatPageNumber($this->pagegroups[$groupnum]);
-                    $ptgu = TCPDF_FONTS::UTF8ToUTF16BE($ptga, false, $this->isunicode, $this->CurrentFont);
+                    $ptga = TCPDFSTATIC::formatPageNumber($this->pagegroups[$groupnum]);
+                    $ptgu = FONTS::UTF8ToUTF16BE($ptga, false, $this->isunicode, $this->CurrentFont);
                     $ptg_num_chars = $this->GetNumChars($ptga);
                 }
                 ++$pagegroupnum;
-                $pnga = TCPDF_STATIC::formatPageNumber($pagegroupnum);
-                $pngu = TCPDF_FONTS::UTF8ToUTF16BE($pnga, false, $this->isunicode, $this->CurrentFont);
+                $pnga = TCPDFSTATIC::formatPageNumber($pagegroupnum);
+                $pngu = FONTS::UTF8ToUTF16BE($pnga, false, $this->isunicode, $this->CurrentFont);
                 $png_num_chars = $this->GetNumChars($pnga);
                 // replace page numbers
                 $replace = [];
@@ -8060,7 +8046,7 @@ class TCPDF
                 $replace[] = [$ptga, $ptg_num_chars, 7, $pnalias[2]['a']];
                 $replace[] = [$pngu, $png_num_chars, 9, $pnalias[3]['u']];
                 $replace[] = [$pnga, $png_num_chars, 7, $pnalias[3]['a']];
-                list($temppage, $gdiff) = TCPDF_STATIC::replacePageNumAliases($temppage, $replace, $gdiff);
+                list($temppage, $gdiff) = TCPDFSTATIC::replacePageNumAliases($temppage, $replace, $gdiff);
             }
             // replace page numbers
             $replace = [];
@@ -8068,7 +8054,7 @@ class TCPDF
             $replace[] = [$ptpa, $ptp_num_chars, 7, $pnalias[0]['a']];
             $replace[] = [$pnpu, $pnp_num_chars, 9, $pnalias[1]['u']];
             $replace[] = [$pnpa, $pnp_num_chars, 7, $pnalias[1]['a']];
-            list($temppage, $pdiff) = TCPDF_STATIC::replacePageNumAliases($temppage, $replace, $pdiff);
+            list($temppage, $pdiff) = TCPDFSTATIC::replacePageNumAliases($temppage, $replace, $pdiff);
             // replace right shift alias
             $temppage = $this->replaceRightShiftPageNumAliases($temppage, $pnalias[4], max($pdiff, $gdiff));
             // replace EPS marker
@@ -8299,49 +8285,48 @@ class TCPDF
                         if (is_array($pl['opt']['f'])) {
                             foreach ($pl['opt']['f'] as $f) {
                                 switch (strtolower($f)) {
-                                    case 'invisible': {
+                                    case 'invisible':
                                         $fval += 1 << 0;
                                         break;
-                                    }
-                                    case 'hidden': {
+
+                                    case 'hidden':
                                         $fval += 1 << 1;
                                         break;
-                                    }
-                                    case 'print': {
+
+                                    case 'print':
                                         $fval += 1 << 2;
                                         break;
-                                    }
-                                    case 'nozoom': {
+
+                                    case 'nozoom':
                                         $fval += 1 << 3;
                                         break;
-                                    }
-                                    case 'norotate': {
+
+                                    case 'norotate':
                                         $fval += 1 << 4;
                                         break;
-                                    }
-                                    case 'noview': {
+
+                                    case 'noview':
                                         $fval += 1 << 5;
                                         break;
-                                    }
-                                    case 'readonly': {
+
+                                    case 'readonly':
                                         $fval += 1 << 6;
                                         break;
-                                    }
-                                    case 'locked': {
+
+                                    case 'locked':
                                         $fval += 1 << 8;
                                         break;
-                                    }
-                                    case 'togglenoview': {
+
+                                    case 'togglenoview':
                                         $fval += 1 << 9;
                                         break;
-                                    }
-                                    case 'lockedcontents': {
+
+                                    case 'lockedcontents':
                                         $fval += 1 << 10;
                                         break;
-                                    }
-                                    default: {
+
+                                    default:
                                         break;
-                                    }
                                 }
                             }
                         } else {
@@ -8434,7 +8419,7 @@ class TCPDF
                         $annots .= '>>';
                     }
                     if (isset($pl['opt']['c']) and (is_array($pl['opt']['c'])) and !empty($pl['opt']['c'])) {
-                        $annots .= ' /C '.TCPDF_COLORS::getColorStringFromArray($pl['opt']['c']);
+                        $annots .= ' /C '.COLORS::getColorStringFromArray($pl['opt']['c']);
                     }
                     //$annots .= ' /StructParent ';
                     //$annots .= ' /OC ';
@@ -8463,7 +8448,7 @@ class TCPDF
                     $lineendings = ['Square', 'Circle', 'Diamond', 'OpenArrow', 'ClosedArrow', 'None', 'Butt', 'ROpenArrow', 'RClosedArrow', 'Slash'];
                     // Annotation types
                     switch (strtolower($pl['opt']['subtype'])) {
-                        case 'text': {
+                        case 'text':
                             if (isset($pl['opt']['open'])) {
                                 $annots .= ' /Open '. (strtolower($pl['opt']['open']) == 'true' ? 'true' : 'false');
                             }
@@ -8495,12 +8480,12 @@ class TCPDF
                                 }
                             }
                             break;
-                        }
-                        case 'link': {
+
+                        case 'link':
                             if (is_string($pl['txt'])) {
                                 if ($pl['txt'][0] == '#') {
                                     // internal destination
-                                    $annots .= ' /Dest /'.TCPDF_STATIC::encodeNameObject(substr($pl['txt'], 1));
+                                    $annots .= ' /Dest /'.TCPDFSTATIC::encodeNameObject(substr($pl['txt'], 1));
                                 } elseif ($pl['txt'][0] == '%') {
                                     // embedded PDF file
                                     $filename = basename(substr($pl['txt'], 1));
@@ -8542,8 +8527,8 @@ class TCPDF
                             //$annots .= ' /PA ';
                             //$annots .= ' /Quadpoints ';
                             break;
-                        }
-                        case 'freetext': {
+
+                        case 'freetext':
                             if (isset($pl['opt']['da']) and !empty($pl['opt']['da'])) {
                                 $annots .= ' /DA ('.$pl['opt']['da'].')';
                             }
@@ -8578,47 +8563,47 @@ class TCPDF
                                 $annots .= ' /LE /'.$pl['opt']['le'];
                             }
                             break;
-                        }
-                        case 'line': {
+
+                        case 'line':
                             break;
-                        }
-                        case 'square': {
+
+                        case 'square':
                             break;
-                        }
-                        case 'circle': {
+
+                        case 'circle':
                             break;
-                            }
-                        case 'polygon': {
+
+                        case 'polygon':
                             break;
-                        }
-                        case 'polyline': {
+
+                        case 'polyline':
                             break;
-                        }
-                        case 'highlight': {
+
+                        case 'highlight':
                             break;
-                        }
-                        case 'underline': {
+
+                        case 'underline':
                             break;
-                        }
-                        case 'squiggly': {
+
+                        case 'squiggly':
                             break;
-                        }
-                        case 'strikeout': {
+
+                        case 'strikeout':
                             break;
-                        }
-                        case 'stamp': {
+
+                        case 'stamp':
                             break;
-                        }
-                        case 'caret': {
+
+                        case 'caret':
                             break;
-                        }
-                        case 'ink': {
+
+                        case 'ink':
                             break;
-                        }
-                        case 'popup': {
+
+                        case 'popup':
                             break;
-                            }
-                        case 'fileattachment': {
+
+                        case 'fileattachment':
                             if ($this->pdfa_mode) {
                                 // embedded files are not allowed in PDF/A mode
                                 break;
@@ -8639,8 +8624,8 @@ class TCPDF
                                 $this->embeddedfiles[$filename]['a'] = $key;
                             }
                             break;
-                        }
-                        case 'sound': {
+
+                        case 'sound':
                             if (!isset($pl['opt']['fs'])) {
                                 break;
                             }
@@ -8657,11 +8642,11 @@ class TCPDF
                                 }
                             }
                             break;
-                        }
-                        case 'movie': {
+
+                        case 'movie':
                             break;
-                        }
-                        case 'widget': {
+
+                        case 'widget':
                             $hmode = ['N', 'I', 'O', 'P', 'T'];
                             if (isset($pl['opt']['h']) and in_array($pl['opt']['h'], $hmode)) {
                                 $annots .= ' /H /'.$pl['opt']['h'];
@@ -8672,10 +8657,10 @@ class TCPDF
                                     $annots .= ' /R '.$pl['opt']['mk']['r'];
                                 }
                                 if (isset($pl['opt']['mk']['bc']) and (is_array($pl['opt']['mk']['bc']))) {
-                                    $annots .= ' /BC '.TCPDF_COLORS::getColorStringFromArray($pl['opt']['mk']['bc']);
+                                    $annots .= ' /BC '.COLORS::getColorStringFromArray($pl['opt']['mk']['bc']);
                                 }
                                 if (isset($pl['opt']['mk']['bg']) and (is_array($pl['opt']['mk']['bg']))) {
-                                    $annots .= ' /BG '.TCPDF_COLORS::getColorStringFromArray($pl['opt']['mk']['bg']);
+                                    $annots .= ' /BG '.COLORS::getColorStringFromArray($pl['opt']['mk']['bg']);
                                 }
                                 if (isset($pl['opt']['mk']['ca'])) {
                                     $annots .= ' /CA '.$pl['opt']['mk']['ca'];
@@ -8829,25 +8814,24 @@ class TCPDF
                                 $annots .= ']';
                             }
                             break;
-                        }
-                        case 'screen': {
+
+                        case 'screen':
                             break;
-                        }
-                        case 'printermark': {
+
+                        case 'printermark':
                             break;
-                        }
-                        case 'trapnet': {
+
+                        case 'trapnet':
                             break;
-                        }
-                        case 'watermark': {
+
+                        case 'watermark':
                             break;
-                        }
-                        case '3d': {
+
+                        case '3d':
                             break;
-                        }
-                        default: {
+
+                        default:
                             break;
-                        }
                     }
                     $annots .= '>>';
                     // create new annotation object
@@ -8909,12 +8893,12 @@ class TCPDF
             $this->_newobj();
             $this->_out('<< /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences ['.$diff.'] >>'."\n".'endobj');
         }
-        $mqr = TCPDF_STATIC::get_mqr();
-        TCPDF_STATIC::set_mqr(false);
+        $mqr = TCPDFSTATIC::get_mqr();
+        TCPDFSTATIC::set_mqr(false);
         foreach ($this->FontFiles as $file => $info) {
             // search and get font file to embedd
-            $fontfile = TCPDF_FONTS::getFontFullPath($file, $info['fontdir']);
-            if (!TCPDF_STATIC::empty_string($fontfile)) {
+            $fontfile = FONTS::getFontFullPath($file, $info['fontdir']);
+            if (!TCPDFSTATIC::empty_string($fontfile)) {
                 $font = file_get_contents($fontfile);
                 $compressed = (substr($file, -2) == '.z');
                 if ((!$compressed) and (isset($info['length2']))) {
@@ -8939,7 +8923,7 @@ class TCPDF
                         $subsetchars += $fontinfo['subsetchars'];
                     }
                     // rebuild a font subset
-                    $font = TCPDF_FONTS::_getTrueTypeFontSubset($font, $subsetchars);
+                    $font = FONTS::_getTrueTypeFontSubset($font, $subsetchars);
                     // calculate new font length
                     $info['length1'] = strlen($font);
                     if ($compressed) {
@@ -8964,7 +8948,7 @@ class TCPDF
                 $this->_out($out);
             }
         }
-        TCPDF_STATIC::set_mqr($mqr);
+        TCPDFSTATIC::set_mqr($mqr);
         foreach ($this->fontkeys as $k) {
             //Font objects
             $font = $this->getFontBuffer($k);
@@ -9029,7 +9013,7 @@ class TCPDF
                     }
                     $s .= ' /'.$fdk.' '.$fdv.'';
                 }
-                if (!TCPDF_STATIC::empty_string($font['file'])) {
+                if (!TCPDFSTATIC::empty_string($font['file'])) {
                     $s .= ' /FontFile'.($type == 'Type1' ? '' : '2').' '.$this->FontFiles[$font['file']]['n'].' 0 R';
                 }
                 $s .= '>>';
@@ -9078,7 +9062,7 @@ class TCPDF
         $out .= "\n".'endobj';
         $this->_out($out);
         // ToUnicode map for Identity-H
-        $stream = TCPDF_FONT_DATA::$uni_identity_h;
+        $stream = FONT\DATA::$uni_identity_h;
         // ToUnicode Object
         $this->_newobj();
         $stream = ($this->compress) ? gzcompress($stream) : $stream;
@@ -9098,8 +9082,8 @@ class TCPDF
         $out .= ' /CIDSystemInfo << '.$cidinfo.' >>';
         $out .= ' /FontDescriptor '.($this->n + 1).' 0 R';
         $out .= ' /DW '.$font['dw']; // default width
-        $out .= "\n".TCPDF_FONTS::_putfontwidths($font, 0);
-        if (isset($font['ctg']) and (!TCPDF_STATIC::empty_string($font['ctg']))) {
+        $out .= "\n".FONTS::_putfontwidths($font, 0);
+        if (isset($font['ctg']) and (!TCPDFSTATIC::empty_string($font['ctg']))) {
             $out .= "\n".'/CIDToGIDMap '.($this->n + 2).' 0 R';
         }
         $out .= ' >>';
@@ -9117,7 +9101,7 @@ class TCPDF
             $out .= ' /'.$key.' '.$value;
         }
         $fontdir = false;
-        if (!TCPDF_STATIC::empty_string($font['file'])) {
+        if (!TCPDFSTATIC::empty_string($font['file'])) {
             // A stream containing a TrueType font
             $out .= ' /FontFile2 '.$this->FontFiles[$font['file']]['n'].' 0 R';
             $fontdir = $this->FontFiles[$font['file']]['fontdir'];
@@ -9125,15 +9109,15 @@ class TCPDF
         $out .= ' >>';
         $out .= "\n".'endobj';
         $this->_out($out);
-        if (isset($font['ctg']) and (!TCPDF_STATIC::empty_string($font['ctg']))) {
+        if (isset($font['ctg']) and (!TCPDFSTATIC::empty_string($font['ctg']))) {
             $this->_newobj();
             // Embed CIDToGIDMap
             // A specification of the mapping from CIDs to glyph indices
             // search and get CTG font file to embedd
             $ctgfile = strtolower($font['ctg']);
             // search and get ctg font file to embedd
-            $fontfile = TCPDF_FONTS::getFontFullPath($ctgfile, $fontdir);
-            if (TCPDF_STATIC::empty_string($fontfile)) {
+            $fontfile = FONTS::getFontFullPath($ctgfile, $fontdir);
+            if (TCPDFSTATIC::empty_string($fontfile)) {
                 $this->Error('Font file not found: '.$ctgfile);
             }
             $stream = $this->_getrawstream(file_get_contents($fontfile));
@@ -9207,7 +9191,7 @@ class TCPDF
         $out .= ' /CIDSystemInfo <<'.$cidinfo.'>>';
         $out .= ' /FontDescriptor '.($this->n + 1).' 0 R';
         $out .= ' /DW '.$font['dw'];
-        $out .= "\n".TCPDF_FONTS::_putfontwidths($font, $cidoffset);
+        $out .= "\n".FONTS::_putfontwidths($font, $cidoffset);
         $out .= ' >>';
         $out .= "\n".'endobj';
         $this->_out($out);
@@ -9596,30 +9580,30 @@ class TCPDF
         if ($this->docinfounicode) {
             $this->isunicode = true;
         }
-        if (!TCPDF_STATIC::empty_string($this->title)) {
+        if (!TCPDFSTATIC::empty_string($this->title)) {
             // The document's title.
             $out .= ' /Title '.$this->_textstring($this->title, $oid);
         }
-        if (!TCPDF_STATIC::empty_string($this->author)) {
+        if (!TCPDFSTATIC::empty_string($this->author)) {
             // The name of the person who created the document.
             $out .= ' /Author '.$this->_textstring($this->author, $oid);
         }
-        if (!TCPDF_STATIC::empty_string($this->subject)) {
+        if (!TCPDFSTATIC::empty_string($this->subject)) {
             // The subject of the document.
             $out .= ' /Subject '.$this->_textstring($this->subject, $oid);
         }
-        if (!TCPDF_STATIC::empty_string($this->keywords)) {
+        if (!TCPDFSTATIC::empty_string($this->keywords)) {
             // Keywords associated with the document.
             $out .= ' /Keywords '.$this->_textstring($this->keywords, $oid);
         }
-        if (!TCPDF_STATIC::empty_string($this->creator)) {
+        if (!TCPDFSTATIC::empty_string($this->creator)) {
             // If the document was converted to PDF from another format, the name of the conforming product that created the original document from which it was converted.
             $out .= ' /Creator '.$this->_textstring($this->creator, $oid);
         }
         // restore previous isunicode value
         $this->isunicode = $prev_isunicode;
         // default producer
-        $out .= ' /Producer '.$this->_textstring(TCPDF_STATIC::getTCPDFProducer(), $oid);
+        $out .= ' /Producer '.$this->_textstring(TCPDFSTATIC::getTCPDFProducer(), $oid);
         // The date and time the document was created, in human-readable form
         $out .= ' /CreationDate '.$this->_datestring(0, $this->doc_creation_timestamp);
         // The date and time the document was most recently modified, in human-readable form
@@ -9659,44 +9643,44 @@ class TCPDF
         $prev_encrypted = $this->encrypted;
         $this->encrypted = false;
         // set XMP data
-        $xmp = '<?xpacket begin="'.TCPDF_FONTS::unichr(0xfeff, $this->isunicode).'" id="W5M0MpCehiHzreSzNTczkc9d"?>'."\n";
+        $xmp = '<?xpacket begin="'.FONTS::unichr(0xfeff, $this->isunicode).'" id="W5M0MpCehiHzreSzNTczkc9d"?>'."\n";
         $xmp .= '<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 4.2.1-c043 52.372728, 2009/01/18-15:08:04">'."\n";
         $xmp .= "\t".'<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">'."\n";
         $xmp .= "\t\t".'<rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">'."\n";
         $xmp .= "\t\t\t".'<dc:format>application/pdf</dc:format>'."\n";
         $xmp .= "\t\t\t".'<dc:title>'."\n";
         $xmp .= "\t\t\t\t".'<rdf:Alt>'."\n";
-        $xmp .= "\t\t\t\t\t".'<rdf:li xml:lang="x-default">'.TCPDF_STATIC::_escapeXML($this->title).'</rdf:li>'."\n";
+        $xmp .= "\t\t\t\t\t".'<rdf:li xml:lang="x-default">'.TCPDFSTATIC::_escapeXML($this->title).'</rdf:li>'."\n";
         $xmp .= "\t\t\t\t".'</rdf:Alt>'."\n";
         $xmp .= "\t\t\t".'</dc:title>'."\n";
         $xmp .= "\t\t\t".'<dc:creator>'."\n";
         $xmp .= "\t\t\t\t".'<rdf:Seq>'."\n";
-        $xmp .= "\t\t\t\t\t".'<rdf:li>'.TCPDF_STATIC::_escapeXML($this->author).'</rdf:li>'."\n";
+        $xmp .= "\t\t\t\t\t".'<rdf:li>'.TCPDFSTATIC::_escapeXML($this->author).'</rdf:li>'."\n";
         $xmp .= "\t\t\t\t".'</rdf:Seq>'."\n";
         $xmp .= "\t\t\t".'</dc:creator>'."\n";
         $xmp .= "\t\t\t".'<dc:description>'."\n";
         $xmp .= "\t\t\t\t".'<rdf:Alt>'."\n";
-        $xmp .= "\t\t\t\t\t".'<rdf:li xml:lang="x-default">'.TCPDF_STATIC::_escapeXML($this->subject).'</rdf:li>'."\n";
+        $xmp .= "\t\t\t\t\t".'<rdf:li xml:lang="x-default">'.TCPDFSTATIC::_escapeXML($this->subject).'</rdf:li>'."\n";
         $xmp .= "\t\t\t\t".'</rdf:Alt>'."\n";
         $xmp .= "\t\t\t".'</dc:description>'."\n";
         $xmp .= "\t\t\t".'<dc:subject>'."\n";
         $xmp .= "\t\t\t\t".'<rdf:Bag>'."\n";
-        $xmp .= "\t\t\t\t\t".'<rdf:li>'.TCPDF_STATIC::_escapeXML($this->keywords).'</rdf:li>'."\n";
+        $xmp .= "\t\t\t\t\t".'<rdf:li>'.TCPDFSTATIC::_escapeXML($this->keywords).'</rdf:li>'."\n";
         $xmp .= "\t\t\t\t".'</rdf:Bag>'."\n";
         $xmp .= "\t\t\t".'</dc:subject>'."\n";
         $xmp .= "\t\t".'</rdf:Description>'."\n";
         // convert doc creation date format
-        $dcdate = TCPDF_STATIC::getFormattedDate($this->doc_creation_timestamp);
+        $dcdate = TCPDFSTATIC::getFormattedDate($this->doc_creation_timestamp);
         $doccreationdate = substr($dcdate, 0, 4).'-'.substr($dcdate, 4, 2).'-'.substr($dcdate, 6, 2);
         $doccreationdate .= 'T'.substr($dcdate, 8, 2).':'.substr($dcdate, 10, 2).':'.substr($dcdate, 12, 2);
         $doccreationdate .= substr($dcdate, 14, 3).':'.substr($dcdate, 18, 2);
-        $doccreationdate = TCPDF_STATIC::_escapeXML($doccreationdate);
+        $doccreationdate = TCPDFSTATIC::_escapeXML($doccreationdate);
         // convert doc modification date format
-        $dmdate = TCPDF_STATIC::getFormattedDate($this->doc_modification_timestamp);
+        $dmdate = TCPDFSTATIC::getFormattedDate($this->doc_modification_timestamp);
         $docmoddate = substr($dmdate, 0, 4).'-'.substr($dmdate, 4, 2).'-'.substr($dmdate, 6, 2);
         $docmoddate .= 'T'.substr($dmdate, 8, 2).':'.substr($dmdate, 10, 2).':'.substr($dmdate, 12, 2);
         $docmoddate .= substr($dmdate, 14, 3).':'.substr($dmdate, 18, 2);
-        $docmoddate = TCPDF_STATIC::_escapeXML($docmoddate);
+        $docmoddate = TCPDFSTATIC::_escapeXML($docmoddate);
         $xmp .= "\t\t".'<rdf:Description rdf:about="" xmlns:xmp="http://ns.adobe.com/xap/1.0/">'."\n";
         $xmp .= "\t\t\t".'<xmp:CreateDate>'.$doccreationdate.'</xmp:CreateDate>'."\n";
         $xmp .= "\t\t\t".'<xmp:CreatorTool>'.$this->creator.'</xmp:CreatorTool>'."\n";
@@ -9704,8 +9688,8 @@ class TCPDF
         $xmp .= "\t\t\t".'<xmp:MetadataDate>'.$doccreationdate.'</xmp:MetadataDate>'."\n";
         $xmp .= "\t\t".'</rdf:Description>'."\n";
         $xmp .= "\t\t".'<rdf:Description rdf:about="" xmlns:pdf="http://ns.adobe.com/pdf/1.3/">'."\n";
-        $xmp .= "\t\t\t".'<pdf:Keywords>'.TCPDF_STATIC::_escapeXML($this->keywords).'</pdf:Keywords>'."\n";
-        $xmp .= "\t\t\t".'<pdf:Producer>'.TCPDF_STATIC::_escapeXML(TCPDF_STATIC::getTCPDFProducer()).'</pdf:Producer>'."\n";
+        $xmp .= "\t\t\t".'<pdf:Keywords>'.TCPDFSTATIC::_escapeXML($this->keywords).'</pdf:Keywords>'."\n";
+        $xmp .= "\t\t\t".'<pdf:Producer>'.TCPDFSTATIC::_escapeXML(TCPDFSTATIC::getTCPDFProducer()).'</pdf:Producer>'."\n";
         $xmp .= "\t\t".'</rdf:Description>'."\n";
         $xmp .= "\t\t".'<rdf:Description rdf:about="" xmlns:xmpMM="http://ns.adobe.com/xap/1.0/mm/">'."\n";
         $uuid = 'uuid:'.substr($this->file_id, 0, 8).'-'.substr($this->file_id, 8, 4).'-'.substr($this->file_id, 12, 4).'-'.substr($this->file_id, 16, 4).'-'.substr($this->file_id, 20, 12);
@@ -9828,10 +9812,10 @@ class TCPDF
             $out .= ' /Dests '.($this->n_dests).' 0 R';
         }
         $out .= $this->_putviewerpreferences();
-        if (isset($this->LayoutMode) and (!TCPDF_STATIC::empty_string($this->LayoutMode))) {
+        if (isset($this->LayoutMode) and (!TCPDFSTATIC::empty_string($this->LayoutMode))) {
             $out .= ' /PageLayout /'.$this->LayoutMode;
         }
-        if (isset($this->PageMode) and (!TCPDF_STATIC::empty_string($this->PageMode))) {
+        if (isset($this->PageMode) and (!TCPDFSTATIC::empty_string($this->PageMode))) {
             $out .= ' /PageMode /'.$this->PageMode;
         }
         if (count($this->outlines) > 0) {
@@ -10022,7 +10006,7 @@ class TCPDF
         if (isset($vp['PrintScaling'])) {
             $out .= ' /PrintScaling /'.$vp['PrintScaling'];
         }
-        if (isset($vp['Duplex']) and (!TCPDF_STATIC::empty_string($vp['Duplex']))) {
+        if (isset($vp['Duplex']) and (!TCPDFSTATIC::empty_string($vp['Duplex']))) {
             $out .= ' /Duplex /'.$vp['Duplex'];
         }
         if (isset($vp['PickTrayByPDFSize'])) {
@@ -10160,7 +10144,7 @@ class TCPDF
         // initialize array for graphics tranformation positions inside a page buffer
         $this->transfmrk[$this->page] = [];
         $this->state = 2;
-        if (TCPDF_STATIC::empty_string($orientation)) {
+        if (TCPDFSTATIC::empty_string($orientation)) {
             if (isset($this->CurOrientation)) {
                 $orientation = $this->CurOrientation;
             } elseif ($this->fwPt > $this->fhPt) {
@@ -10171,7 +10155,7 @@ class TCPDF
                 $orientation = 'P';
             }
         }
-        if (TCPDF_STATIC::empty_string($format)) {
+        if (TCPDFSTATIC::empty_string($format)) {
             $this->pagedim[$this->page] = $this->pagedim[($this->page - 1)];
             $this->setPageOrientation($orientation);
         } else {
@@ -10327,7 +10311,7 @@ class TCPDF
             $n = $this->n;
         }
         $s = $this->_encrypt_data($n, $s);
-        return '('. TCPDF_STATIC::_escape($s).')';
+        return '('. TCPDFSTATIC::_escape($s).')';
     }
 
     /**
@@ -10339,7 +10323,7 @@ class TCPDF
     public function setDocCreationTimestamp($time)
     {
         if (is_string($time)) {
-            $time = TCPDF_STATIC::getTimestamp($time);
+            $time = TCPDFSTATIC::getTimestamp($time);
         }
         $this->doc_creation_timestamp = intval($time);
     }
@@ -10353,7 +10337,7 @@ class TCPDF
     public function setDocModificationTimestamp($time)
     {
         if (is_string($time)) {
-            $time = TCPDF_STATIC::getTimestamp($time);
+            $time = TCPDFSTATIC::getTimestamp($time);
         }
         $this->doc_modification_timestamp = intval($time);
     }
@@ -10393,7 +10377,7 @@ class TCPDF
         if ((empty($timestamp)) or ($timestamp < 0)) {
             $timestamp = $this->doc_creation_timestamp;
         }
-        return $this->_datastring('D:'.TCPDF_STATIC::getFormattedDate($timestamp), $n);
+        return $this->_datastring('D:'.TCPDFSTATIC::getFormattedDate($timestamp), $n);
     }
 
     /**
@@ -10407,7 +10391,7 @@ class TCPDF
     {
         if ($this->isunicode) {
             //Convert string to UTF-16BE
-            $s = TCPDF_FONTS::UTF8ToUTF16BE($s, true, $this->isunicode, $this->CurrentFont);
+            $s = FONTS::UTF8ToUTF16BE($s, true, $this->isunicode, $this->CurrentFont);
         }
         return $this->_datastring($s, $n);
     }
@@ -10620,7 +10604,7 @@ class TCPDF
             // AES padding
             $objkey .= "\x73\x41\x6C\x54"; // sAlT
         }
-        $objkey = substr(TCPDF_STATIC::_md5_16($objkey), 0, (($this->encryptdata['Length'] / 8) + 5));
+        $objkey = substr(TCPDFSTATIC::_md5_16($objkey), 0, (($this->encryptdata['Length'] / 8) + 5));
         $objkey = substr($objkey, 0, 16);
         return $objkey;
     }
@@ -10642,18 +10626,17 @@ class TCPDF
         switch ($this->encryptdata['mode']) {
             case 0:
                 // RC4-40
-            case 1: { // RC4-128
-                $s = TCPDF_STATIC::_RC4($this->_objectkey($n), $s, $this->last_enc_key, $this->last_enc_key_c);
+            case 1: // RC4-128
+                $s = TCPDFSTATIC::_RC4($this->_objectkey($n), $s, $this->last_enc_key, $this->last_enc_key_c);
                 break;
-            }
-            case 2: { // AES-128
-                $s = TCPDF_STATIC::_AES($this->_objectkey($n), $s);
+
+            case 2: // AES-128
+                $s = TCPDFSTATIC::_AES($this->_objectkey($n), $s);
                 break;
-                }
-            case 3: { // AES-256
-                $s = TCPDF_STATIC::_AES($this->encryptdata['key'], $s);
+
+            case 3: // AES-256
+                $s = TCPDFSTATIC::_AES($this->encryptdata['key'], $s);
                 break;
-            }
         }
         return $s;
     }
@@ -10754,9 +10737,9 @@ class TCPDF
             $out .= ' /R';
             if ($this->encryptdata['V'] == 5) { // AES-256
                 $out .= ' 5';
-                $out .= ' /OE ('.TCPDF_STATIC::_escape($this->encryptdata['OE']).')';
-                $out .= ' /UE ('.TCPDF_STATIC::_escape($this->encryptdata['UE']).')';
-                $out .= ' /Perms ('.TCPDF_STATIC::_escape($this->encryptdata['perms']).')';
+                $out .= ' /OE ('.TCPDFSTATIC::_escape($this->encryptdata['OE']).')';
+                $out .= ' /UE ('.TCPDFSTATIC::_escape($this->encryptdata['UE']).')';
+                $out .= ' /Perms ('.TCPDFSTATIC::_escape($this->encryptdata['perms']).')';
             } elseif ($this->encryptdata['V'] == 4) { // AES-128
                 $out .= ' 4';
             } elseif ($this->encryptdata['V'] < 2) { // RC-40
@@ -10764,8 +10747,8 @@ class TCPDF
             } else { // RC-128
                 $out .= ' 3';
             }
-            $out .= ' /O ('.TCPDF_STATIC::_escape($this->encryptdata['O']).')';
-            $out .= ' /U ('.TCPDF_STATIC::_escape($this->encryptdata['U']).')';
+            $out .= ' /O ('.TCPDFSTATIC::_escape($this->encryptdata['O']).')';
+            $out .= ' /U ('.TCPDFSTATIC::_escape($this->encryptdata['U']).')';
             $out .= ' /P '.$this->encryptdata['P'];
             if (isset($this->encryptdata['EncryptMetadata']) and (!$this->encryptdata['EncryptMetadata'])) {
                 $out .= ' /EncryptMetadata false';
@@ -10788,22 +10771,22 @@ class TCPDF
     protected function _Uvalue()
     {
         if ($this->encryptdata['mode'] == 0) { // RC4-40
-            return TCPDF_STATIC::_RC4($this->encryptdata['key'], TCPDF_STATIC::$enc_padding, $this->last_enc_key, $this->last_enc_key_c);
+            return TCPDFSTATIC::_RC4($this->encryptdata['key'], TCPDFSTATIC::$enc_padding, $this->last_enc_key, $this->last_enc_key_c);
         } elseif ($this->encryptdata['mode'] < 3) { // RC4-128, AES-128
-            $tmp = TCPDF_STATIC::_md5_16(TCPDF_STATIC::$enc_padding.$this->encryptdata['fileid']);
-            $enc = TCPDF_STATIC::_RC4($this->encryptdata['key'], $tmp, $this->last_enc_key, $this->last_enc_key_c);
+            $tmp = TCPDFSTATIC::_md5_16(TCPDFSTATIC::$enc_padding.$this->encryptdata['fileid']);
+            $enc = TCPDFSTATIC::_RC4($this->encryptdata['key'], $tmp, $this->last_enc_key, $this->last_enc_key_c);
             $len = strlen($tmp);
             for ($i = 1; $i <= 19; ++$i) {
                 $ek = '';
                 for ($j = 0; $j < $len; ++$j) {
                     $ek .= chr(ord($this->encryptdata['key'][$j]) ^ $i);
                 }
-                $enc = TCPDF_STATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
+                $enc = TCPDFSTATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
             }
             $enc .= str_repeat("\x00", 16);
             return substr($enc, 0, 32);
         } elseif ($this->encryptdata['mode'] == 3) { // AES-256
-            $seed = TCPDF_STATIC::_md5_16(TCPDF_STATIC::getRandomSeed());
+            $seed = TCPDFSTATIC::_md5_16(TCPDFSTATIC::getRandomSeed());
             // User Validation Salt
             $this->encryptdata['UVS'] = substr($seed, 0, 8);
             // User Key Salt
@@ -10822,7 +10805,7 @@ class TCPDF
     protected function _UEvalue()
     {
         $hashkey = hash('sha256', $this->encryptdata['user_password'].$this->encryptdata['UKS'], true);
-        return TCPDF_STATIC::_AESnopad($hashkey, $this->encryptdata['key']);
+        return TCPDFSTATIC::_AESnopad($hashkey, $this->encryptdata['key']);
     }
 
     /**
@@ -10835,14 +10818,14 @@ class TCPDF
     protected function _Ovalue()
     {
         if ($this->encryptdata['mode'] < 3) { // RC4-40, RC4-128, AES-128
-            $tmp = TCPDF_STATIC::_md5_16($this->encryptdata['owner_password']);
+            $tmp = TCPDFSTATIC::_md5_16($this->encryptdata['owner_password']);
             if ($this->encryptdata['mode'] > 0) {
                 for ($i = 0; $i < 50; ++$i) {
-                    $tmp = TCPDF_STATIC::_md5_16($tmp);
+                    $tmp = TCPDFSTATIC::_md5_16($tmp);
                 }
             }
             $owner_key = substr($tmp, 0, ($this->encryptdata['Length'] / 8));
-            $enc = TCPDF_STATIC::_RC4($owner_key, $this->encryptdata['user_password'], $this->last_enc_key, $this->last_enc_key_c);
+            $enc = TCPDFSTATIC::_RC4($owner_key, $this->encryptdata['user_password'], $this->last_enc_key, $this->last_enc_key_c);
             if ($this->encryptdata['mode'] > 0) {
                 $len = strlen($owner_key);
                 for ($i = 1; $i <= 19; ++$i) {
@@ -10850,12 +10833,12 @@ class TCPDF
                     for ($j = 0; $j < $len; ++$j) {
                         $ek .= chr(ord($owner_key[$j]) ^ $i);
                     }
-                    $enc = TCPDF_STATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
+                    $enc = TCPDFSTATIC::_RC4($ek, $enc, $this->last_enc_key, $this->last_enc_key_c);
                 }
             }
             return $enc;
         } elseif ($this->encryptdata['mode'] == 3) { // AES-256
-            $seed = TCPDF_STATIC::_md5_16(TCPDF_STATIC::getRandomSeed());
+            $seed = TCPDFSTATIC::_md5_16(TCPDFSTATIC::getRandomSeed());
             // Owner Validation Salt
             $this->encryptdata['OVS'] = substr($seed, 0, 8);
             // Owner Key Salt
@@ -10874,7 +10857,7 @@ class TCPDF
     protected function _OEvalue()
     {
         $hashkey = hash('sha256', $this->encryptdata['owner_password'].$this->encryptdata['OKS'].$this->encryptdata['U'], true);
-        return TCPDF_STATIC::_AESnopad($hashkey, $this->encryptdata['key']);
+        return TCPDFSTATIC::_AESnopad($hashkey, $this->encryptdata['key']);
     }
 
     /**
@@ -10888,9 +10871,9 @@ class TCPDF
     protected function _fixAES256Password($password)
     {
         $psw = ''; // password to be returned
-        $psw_array = TCPDF_FONTS::utf8Bidi(TCPDF_FONTS::UTF8StringToArray($password, $this->isunicode, $this->CurrentFont), $password, $this->rtl, $this->isunicode, $this->CurrentFont);
+        $psw_array = FONTS::utf8Bidi(FONTS::UTF8StringToArray($password, $this->isunicode, $this->CurrentFont), $password, $this->rtl, $this->isunicode, $this->CurrentFont);
         foreach ($psw_array as $c) {
-            $psw .= TCPDF_FONTS::unichr($c, $this->isunicode);
+            $psw .= FONTS::unichr($c, $this->isunicode);
         }
         return substr($psw, 0, 127);
     }
@@ -10907,7 +10890,7 @@ class TCPDF
         if (!$this->encryptdata['pubkey']) { // standard mode
             if ($this->encryptdata['mode'] == 3) { // AES-256
                 // generate 256 bit random key
-                $this->encryptdata['key'] = substr(hash('sha256', TCPDF_STATIC::getRandomSeed(), true), 0, $keybytelen);
+                $this->encryptdata['key'] = substr(hash('sha256', TCPDFSTATIC::getRandomSeed(), true), 0, $keybytelen);
                 // truncate passwords
                 $this->encryptdata['user_password'] = $this->_fixAES256Password($this->encryptdata['user_password']);
                 $this->encryptdata['owner_password'] = $this->_fixAES256Password($this->encryptdata['owner_password']);
@@ -10922,7 +10905,7 @@ class TCPDF
                 // Compute P value
                 $this->encryptdata['P'] = $this->encryptdata['protection'];
                 // Computing the encryption dictionary's Perms (permissions) value
-                $perms = TCPDF_STATIC::getEncPermissionsString($this->encryptdata['protection']); // bytes 0-3
+                $perms = TCPDFSTATIC::getEncPermissionsString($this->encryptdata['protection']); // bytes 0-3
                 $perms .= chr(255).chr(255).chr(255).chr(255); // bytes 4-7
                 if (isset($this->encryptdata['CF']['EncryptMetadata']) and (!$this->encryptdata['CF']['EncryptMetadata'])) { // byte 8
                     $perms .= 'F';
@@ -10931,20 +10914,20 @@ class TCPDF
                 }
                 $perms .= 'adb'; // bytes 9-11
                 $perms .= 'nick'; // bytes 12-15
-                $this->encryptdata['perms'] = TCPDF_STATIC::_AESnopad($this->encryptdata['key'], $perms);
+                $this->encryptdata['perms'] = TCPDFSTATIC::_AESnopad($this->encryptdata['key'], $perms);
             } else { // RC4-40, RC4-128, AES-128
                 // Pad passwords
-                $this->encryptdata['user_password'] = substr($this->encryptdata['user_password'].TCPDF_STATIC::$enc_padding, 0, 32);
-                $this->encryptdata['owner_password'] = substr($this->encryptdata['owner_password'].TCPDF_STATIC::$enc_padding, 0, 32);
+                $this->encryptdata['user_password'] = substr($this->encryptdata['user_password'].TCPDFSTATIC::$enc_padding, 0, 32);
+                $this->encryptdata['owner_password'] = substr($this->encryptdata['owner_password'].TCPDFSTATIC::$enc_padding, 0, 32);
                 // Compute O value
                 $this->encryptdata['O'] = $this->_Ovalue();
                 // get default permissions (reverse byte order)
-                $permissions = TCPDF_STATIC::getEncPermissionsString($this->encryptdata['protection']);
+                $permissions = TCPDFSTATIC::getEncPermissionsString($this->encryptdata['protection']);
                 // Compute encryption key
-                $tmp = TCPDF_STATIC::_md5_16($this->encryptdata['user_password'].$this->encryptdata['O'].$permissions.$this->encryptdata['fileid']);
+                $tmp = TCPDFSTATIC::_md5_16($this->encryptdata['user_password'].$this->encryptdata['O'].$permissions.$this->encryptdata['fileid']);
                 if ($this->encryptdata['mode'] > 0) {
                     for ($i = 0; $i < 50; ++$i) {
-                        $tmp = TCPDF_STATIC::_md5_16(substr($tmp, 0, $keybytelen));
+                        $tmp = TCPDFSTATIC::_md5_16(substr($tmp, 0, $keybytelen));
                     }
                 }
                 $this->encryptdata['key'] = substr($tmp, 0, $keybytelen);
@@ -10955,29 +10938,29 @@ class TCPDF
             }
         } else { // Public-Key mode
             // random 20-byte seed
-            $seed = sha1(TCPDF_STATIC::getRandomSeed(), true);
+            $seed = sha1(TCPDFSTATIC::getRandomSeed(), true);
             $recipient_bytes = '';
             foreach ($this->encryptdata['pubkeys'] as $pubkey) {
                 // for each public certificate
                 if (isset($pubkey['p'])) {
-                    $pkprotection = TCPDF_STATIC::getUserPermissionCode($pubkey['p'], $this->encryptdata['mode']);
+                    $pkprotection = TCPDFSTATIC::getUserPermissionCode($pubkey['p'], $this->encryptdata['mode']);
                 } else {
                     $pkprotection = $this->encryptdata['protection'];
                 }
                 // get default permissions (reverse byte order)
-                $pkpermissions = TCPDF_STATIC::getEncPermissionsString($pkprotection);
+                $pkpermissions = TCPDFSTATIC::getEncPermissionsString($pkprotection);
                 // envelope data
                 $envelope = $seed.$pkpermissions;
                 // write the envelope data to a temporary file
-                $tempkeyfile = TCPDF_STATIC::getObjFilename('key', $this->file_id);
-                $f = TCPDF_STATIC::fopenLocal($tempkeyfile, 'wb');
+                $tempkeyfile = TCPDFSTATIC::getObjFilename('key', $this->file_id);
+                $f = TCPDFSTATIC::fopenLocal($tempkeyfile, 'wb');
                 if (!$f) {
                     $this->Error('Unable to create temporary key file: '.$tempkeyfile);
                 }
                 $envelope_length = strlen($envelope);
                 fwrite($f, $envelope, $envelope_length);
                 fclose($f);
-                $tempencfile = TCPDF_STATIC::getObjFilename('enc', $this->file_id);
+                $tempencfile = TCPDFSTATIC::getObjFilename('enc', $this->file_id);
                 if (!openssl_pkcs7_encrypt($tempkeyfile, $tempencfile, $pubkey['c'], [], PKCS7_BINARY | PKCS7_DETACHED)) {
                     $this->Error('Unable to encrypt the file: '.$tempkeyfile);
                 }
@@ -11026,7 +11009,7 @@ class TCPDF
             // encryption is not allowed in PDF/A mode
             return;
         }
-        $this->encryptdata['protection'] = TCPDF_STATIC::getUserPermissionCode($permissions, $mode);
+        $this->encryptdata['protection'] = TCPDFSTATIC::getUserPermissionCode($permissions, $mode);
         if (($pubkeys !== null) and (is_array($pubkeys))) {
             // public-key mode
             $this->encryptdata['pubkeys'] = $pubkeys;
@@ -11065,19 +11048,19 @@ class TCPDF
             }
         }
         if ($owner_pass === null) {
-            $owner_pass = md5(TCPDF_STATIC::getRandomSeed());
+            $owner_pass = md5(TCPDFSTATIC::getRandomSeed());
         }
         $this->encryptdata['user_password'] = $user_pass;
         $this->encryptdata['owner_password'] = $owner_pass;
         $this->encryptdata['mode'] = $mode;
         switch ($mode) {
-            case 0: { // RC4 40 bit
+            case 0: // RC4 40 bit
                 $this->encryptdata['V'] = 1;
                 $this->encryptdata['Length'] = 40;
                 $this->encryptdata['CF']['CFM'] = 'V2';
                 break;
-            }
-            case 1: { // RC4 128 bit
+
+            case 1: // RC4 128 bit
                 $this->encryptdata['V'] = 2;
                 $this->encryptdata['Length'] = 128;
                 $this->encryptdata['CF']['CFM'] = 'V2';
@@ -11086,8 +11069,8 @@ class TCPDF
                     $this->encryptdata['Recipients'] = [];
                 }
                 break;
-            }
-            case 2: { // AES 128 bit
+
+            case 2: // AES 128 bit
                 $this->encryptdata['V'] = 4;
                 $this->encryptdata['Length'] = 128;
                 $this->encryptdata['CF']['CFM'] = 'AESV2';
@@ -11097,8 +11080,8 @@ class TCPDF
                     $this->encryptdata['Recipients'] = [];
                 }
                 break;
-            }
-            case 3: { // AES 256 bit
+
+            case 3: // AES 256 bit
                 $this->encryptdata['V'] = 5;
                 $this->encryptdata['Length'] = 256;
                 $this->encryptdata['CF']['CFM'] = 'AESV3';
@@ -11108,10 +11091,9 @@ class TCPDF
                     $this->encryptdata['Recipients'] = [];
                 }
                 break;
-            }
         }
         $this->encrypted = true;
-        $this->encryptdata['fileid'] = TCPDF_STATIC::convertHexStringToString($this->file_id);
+        $this->encryptdata['fileid'] = TCPDFSTATIC::convertHexStringToString($this->file_id);
         $this->_generateencryptionkey();
     }
 
@@ -11747,7 +11729,7 @@ class TCPDF
             }
         }
         if (!empty($style)) {
-            $op = TCPDF_STATIC::getPathPaintOperator($style);
+            $op = TCPDFSTATIC::getPathPaintOperator($style);
             $this->_outRect($x, $y, $w, $h, $op);
         }
         if (!empty($border_style)) {
@@ -11801,7 +11783,7 @@ class TCPDF
         if (!(false === strpos($style, 'F')) and isset($fill_color)) {
             $this->SetFillColorArray($fill_color);
         }
-        $op = TCPDF_STATIC::getPathPaintOperator($style);
+        $op = TCPDFSTATIC::getPathPaintOperator($style);
         if ($line_style) {
             $this->SetLineStyle($line_style);
         }
@@ -11832,7 +11814,7 @@ class TCPDF
         if (!(false === strpos($style, 'F')) and isset($fill_color)) {
             $this->SetFillColorArray($fill_color);
         }
-        $op = TCPDF_STATIC::getPathPaintOperator($style);
+        $op = TCPDFSTATIC::getPathPaintOperator($style);
         if ($op == 'f') {
             $line_style = [];
         }
@@ -11870,13 +11852,13 @@ class TCPDF
         if ($this->state != 2) {
             return;
         }
-        if (TCPDF_STATIC::empty_string($ry) or ($ry == 0)) {
+        if (TCPDFSTATIC::empty_string($ry) or ($ry == 0)) {
             $ry = $rx;
         }
         if (!(false === strpos($style, 'F')) and isset($fill_color)) {
             $this->SetFillColorArray($fill_color);
         }
-        $op = TCPDF_STATIC::getPathPaintOperator($style);
+        $op = TCPDFSTATIC::getPathPaintOperator($style);
         if ($op == 'f') {
             $line_style = [];
         }
@@ -12099,7 +12081,7 @@ class TCPDF
         if (!(false === strpos($style, 'F')) and isset($fill_color)) {
             $this->SetFillColorArray($fill_color);
         }
-        $op = TCPDF_STATIC::getPathPaintOperator($style);
+        $op = TCPDFSTATIC::getPathPaintOperator($style);
         if ($op == 'f') {
             $line_style = [];
         }
@@ -12306,7 +12288,7 @@ class TCPDF
         if (!(false === strpos($style, 'F')) and isset($fill_color)) {
             $this->SetFillColorArray($fill_color);
         }
-        $op = TCPDF_STATIC::getPathPaintOperator($style);
+        $op = TCPDFSTATIC::getPathPaintOperator($style);
         if ($op == 'f') {
             $border_style = [];
         }
@@ -12390,27 +12372,26 @@ class TCPDF
         $mode = 'D';
         $style = [];
         switch ($head_style) {
-            case 0: {
+            case 0:
                 // draw only arrowhead arms
                 $mode = 'D';
                 $style = [1, 1, 0];
                 break;
-            }
-            case 1: {
+
+            case 1:
                 // draw closed arrowhead, but no fill
                 $mode = 'D';
                 break;
-            }
-            case 2: {
+
+            case 2:
                 // closed and filled arrowhead
                 $mode = 'DF';
                 break;
-            }
-            case 3: {
+
+            case 3:
                 // filled arrowhead
                 $mode = 'F';
                 break;
-            }
         }
         $this->Polygon([$x2L, $y2L, $x1, $y1, $x2R, $y2R], $mode, $style, []);
     }
@@ -12432,8 +12413,8 @@ class TCPDF
     public function setDestination($name, $y = -1, $page = '', $x = -1)
     {
         // remove unsupported characters
-        $name = TCPDF_STATIC::encodeNameObject($name);
-        if (TCPDF_STATIC::empty_string($name)) {
+        $name = TCPDFSTATIC::encodeNameObject($name);
+        if (TCPDFSTATIC::empty_string($name)) {
             return false;
         }
         if ($y == -1) {
@@ -12658,7 +12639,7 @@ class TCPDF
                 if (is_string($o['u'])) {
                     if ($o['u'][0] == '#') {
                         // internal destination
-                        $out .= ' /Dest /'.TCPDF_STATIC::encodeNameObject(substr($o['u'], 1));
+                        $out .= ' /Dest /'.TCPDFSTATIC::encodeNameObject(substr($o['u'], 1));
                     } elseif ($o['u'][0] == '%') {
                         // embedded PDF file
                         $filename = basename(substr($o['u'], 1));
@@ -12825,7 +12806,7 @@ class TCPDF
         $this->javascript .= 'f'.$name.'.textSize='.$this->FontSizePt.";\n";
         while (list($key, $val) = each($prop)) {
             if (strcmp(substr($key, -5), 'Color') == 0) {
-                $val = TCPDF_COLORS::_JScolor($val);
+                $val = COLORS::_JScolor($val);
             } else {
                 $val = "'".$val."'";
             }
@@ -12898,7 +12879,7 @@ class TCPDF
         // get default style
         $prop = array_merge($this->getFormDefaultProp(), $prop);
         // get annotation data
-        $popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+        $popt = TCPDFSTATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
         // set default appearance stream
         $this->annotation_fonts[$this->CurrentFont['fontkey']] = $this->CurrentFont['i'];
         $fontstyle = sprintf('/F%d %F Tf %s', $this->CurrentFont['i'], $this->FontSizePt, $this->TextColor);
@@ -12916,22 +12897,21 @@ class TCPDF
         $align = '';
         if (isset($popt['q'])) {
             switch ($popt['q']) {
-                case 0: {
+                case 0:
                     $align = 'L';
                     break;
-                }
-                case 1: {
+
+                case 1:
                     $align = 'C';
                     break;
-                }
-                case 2: {
+
+                case 2:
                     $align = 'R';
                     break;
-                }
-                default: {
+
+                default:
                     $align = '';
                     break;
-                }
             }
         }
         $this->MultiCell($w, $h, $text, 0, $align, false, 0, 0, 0, true, 0, false, true, 0, 'T', false);
@@ -13017,7 +12997,7 @@ class TCPDF
             $this->_addfield('radiobutton', $name, $x, $y, $w, $w, $prop);
             return;
         }
-        if (TCPDF_STATIC::empty_string($onvalue)) {
+        if (TCPDFSTATIC::empty_string($onvalue)) {
             $onvalue = 'On';
         }
         if ($checked) {
@@ -13052,7 +13032,7 @@ class TCPDF
         $prop['Radio'] = 'true';
         $prop['borderStyle'] = 'inset';
         // get annotation data
-        $popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+        $popt = TCPDFSTATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
         // set additional default options
         $this->annotation_fonts[$tmpfont['fontkey']] = $tmpfont['i'];
         $fontstyle = sprintf('/F%d %F Tf %s', $tmpfont['i'], $this->FontSizePt, $this->TextColor);
@@ -13133,7 +13113,7 @@ class TCPDF
         // get default style
         $prop = array_merge($this->getFormDefaultProp(), $prop);
         // get annotation data
-        $popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+        $popt = TCPDFSTATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
         // set additional default values
         $this->annotation_fonts[$this->CurrentFont['fontkey']] = $this->CurrentFont['i'];
         $fontstyle = sprintf('/F%d %F Tf %s', $this->CurrentFont['i'], $this->FontSizePt, $this->TextColor);
@@ -13221,7 +13201,7 @@ class TCPDF
         $prop = array_merge($this->getFormDefaultProp(), $prop);
         $prop['Combo'] = true;
         // get annotation data
-        $popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+        $popt = TCPDFSTATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
         // set additional default options
         $this->annotation_fonts[$this->CurrentFont['fontkey']] = $this->CurrentFont['i'];
         $fontstyle = sprintf('/F%d %F Tf %s', $this->CurrentFont['i'], $this->FontSizePt, $this->TextColor);
@@ -13303,7 +13283,7 @@ class TCPDF
         $prop = array_merge($this->getFormDefaultProp(), $prop);
         $prop['borderStyle'] = 'inset';
         // get annotation data
-        $popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+        $popt = TCPDFSTATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
         // set additional default options
         $font = 'zapfdingbats';
         if ($this->pdfa_mode) {
@@ -13328,7 +13308,7 @@ class TCPDF
         $opt['Subtype'] = 'Widget';
         $opt['ft'] = 'Btn';
         $opt['t'] = $name;
-        if (TCPDF_STATIC::empty_string($onvalue)) {
+        if (TCPDFSTATIC::empty_string($onvalue)) {
             $onvalue = 'Yes';
         }
         $opt['opt'] = [$onvalue];
@@ -13387,7 +13367,7 @@ class TCPDF
         $prop['highlight'] = 'push';
         $prop['display'] = 'display.noPrint';
         // get annotation data
-        $popt = TCPDF_STATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
+        $popt = TCPDFSTATIC::getAnnotOptFromJSProp($prop, $this->spot_colors, $this->rtl);
         $this->annotation_fonts[$this->CurrentFont['fontkey']] = $this->CurrentFont['i'];
         $fontstyle = sprintf('/F%d %F Tf %s', $this->CurrentFont['i'], $this->FontSizePt, $this->TextColor);
         $popt['da'] = $fontstyle;
@@ -13447,58 +13427,57 @@ class TCPDF
                         if (is_array($val)) {
                             foreach ($val as $flag) {
                                 switch ($flag) {
-                                    case 'Include/Exclude': {
+                                    case 'Include/Exclude':
                                         $ff += 1 << 0;
                                         break;
-                                    }
-                                    case 'IncludeNoValueFields': {
+
+                                    case 'IncludeNoValueFields':
                                         $ff += 1 << 1;
                                         break;
-                                    }
-                                    case 'ExportFormat': {
+
+                                    case 'ExportFormat':
                                         $ff += 1 << 2;
                                         break;
-                                    }
-                                    case 'GetMethod': {
+
+                                    case 'GetMethod':
                                         $ff += 1 << 3;
                                         break;
-                                    }
-                                    case 'SubmitCoordinates': {
+
+                                    case 'SubmitCoordinates':
                                         $ff += 1 << 4;
                                         break;
-                                    }
-                                    case 'XFDF': {
+
+                                    case 'XFDF':
                                         $ff += 1 << 5;
                                         break;
-                                    }
-                                    case 'IncludeAppendSaves': {
+
+                                    case 'IncludeAppendSaves':
                                         $ff += 1 << 6;
                                         break;
-                                    }
-                                    case 'IncludeAnnotations': {
+
+                                    case 'IncludeAnnotations':
                                         $ff += 1 << 7;
                                         break;
-                                    }
-                                    case 'SubmitPDF': {
+
+                                    case 'SubmitPDF':
                                         $ff += 1 << 8;
                                         break;
-                                    }
-                                    case 'CanonicalFormat': {
+
+                                    case 'CanonicalFormat':
                                         $ff += 1 << 9;
                                         break;
-                                    }
-                                    case 'ExclNonUserAnnots': {
+
+                                    case 'ExclNonUserAnnots':
                                         $ff += 1 << 10;
                                         break;
-                                    }
-                                    case 'ExclFKey': {
+
+                                    case 'ExclFKey':
                                         $ff += 1 << 11;
                                         break;
-                                    }
-                                    case 'EmbedForm': {
+
+                                    case 'EmbedForm':
                                         $ff += 1 << 13;
                                         break;
-                                    }
                                 }
                             }
                         } else {
@@ -13541,7 +13520,7 @@ class TCPDF
         $out .= '<< /Type /Sig';
         $out .= ' /Filter /Adobe.PPKLite';
         $out .= ' /SubFilter /adbe.pkcs7.detached';
-        $out .= ' '.TCPDF_STATIC::$byterange_string;
+        $out .= ' '.TCPDFSTATIC::$byterange_string;
         $out .= ' /Contents<'.str_repeat('0', $this->signature_max_length).'>';
         if (empty($this->signature_data['approval']) or ($this->signature_data['approval'] != 'A')) {
             $out .= ' /Reference ['; // array of signature reference dictionaries
@@ -13557,22 +13536,22 @@ class TCPDF
                 $out .= ' /TransformParams <<';
                 $out .= ' /Type /TransformParams';
                 $out .= ' /V /2.2';
-                if (!TCPDF_STATIC::empty_string($this->ur['document'])) {
+                if (!TCPDFSTATIC::empty_string($this->ur['document'])) {
                     $out .= ' /Document['.$this->ur['document'].']';
                 }
-                if (!TCPDF_STATIC::empty_string($this->ur['form'])) {
+                if (!TCPDFSTATIC::empty_string($this->ur['form'])) {
                     $out .= ' /Form['.$this->ur['form'].']';
                 }
-                if (!TCPDF_STATIC::empty_string($this->ur['signature'])) {
+                if (!TCPDFSTATIC::empty_string($this->ur['signature'])) {
                     $out .= ' /Signature['.$this->ur['signature'].']';
                 }
-                if (!TCPDF_STATIC::empty_string($this->ur['annots'])) {
+                if (!TCPDFSTATIC::empty_string($this->ur['annots'])) {
                     $out .= ' /Annots['.$this->ur['annots'].']';
                 }
-                if (!TCPDF_STATIC::empty_string($this->ur['ef'])) {
+                if (!TCPDFSTATIC::empty_string($this->ur['ef'])) {
                     $out .= ' /EF['.$this->ur['ef'].']';
                 }
-                if (!TCPDF_STATIC::empty_string($this->ur['formex'])) {
+                if (!TCPDFSTATIC::empty_string($this->ur['formex'])) {
                     $out .= ' /FormEX['.$this->ur['formex'].']';
                 }
             }
@@ -13585,16 +13564,16 @@ class TCPDF
             $out .= ' >>';
             $out .= ' ]'; // end of reference
         }
-        if (isset($this->signature_data['info']['Name']) and !TCPDF_STATIC::empty_string($this->signature_data['info']['Name'])) {
+        if (isset($this->signature_data['info']['Name']) and !TCPDFSTATIC::empty_string($this->signature_data['info']['Name'])) {
             $out .= ' /Name '.$this->_textstring($this->signature_data['info']['Name'], $sigobjid);
         }
-        if (isset($this->signature_data['info']['Location']) and !TCPDF_STATIC::empty_string($this->signature_data['info']['Location'])) {
+        if (isset($this->signature_data['info']['Location']) and !TCPDFSTATIC::empty_string($this->signature_data['info']['Location'])) {
             $out .= ' /Location '.$this->_textstring($this->signature_data['info']['Location'], $sigobjid);
         }
-        if (isset($this->signature_data['info']['Reason']) and !TCPDF_STATIC::empty_string($this->signature_data['info']['Reason'])) {
+        if (isset($this->signature_data['info']['Reason']) and !TCPDFSTATIC::empty_string($this->signature_data['info']['Reason'])) {
             $out .= ' /Reason '.$this->_textstring($this->signature_data['info']['Reason'], $sigobjid);
         }
-        if (isset($this->signature_data['info']['ContactInfo']) and !TCPDF_STATIC::empty_string($this->signature_data['info']['ContactInfo'])) {
+        if (isset($this->signature_data['info']['ContactInfo']) and !TCPDFSTATIC::empty_string($this->signature_data['info']['ContactInfo'])) {
             $out .= ' /ContactInfo '.$this->_textstring($this->signature_data['info']['ContactInfo'], $sigobjid);
         }
         $out .= ' /M '.$this->_datestring($sigobjid, $this->doc_modification_timestamp);
@@ -13839,7 +13818,7 @@ class TCPDF
     public function getAliasRightShift()
     {
         // calculate aproximatively the ratio between widths of aliases and replacements.
-        $ref = '{'.TCPDF_STATIC::$alias_right_shift.'}{'.TCPDF_STATIC::$alias_tot_pages.'}{'.TCPDF_STATIC::$alias_num_page.'}';
+        $ref = '{'.TCPDFSTATIC::$alias_right_shift.'}{'.TCPDFSTATIC::$alias_tot_pages.'}{'.TCPDFSTATIC::$alias_num_page.'}';
         $rep = str_repeat(' ', $this->GetNumChars($ref));
         $wrep = $this->GetStringWidth($rep);
         if ($wrep > 0) {
@@ -13848,7 +13827,7 @@ class TCPDF
             $wdiff = 1;
         }
         $sdiff = sprintf('%F', $wdiff);
-        $alias = TCPDF_STATIC::$alias_right_shift.$sdiff.'}';
+        $alias = TCPDFSTATIC::$alias_right_shift.$sdiff.'}';
         if ($this->isUnicodeFont()) {
             $alias = '{'.$alias;
         }
@@ -13866,9 +13845,9 @@ class TCPDF
     public function getAliasNbPages()
     {
         if ($this->isUnicodeFont()) {
-            return '{'.TCPDF_STATIC::$alias_tot_pages.'}';
+            return '{'.TCPDFSTATIC::$alias_tot_pages.'}';
         }
-        return TCPDF_STATIC::$alias_tot_pages;
+        return TCPDFSTATIC::$alias_tot_pages;
     }
 
     /**
@@ -13882,9 +13861,9 @@ class TCPDF
     public function getAliasNumPage()
     {
         if ($this->isUnicodeFont()) {
-            return '{'.TCPDF_STATIC::$alias_num_page.'}';
+            return '{'.TCPDFSTATIC::$alias_num_page.'}';
         }
-        return TCPDF_STATIC::$alias_num_page;
+        return TCPDFSTATIC::$alias_num_page;
     }
 
     /**
@@ -13898,9 +13877,9 @@ class TCPDF
     public function getPageGroupAlias()
     {
         if ($this->isUnicodeFont()) {
-            return '{'.TCPDF_STATIC::$alias_group_tot_pages.'}';
+            return '{'.TCPDFSTATIC::$alias_group_tot_pages.'}';
         }
-        return TCPDF_STATIC::$alias_group_tot_pages;
+        return TCPDFSTATIC::$alias_group_tot_pages;
     }
 
     /**
@@ -13914,9 +13893,9 @@ class TCPDF
     public function getPageNumGroupAlias()
     {
         if ($this->isUnicodeFont()) {
-            return '{'.TCPDF_STATIC::$alias_group_num_page.'}';
+            return '{'.TCPDFSTATIC::$alias_group_num_page.'}';
         }
-        return TCPDF_STATIC::$alias_group_num_page;
+        return TCPDFSTATIC::$alias_group_num_page;
     }
 
     /**
@@ -13938,7 +13917,7 @@ class TCPDF
      */
     public function getGroupPageNoFormatted()
     {
-        return TCPDF_STATIC::formatPageNumber($this->getGroupPageNo());
+        return TCPDFSTATIC::formatPageNumber($this->getGroupPageNo());
     }
 
     /**
@@ -13949,7 +13928,7 @@ class TCPDF
      */
     public function PageNoFormatted()
     {
-        return TCPDF_STATIC::formatPageNumber($this->PageNo());
+        return TCPDFSTATIC::formatPageNumber($this->PageNo());
     }
 
     /**
@@ -14034,23 +14013,22 @@ class TCPDF
         }
         $this->endLayer();
         switch ($v) {
-            case 'print': {
+            case 'print':
                 $this->startLayer('Print', true, false);
                 break;
-            }
+
             case 'view':
-            case 'screen': {
+            case 'screen':
                 $this->startLayer('View', false, true);
                 break;
-            }
-            case 'all': {
+
+            case 'all':
                 $this->_out('');
                 break;
-            }
-            default: {
+
+            default:
                 $this->Error('Incorrect visibility: '.$v);
                 break;
-            }
         }
     }
 
@@ -14143,7 +14121,7 @@ class TCPDF
             return;
         }
         $stroking = $stroking ? true : false;
-        if (TCPDF_STATIC::empty_string($nonstroking)) {
+        if (TCPDFSTATIC::empty_string($nonstroking)) {
             // default value if not set
             $nonstroking = $stroking;
         } else {
@@ -14185,7 +14163,7 @@ class TCPDF
             return;
         }
         $stroking = floatval($stroking);
-        if (TCPDF_STATIC::empty_string($nonstroking)) {
+        if (TCPDFSTATIC::empty_string($nonstroking)) {
             // default value if not set
             $nonstroking = $stroking;
         } else {
@@ -14344,80 +14322,79 @@ class TCPDF
         foreach ($bars as $col) {
             switch ($col) {
                 // set transition colors
-                case 'A': { // BLACK (GRAYSCALE)
+                case 'A': // BLACK (GRAYSCALE)
                     $col_a = [255];
                     $col_b = [0];
                     break;
-                }
-                case 'W': { // WHITE (GRAYSCALE)
+
+                case 'W': // WHITE (GRAYSCALE)
                     $col_a = [0];
                     $col_b = [255];
                     break;
-                }
-                case 'R': { // RED (RGB)
+
+                case 'R': // RED (RGB)
                     $col_a = [255,255,255];
                     $col_b = [255,0,0];
                     break;
-                }
-                case 'G': { // GREEN (RGB)
+
+                case 'G': // GREEN (RGB)
                     $col_a = [255,255,255];
                     $col_b = [0,255,0];
                     break;
-                }
-                case 'B': { // BLUE (RGB)
+
+                case 'B': // BLUE (RGB)
                     $col_a = [255,255,255];
                     $col_b = [0,0,255];
                     break;
-                }
-                case 'C': { // CYAN (CMYK)
+
+                case 'C': // CYAN (CMYK)
                     $col_a = [0,0,0,0];
                     $col_b = [100,0,0,0];
                     break;
-                }
-                case 'M': { // MAGENTA (CMYK)
+
+                case 'M': // MAGENTA (CMYK)
                     $col_a = [0,0,0,0];
                     $col_b = [0,100,0,0];
                     break;
-                }
-                case 'Y': { // YELLOW (CMYK)
+
+                case 'Y': // YELLOW (CMYK)
                     $col_a = [0,0,0,0];
                     $col_b = [0,0,100,0];
                     break;
-                }
-                case 'K': { // KEY - BLACK (CMYK)
+
+                case 'K': // KEY - BLACK (CMYK)
                     $col_a = [0,0,0,0];
                     $col_b = [0,0,0,100];
                     break;
-                }
-                case 'RGB': { // BLACK REGISTRATION (RGB)
+
+                case 'RGB': // BLACK REGISTRATION (RGB)
                     $col_a = [255,255,255];
                     $col_b = [0,0,0];
                     break;
-                }
-                case 'CMYK': { // BLACK REGISTRATION (CMYK)
+
+                case 'CMYK': // BLACK REGISTRATION (CMYK)
                     $col_a = [0,0,0,0];
                     $col_b = [100,100,100,100];
                     break;
-                }
-                case 'ALL': { // SPOT COLOR REGISTRATION
+
+                case 'ALL': // SPOT COLOR REGISTRATION
                     $col_a = [0,0,0,0,'None'];
                     $col_b = [100,100,100,100,'All'];
                     break;
-                }
-                case 'NONE': { // SKIP THIS COLOR
+
+                case 'NONE': // SKIP THIS COLOR
                     $col_a = [0,0,0,0,'None'];
                     $col_b = [0,0,0,0,'None'];
                     break;
-                }
-                default: { // SPECIFIC SPOT COLOR NAME
+
+                default: // SPECIFIC SPOT COLOR NAME
                     $col_a = [0,0,0,0,'None'];
-                    $col_b = TCPDF_COLORS::getSpotColor($col, $this->spot_colors);
+                    $col_b = COLORS::getSpotColor($col, $this->spot_colors);
                     if ($col_b === false) {
                         // in case of error defaults to the registration color
                         $col_b = [100,100,100,100,'All'];
                     }
                     break;
-                }
             }
             if ($col != 'NONE') {
                 if ($transition) {
@@ -14470,37 +14447,36 @@ class TCPDF
         foreach ($crops as $crop) {
             switch ($crop) {
                 case 'T':
-                case 'TOP': {
+                case 'TOP':
                     $x1 = $x;
                     $y1 = ($y - $h);
                     $x2 = $x;
                     $y2 = ($y - $dh);
                     break;
-                }
+
                 case 'F':
-                case 'BOTTOM': {
+                case 'BOTTOM':
                     $x1 = $x;
                     $y1 = ($y + $dh);
                     $x2 = $x;
                     $y2 = ($y + $h);
                     break;
-                }
+
                 case 'L':
-                case 'LEFT': {
+                case 'LEFT':
                     $x1 = ($x - $w);
                     $y1 = $y;
                     $x2 = ($x - $dw);
                     $y2 = $y;
                     break;
-                }
+
                 case 'R':
-                case 'RIGHT': {
+                case 'RIGHT':
                     $x1 = ($x + $dw);
                     $y1 = $y;
                     $x2 = ($x + $w);
                     $y2 = $y;
                     break;
-                }
             }
             $this->Line($x1, $y1, $x2, $y2);
         }
@@ -14773,27 +14749,26 @@ class TCPDF
         switch ($numcolspace) {
             case 5:
                 // SPOT
-            case 4: { // CMYK
+            case 4: // CMYK
                 $this->gradients[$n]['colspace'] = 'DeviceCMYK';
                 if (!empty($background)) {
                     $this->gradients[$n]['background'] = sprintf('%F %F %F %F', $bcolor[0]/100, $bcolor[1]/100, $bcolor[2]/100, $bcolor[3]/100);
                 }
                 break;
-            }
-            case 3: { // RGB
+
+            case 3: // RGB
                 $this->gradients[$n]['colspace'] = 'DeviceRGB';
                 if (!empty($background)) {
                     $this->gradients[$n]['background'] = sprintf('%F %F %F', $bcolor[0]/255, $bcolor[1]/255, $bcolor[2]/255);
                 }
                 break;
-            }
-            case 1: { // GRAY SCALE
+
+            case 1: // GRAY SCALE
                 $this->gradients[$n]['colspace'] = 'DeviceGray';
                 if (!empty($background)) {
                     $this->gradients[$n]['background'] = sprintf('%F', $bcolor[0]/255);
                 }
                 break;
-            }
         }
         $num_stops = count($stops);
         $last_stop_id = $num_stops - 1;
@@ -14831,18 +14806,17 @@ class TCPDF
             switch ($numcolspace) {
                 case 5:
                     // SPOT
-                case 4: { // CMYK
+                case 4: // CMYK
                     $this->gradients[$n]['colors'][$key]['color'] = sprintf('%F %F %F %F', $color[0]/100, $color[1]/100, $color[2]/100, $color[3]/100);
                     break;
-                }
-                case 3: { // RGB
+
+                case 3: // RGB
                     $this->gradients[$n]['colors'][$key]['color'] = sprintf('%F %F %F', $color[0]/255, $color[1]/255, $color[2]/255);
                     break;
-                }
-                case 1: { // GRAY SCALE
+
+                case 1: // GRAY SCALE
                     $this->gradients[$n]['colors'][$key]['color'] = sprintf('%F', $color[0]/255);
                     break;
-                }
             }
         }
         if ($this->gradients[$n]['transparency']) {
@@ -15088,7 +15062,7 @@ class TCPDF
         if ($this->rtl) {
             $xc = ($this->w - $xc);
         }
-        $op = TCPDF_STATIC::getPathPaintOperator($style);
+        $op = TCPDFSTATIC::getPathPaintOperator($style);
         if ($op == 'f') {
             $line_style = [];
         }
@@ -15146,7 +15120,7 @@ class TCPDF
         if ($file[0] === '@') { // image from string
             $data = substr($file, 1);
         } else { // EPS/AI file
-            $data = TCPDF_STATIC::fileGetContents($file);
+            $data = TCPDFSTATIC::fileGetContents($file);
         }
         if ($data === false) {
             $this->Error('EPS file not found: '.$file);
@@ -15288,7 +15262,7 @@ class TCPDF
                 switch ($cmd) {
                     case 'm':
                     case 'l':
-                    case 'L': {
+                    case 'L':
                         // skip values outside bounding box
                         foreach ($chunks as $key => $val) {
                             if ((($key % 2) == 0) and (($val < $x1) or ($val > $x2))) {
@@ -15297,7 +15271,6 @@ class TCPDF
                                 $skip = true;
                             }
                         }
-                    }
                 }
             }
             switch ($cmd) {
@@ -15317,14 +15290,14 @@ class TCPDF
                 case 'w':
                 case 'M':
                 case 'd':
-                case 'n': {
+                case 'n':
                     if ($skip) {
                         break;
                     }
                     $this->_out($line);
                     break;
-                }
-                case 'x': {// custom fill color
+
+                case 'x': // custom fill color
                     if (empty($color_name)) {
                         // CMYK color
                         list($col_c, $col_m, $col_y, $col_k) = $chunks;
@@ -15337,8 +15310,8 @@ class TCPDF
                         $this->_out($color_cmd);
                     }
                     break;
-                }
-                case 'X': { // custom stroke color
+
+                case 'X': // custom stroke color
                     if (empty($color_name)) {
                         // CMYK color
                         list($col_c, $col_m, $col_y, $col_k) = $chunks;
@@ -15351,26 +15324,26 @@ class TCPDF
                         $this->_out($color_cmd);
                     }
                     break;
-                }
+
                 case 'Y':
                 case 'N':
                 case 'V':
                 case 'L':
-                case 'C': {
+                case 'C':
                     if ($skip) {
                         break;
                     }
                     $line[($len - 1)] = strtolower($cmd);
                     $this->_out($line);
                     break;
-                }
+
                 case 'b':
-                case 'B': {
+                case 'B':
                     $this->_out($cmd . '*');
                     break;
-                }
+
                 case 'f':
-                case 'F': {
+                case 'F':
                     if ($u > 0) {
                         $isU = false;
                         $max = min(($i + 5), $cnt);
@@ -15384,15 +15357,14 @@ class TCPDF
                         $this->_out('f*');
                     }
                     break;
-                }
-                case '*u': {
+
+                case '*u':
                     ++$u;
                     break;
-                }
-                case '*U': {
+
+                case '*U':
                     --$u;
                     break;
-                }
             }
         }
         // restore previous graphic state
@@ -15414,28 +15386,27 @@ class TCPDF
         }
         // set pointer to align the next text/objects
         switch ($align) {
-            case 'T':{
+            case 'T':
                 $this->y = $y;
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'M':{
+
+            case 'M':
                 $this->y = $y + round($h/2);
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'B':{
+
+            case 'B':
                 $this->y = $this->img_rb_y;
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'N':{
+
+            case 'N':
                 $this->SetY($this->img_rb_y);
                 break;
-            }
-            default:{
+
+            default:
                 break;
-            }
         }
         $this->endlinex = $this->img_rb_x;
     }
@@ -15493,10 +15464,9 @@ class TCPDF
      */
     public function write1DBarcode($code, $type, $x = '', $y = '', $w = '', $h = '', $xres = '', $style = '', $align = '')
     {
-        if (TCPDF_STATIC::empty_string(trim($code))) {
+        if (TCPDFSTATIC::empty_string(trim($code))) {
             return;
         }
-        require_once(dirname(__FILE__).'/tcpdf_barcodes_1d.php');
         // save current graphic settings
         $gvars = $this->getGraphicVars();
         // create new barcode object
@@ -15600,7 +15570,7 @@ class TCPDF
         if ($style['stretch']) {
             $xres = $max_xres;
         } else {
-            if (TCPDF_STATIC::empty_string($xres)) {
+            if (TCPDFSTATIC::empty_string($xres)) {
                 $xres = (0.141 * $this->k); // default bar width = 0.4 mm
             }
             if ($xres > $max_xres) {
@@ -15620,29 +15590,28 @@ class TCPDF
             $w = (($arrcode['maxw'] * $xres) + (2 * $hpadding));
             if (isset($style['cellfitalign'])) {
                 switch ($style['cellfitalign']) {
-                    case 'L': {
+                    case 'L':
                         if ($this->rtl) {
                             $x -= ($wold - $w);
                         }
                         break;
-                    }
-                    case 'R': {
+
+                    case 'R':
                         if (!$this->rtl) {
                             $x += ($wold - $w);
                         }
                         break;
-                    }
-                    case 'C': {
+
+                    case 'C':
                         if ($this->rtl) {
                             $x -= (($wold - $w) / 2);
                         } else {
                             $x += (($wold - $w) / 2);
                         }
                         break;
-                    }
-                    default : {
+
+                    default :
                         break;
-                    }
                 }
             }
         }
@@ -15698,19 +15667,18 @@ class TCPDF
             $style['align'] = 'C';
         }
         switch ($style['align']) {
-            case 'L': {
+            case 'L':
                 $xpos = $xpos_rect + $hpadding;
                 break;
-            }
-            case 'R': {
+
+            case 'R':
                 $xpos = $xpos_rect + ($w - ($arrcode['maxw'] * $xres)) - $hpadding;
                 break;
-            }
+
             case 'C':
-                default : {
+            default :
                     $xpos = $xpos_rect + (($w - ($arrcode['maxw'] * $xres)) / 2);
                 break;
-                }
         }
         $xpos_text = $xpos;
         // barcode is always printed in LTR direction
@@ -15737,7 +15705,7 @@ class TCPDF
         }
         // print text
         if ($style['text']) {
-            if (isset($style['label']) and !TCPDF_STATIC::empty_string($style['label'])) {
+            if (isset($style['label']) and !TCPDFSTATIC::empty_string($style['label'])) {
                 $label = $style['label'];
             } else {
                 $label = $code;
@@ -15760,28 +15728,27 @@ class TCPDF
         $this->setGraphicVars($gvars);
         // set pointer to align the next text/objects
         switch ($align) {
-            case 'T':{
+            case 'T':
                 $this->y = $y;
                 $this->x = $this->img_rb_x;
                 break;
-                }
-            case 'M':{
+
+            case 'M':
                 $this->y = $y + round($h / 2);
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'B':{
+
+            case 'B':
                 $this->y = $this->img_rb_y;
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'N':{
+
+            case 'N':
                 $this->SetY($this->img_rb_y);
                 break;
-            }
-            default:{
+
+            default:
                 break;
-            }
         }
         $this->endlinex = $this->img_rb_x;
     }
@@ -15813,10 +15780,9 @@ class TCPDF
      */
     public function write2DBarcode($code, $type, $x = '', $y = '', $w = '', $h = '', $style = '', $align = '', $distort = false)
     {
-        if (TCPDF_STATIC::empty_string(trim($code))) {
+        if (TCPDFSTATIC::empty_string(trim($code))) {
             return;
         }
-        require_once(dirname(__FILE__).'/tcpdf_barcodes_2d.php');
         // save current graphic settings
         $gvars = $this->getGraphicVars();
         // create new barcode object
@@ -15996,28 +15962,27 @@ class TCPDF
         $this->setGraphicVars($gvars);
         // set pointer to align the next text/objects
         switch ($align) {
-            case 'T':{
+            case 'T':
                 $this->y = $y;
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'M':{
+
+            case 'M':
                 $this->y = $y + round($h/2);
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'B':{
+
+            case 'B':
                 $this->y = $this->img_rb_y;
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'N':{
+
+            case 'N':
                 $this->SetY($this->img_rb_y);
                 break;
-            }
-            default:{
+
+            default:
                 break;
-            }
         }
         $this->endlinex = $this->img_rb_x;
     }
@@ -16136,7 +16101,7 @@ class TCPDF
      */
     public function fixHTMLCode($html, $default_css = '', $tagvs = '', $tidy_options = '')
     {
-        return TCPDF_STATIC::fixHTMLCode($html, $default_css, $tagvs, $tidy_options, $this->tagvspaces);
+        return TCPDFSTATIC::fixHTMLCode($html, $default_css, $tagvs, $tidy_options, $this->tagvspaces);
     }
 
     /**
@@ -16171,28 +16136,27 @@ class TCPDF
     {
         switch (strtolower($style)) {
             case 'none':
-            case 'hidden': {
+            case 'hidden':
                 $dash = -1;
                 break;
-                }
-            case 'dotted': {
+
+            case 'dotted':
                 $dash = 1;
                 break;
-            }
-            case 'dashed': {
+
+            case 'dashed':
                 $dash = 3;
                 break;
-            }
+
             case 'double':
             case 'groove':
             case 'ridge':
             case 'inset':
             case 'outset':
             case 'solid':
-                default: {
+            default:
                     $dash = 0;
                 break;
-                }
         }
         return $dash;
     }
@@ -16209,30 +16173,29 @@ class TCPDF
         $bprop = preg_split('/[\s]+/', trim($cssborder));
         $border = []; // value to be returned
         switch (count($bprop)) {
-            case 3: {
+            case 3:
                 $width = $bprop[0];
                 $style = $bprop[1];
                 $color = $bprop[2];
                 break;
-            }
-            case 2: {
+
+            case 2:
                 $width = 'medium';
                 $style = $bprop[0];
                 $color = $bprop[1];
                 break;
-            }
-            case 1: {
+
+            case 1:
                 $width = 'medium';
                 $style = $bprop[0];
                 $color = 'black';
                 break;
-            }
-            default: {
+
+            default:
                 $width = 'medium';
                 $style = 'solid';
                 $color = 'black';
                 break;
-            }
         }
         if ($style == 'none') {
             return [];
@@ -16244,7 +16207,7 @@ class TCPDF
             return [];
         }
         $border['width'] = $this->getCSSBorderWidth($width);
-        $border['color'] = TCPDF_COLORS::convertHTMLColorToDec($color, $this->spot_colors);
+        $border['color'] = COLORS::convertHTMLColorToDec($color, $this->spot_colors);
         return $border;
     }
 
@@ -16261,37 +16224,36 @@ class TCPDF
         $padding = preg_split('/[\s]+/', trim($csspadding));
         $cell_padding = []; // value to be returned
         switch (count($padding)) {
-            case 4: {
+            case 4:
                 $cell_padding['T'] = $padding[0];
                 $cell_padding['R'] = $padding[1];
                 $cell_padding['B'] = $padding[2];
                 $cell_padding['L'] = $padding[3];
                 break;
-            }
-            case 3: {
+
+            case 3:
                 $cell_padding['T'] = $padding[0];
                 $cell_padding['R'] = $padding[1];
                 $cell_padding['B'] = $padding[2];
                 $cell_padding['L'] = $padding[1];
                 break;
-            }
-            case 2: {
+
+            case 2:
                 $cell_padding['T'] = $padding[0];
                 $cell_padding['R'] = $padding[1];
                 $cell_padding['B'] = $padding[0];
                 $cell_padding['L'] = $padding[1];
                 break;
-            }
-            case 1: {
+
+            case 1:
                 $cell_padding['T'] = $padding[0];
                 $cell_padding['R'] = $padding[0];
                 $cell_padding['B'] = $padding[0];
                 $cell_padding['L'] = $padding[0];
                 break;
-            }
-            default: {
+
+            default:
                 return $this->cell_padding;
-                }
         }
         if ($width == 0) {
             $width = $this->w - $this->lMargin - $this->rMargin;
@@ -16316,37 +16278,36 @@ class TCPDF
         $margin = preg_split('/[\s]+/', trim($cssmargin));
         $cell_margin = []; // value to be returned
         switch (count($margin)) {
-            case 4: {
+            case 4:
                 $cell_margin['T'] = $margin[0];
                 $cell_margin['R'] = $margin[1];
                 $cell_margin['B'] = $margin[2];
                 $cell_margin['L'] = $margin[3];
                 break;
-            }
-            case 3: {
+
+            case 3:
                 $cell_margin['T'] = $margin[0];
                 $cell_margin['R'] = $margin[1];
                 $cell_margin['B'] = $margin[2];
                 $cell_margin['L'] = $margin[1];
                 break;
-            }
-            case 2: {
+
+            case 2:
                 $cell_margin['T'] = $margin[0];
                 $cell_margin['R'] = $margin[1];
                 $cell_margin['B'] = $margin[0];
                 $cell_margin['L'] = $margin[1];
                 break;
-            }
-            case 1: {
+
+            case 1:
                 $cell_margin['T'] = $margin[0];
                 $cell_margin['R'] = $margin[0];
                 $cell_margin['B'] = $margin[0];
                 $cell_margin['L'] = $margin[0];
                 break;
-            }
-            default: {
+
+            default:
                 return $this->cell_margin;
-            }
         }
         if ($width == 0) {
             $width = $this->w - $this->lMargin - $this->rMargin;
@@ -16371,19 +16332,18 @@ class TCPDF
         $space = preg_split('/[\s]+/', trim($cssbspace));
         $border_spacing = []; // value to be returned
         switch (count($space)) {
-            case 2: {
+            case 2:
                 $border_spacing['H'] = $space[0];
                 $border_spacing['V'] = $space[1];
                 break;
-            }
-            case 1: {
+
+            case 1:
                 $border_spacing['H'] = $space[0];
                 $border_spacing['V'] = $space[0];
                 break;
-            }
-            default: {
+
+            default:
                 return ['H' => 0, 'V' => 0];
-            }
         }
         if ($width == 0) {
             $width = $this->w - $this->lMargin - $this->rMargin;
@@ -16406,21 +16366,20 @@ class TCPDF
         $val = 0; // value to be returned
         $spacing = trim($spacing);
         switch ($spacing) {
-            case 'normal': {
+            case 'normal':
                 $val = 0;
                 break;
-            }
-            case 'inherit': {
+
+            case 'inherit':
                 if ($parent == 'normal') {
                     $val = 0;
                 } else {
                     $val = $parent;
                 }
                 break;
-            }
-            default: {
+
+            default:
                 $val = $this->getHTMLUnitToUnits($spacing, 0, 'px', false);
-            }
         }
         return $val;
     }
@@ -16438,61 +16397,60 @@ class TCPDF
         $val = 100; // value to be returned
         $stretch = trim($stretch);
         switch ($stretch) {
-            case 'ultra-condensed': {
+            case 'ultra-condensed':
                 $val = 40;
                 break;
-            }
-            case 'extra-condensed': {
+
+            case 'extra-condensed':
                 $val = 55;
                 break;
-            }
-            case 'condensed': {
+
+            case 'condensed':
                 $val = 70;
                 break;
-            }
-            case 'semi-condensed': {
+
+            case 'semi-condensed':
                 $val = 85;
                 break;
-            }
-            case 'normal': {
+
+            case 'normal':
                 $val = 100;
                 break;
-            }
-            case 'semi-expanded': {
+
+            case 'semi-expanded':
                 $val = 115;
                 break;
-            }
-            case 'expanded': {
+
+            case 'expanded':
                 $val = 130;
                 break;
-            }
-            case 'extra-expanded': {
+
+            case 'extra-expanded':
                 $val = 145;
                 break;
-            }
-            case 'ultra-expanded': {
+
+            case 'ultra-expanded':
                 $val = 160;
                 break;
-            }
-            case 'wider': {
+
+            case 'wider':
                 $val = ($parent + 10);
                 break;
-            }
-            case 'narrower': {
+
+            case 'narrower':
                 $val = ($parent - 10);
                 break;
-            }
-            case 'inherit': {
+
+            case 'inherit':
                 if ($parent == 'normal') {
                     $val = 100;
                 } else {
                     $val = $parent;
                 }
                 break;
-            }
-            default: {
+
+            default:
                 $val = $this->getHTMLUnitToUnits($stretch, 100, '%', false);
-            }
         }
         return $val;
     }
@@ -16508,48 +16466,47 @@ class TCPDF
      */
     public function getHTMLFontUnits($val, $refsize = 12, $parent_size = 12, $defaultunit = 'pt')
     {
-        $refsize = TCPDF_FONTS::getFontRefSize($refsize);
-        $parent_size = TCPDF_FONTS::getFontRefSize($parent_size, $refsize);
+        $refsize = FONTS::getFontRefSize($refsize);
+        $parent_size = FONTS::getFontRefSize($parent_size, $refsize);
         switch ($val) {
-            case 'xx-small': {
+            case 'xx-small':
                 $size = ($refsize - 4);
                 break;
-            }
-            case 'x-small': {
+
+            case 'x-small':
                 $size = ($refsize - 3);
                 break;
-            }
-            case 'small': {
+
+            case 'small':
                 $size = ($refsize - 2);
                 break;
-            }
-            case 'medium': {
+
+            case 'medium':
                 $size = $refsize;
                 break;
-            }
-            case 'large': {
+
+            case 'large':
                 $size = ($refsize + 2);
                 break;
-            }
-            case 'x-large': {
+
+            case 'x-large':
                 $size = ($refsize + 4);
                 break;
-            }
-            case 'xx-large': {
+
+            case 'xx-large':
                 $size = ($refsize + 6);
                 break;
-            }
-            case 'smaller': {
+
+            case 'smaller':
                 $size = ($parent_size - 3);
                 break;
-            }
-            case 'larger': {
+
+            case 'larger':
                 $size = ($parent_size + 3);
                 break;
-            }
-            default: {
+
+            default:
                 $size = $this->getHTMLUnitToUnits($val, $parent_size, $defaultunit, true);
-            }
         }
         return $size;
     }
@@ -16587,9 +16544,9 @@ class TCPDF
                         $type = [];
                         if (preg_match('/href[\s]*=[\s]*"([^"]*)"/', $link, $type) > 0) {
                             // read CSS data file
-                            $cssdata = TCPDF_STATIC::fileGetContents(trim($type[1]));
+                            $cssdata = TCPDFSTATIC::fileGetContents(trim($type[1]));
                             if (($cssdata !== false) and (strlen($cssdata) > 0)) {
-                                $css = array_merge($css, TCPDF_STATIC::extractCSSproperties($cssdata));
+                                $css = array_merge($css, TCPDFSTATIC::extractCSSproperties($cssdata));
                             }
                         }
                     }
@@ -16606,7 +16563,7 @@ class TCPDF
                 // (all, braille, embossed, handheld, print, projection, screen, speech, tty, tv)
                 if (empty($type) or (isset($type[1]) and (($type[1] == 'all') or ($type[1] == 'print')))) {
                     $cssdata = $matches[2][$key];
-                    $css = array_merge($css, TCPDF_STATIC::extractCSSproperties($cssdata));
+                    $css = array_merge($css, TCPDFSTATIC::extractCSSproperties($cssdata));
                 }
             }
         }
@@ -16809,7 +16766,7 @@ class TCPDF
                     }
                     // store header rows on a new table
                     if (($dom[$key]['value'] == 'tr') and ($dom[($dom[$key]['parent'])]['thead'] === true)) {
-                        if (TCPDF_STATIC::empty_string($dom[($dom[($dom[$key]['parent'])]['parent'])]['thead'])) {
+                        if (TCPDFSTATIC::empty_string($dom[($dom[($dom[$key]['parent'])]['parent'])]['thead'])) {
                             $dom[($dom[($dom[$key]['parent'])]['parent'])]['thead'] = $csstagarray.$a[$dom[($dom[($dom[$key]['parent'])]['parent'])]['elkey']];
                         }
                         for ($i = $dom[$key]['parent']; $i <= $key; ++$i) {
@@ -16821,7 +16778,7 @@ class TCPDF
                         // header elements must be always contained in a single page
                         $dom[($dom[$key]['parent'])]['attribute']['nobr'] = 'true';
                     }
-                    if (($dom[$key]['value'] == 'table') and (!TCPDF_STATIC::empty_string($dom[($dom[$key]['parent'])]['thead']))) {
+                    if (($dom[$key]['value'] == 'table') and (!TCPDFSTATIC::empty_string($dom[($dom[$key]['parent'])]['thead']))) {
                         // remove the nobr attributes from the table header
                         $dom[($dom[$key]['parent'])]['thead'] = str_replace(' nobr="true"', '', $dom[($dom[$key]['parent'])]['thead']);
                         $dom[($dom[$key]['parent'])]['thead'] .= '</tablehead>';
@@ -16870,8 +16827,8 @@ class TCPDF
                     }
                     if (!empty($css)) {
                         // merge CSS style to current style
-                        list($dom[$key]['csssel'], $dom[$key]['cssdata']) = TCPDF_STATIC::getCSSdataArray($dom, $key, $css);
-                        $dom[$key]['attribute']['style'] = TCPDF_STATIC::getTagStyleFromCSSarray($dom[$key]['cssdata']);
+                        list($dom[$key]['csssel'], $dom[$key]['cssdata']) = TCPDFSTATIC::getCSSdataArray($dom, $key, $css);
+                        $dom[$key]['attribute']['style'] = TCPDFSTATIC::getTagStyleFromCSSarray($dom[$key]['cssdata']);
                     }
                     // split style attributes
                     if (isset($dom[$key]['attribute']['style']) and !empty($dom[$key]['attribute']['style'])) {
@@ -16931,14 +16888,14 @@ class TCPDF
                             $lineheight = trim($dom[$key]['style']['line-height']);
                             switch ($lineheight) {
                                 // A normal line height. This is default
-                                case 'normal': {
+                                case 'normal':
                                     $dom[$key]['line-height'] = $dom[0]['line-height'];
                                     break;
-                                }
-                                case 'inherit': {
+
+                                case 'inherit':
                                     $dom[$key]['line-height'] = $dom[$parentkey]['line-height'];
-                                }
-                                default: {
+
+                                default:
                                     if (is_numeric($lineheight)) {
                                         // convert to percentage of font height
                                         $lineheight = ($lineheight * 100).'%';
@@ -16951,7 +16908,6 @@ class TCPDF
                                             $dom[$key]['line-height'] = (($dom[$key]['line-height'] - $this->cell_padding['T'] - $this->cell_padding['B']) / $dom[$key]['fontsize']);
                                         }
                                     }
-                                }
                             }
                         }
                         // font style
@@ -16968,21 +16924,21 @@ class TCPDF
                             $dom[$key]['fontstyle'] .= 'I';
                         }
                         // font color
-                        if (isset($dom[$key]['style']['color']) and (!TCPDF_STATIC::empty_string($dom[$key]['style']['color']))) {
-                            $dom[$key]['fgcolor'] = TCPDF_COLORS::convertHTMLColorToDec($dom[$key]['style']['color'], $this->spot_colors);
+                        if (isset($dom[$key]['style']['color']) and (!TCPDFSTATIC::empty_string($dom[$key]['style']['color']))) {
+                            $dom[$key]['fgcolor'] = COLORS::convertHTMLColorToDec($dom[$key]['style']['color'], $this->spot_colors);
                         } elseif ($dom[$key]['value'] == 'a') {
                             $dom[$key]['fgcolor'] = $this->htmlLinkColorArray;
                         }
                         // background color
-                        if (isset($dom[$key]['style']['background-color']) and (!TCPDF_STATIC::empty_string($dom[$key]['style']['background-color']))) {
-                            $dom[$key]['bgcolor'] = TCPDF_COLORS::convertHTMLColorToDec($dom[$key]['style']['background-color'], $this->spot_colors);
+                        if (isset($dom[$key]['style']['background-color']) and (!TCPDFSTATIC::empty_string($dom[$key]['style']['background-color']))) {
+                            $dom[$key]['bgcolor'] = COLORS::convertHTMLColorToDec($dom[$key]['style']['background-color'], $this->spot_colors);
                         }
                         // text-decoration
                         if (isset($dom[$key]['style']['text-decoration'])) {
                             $decors = explode(' ', strtolower($dom[$key]['style']['text-decoration']));
                             foreach ($decors as $dec) {
                                 $dec = trim($dec);
-                                if (!TCPDF_STATIC::empty_string($dec)) {
+                                if (!TCPDFSTATIC::empty_string($dec)) {
                                     if ($dec[0] == 'u') {
                                         // underline
                                         $dom[$key]['fontstyle'] .= 'U';
@@ -17020,16 +16976,16 @@ class TCPDF
                         if (isset($dom[$key]['style']['border-color'])) {
                             $brd_colors = preg_split('/[\s]+/', trim($dom[$key]['style']['border-color']));
                             if (isset($brd_colors[3])) {
-                                $dom[$key]['border']['L']['color'] = TCPDF_COLORS::convertHTMLColorToDec($brd_colors[3], $this->spot_colors);
+                                $dom[$key]['border']['L']['color'] = COLORS::convertHTMLColorToDec($brd_colors[3], $this->spot_colors);
                             }
                             if (isset($brd_colors[1])) {
-                                $dom[$key]['border']['R']['color'] = TCPDF_COLORS::convertHTMLColorToDec($brd_colors[1], $this->spot_colors);
+                                $dom[$key]['border']['R']['color'] = COLORS::convertHTMLColorToDec($brd_colors[1], $this->spot_colors);
                             }
                             if (isset($brd_colors[0])) {
-                                $dom[$key]['border']['T']['color'] = TCPDF_COLORS::convertHTMLColorToDec($brd_colors[0], $this->spot_colors);
+                                $dom[$key]['border']['T']['color'] = COLORS::convertHTMLColorToDec($brd_colors[0], $this->spot_colors);
                             }
                             if (isset($brd_colors[2])) {
-                                $dom[$key]['border']['B']['color'] = TCPDF_COLORS::convertHTMLColorToDec($brd_colors[2], $this->spot_colors);
+                                $dom[$key]['border']['B']['color'] = COLORS::convertHTMLColorToDec($brd_colors[2], $this->spot_colors);
                             }
                         }
                         if (isset($dom[$key]['style']['border-width'])) {
@@ -17091,7 +17047,7 @@ class TCPDF
                                 }
                             }
                             if (isset($dom[$key]['style']['border-'.$bsv.'-color'])) {
-                                $dom[$key]['border'][$bsk]['color'] = TCPDF_COLORS::convertHTMLColorToDec($dom[$key]['style']['border-'.$bsv.'-color'], $this->spot_colors);
+                                $dom[$key]['border'][$bsk]['color'] = COLORS::convertHTMLColorToDec($dom[$key]['style']['border-'.$bsv.'-color'], $this->spot_colors);
                             }
                             if (isset($dom[$key]['style']['border-'.$bsv.'-width'])) {
                                 $dom[$key]['border'][$bsk]['width'] = $this->getCSSBorderWidth($dom[$key]['style']['border-'.$bsv.'-width']);
@@ -17186,7 +17142,7 @@ class TCPDF
                     }
                     // force natural alignment for lists
                     if ((($dom[$key]['value'] == 'ul') or ($dom[$key]['value'] == 'ol') or ($dom[$key]['value'] == 'dl'))
-                        and (!isset($dom[$key]['align']) or TCPDF_STATIC::empty_string($dom[$key]['align']) or ($dom[$key]['align'] != 'J'))) {
+                        and (!isset($dom[$key]['align']) or TCPDFSTATIC::empty_string($dom[$key]['align']) or ($dom[$key]['align'] != 'J'))) {
                         if ($this->rtl) {
                             $dom[$key]['align'] = 'R';
                         } else {
@@ -17258,18 +17214,18 @@ class TCPDF
                         $dom[$key]['dir'] = $dom[$key]['attribute']['dir'];
                     }
                     // set foreground color attribute
-                    if (isset($dom[$key]['attribute']['color']) and (!TCPDF_STATIC::empty_string($dom[$key]['attribute']['color']))) {
-                        $dom[$key]['fgcolor'] = TCPDF_COLORS::convertHTMLColorToDec($dom[$key]['attribute']['color'], $this->spot_colors);
+                    if (isset($dom[$key]['attribute']['color']) and (!TCPDFSTATIC::empty_string($dom[$key]['attribute']['color']))) {
+                        $dom[$key]['fgcolor'] = COLORS::convertHTMLColorToDec($dom[$key]['attribute']['color'], $this->spot_colors);
                     } elseif (!isset($dom[$key]['style']['color']) and ($dom[$key]['value'] == 'a')) {
                         $dom[$key]['fgcolor'] = $this->htmlLinkColorArray;
                     }
                     // set background color attribute
-                    if (isset($dom[$key]['attribute']['bgcolor']) and (!TCPDF_STATIC::empty_string($dom[$key]['attribute']['bgcolor']))) {
-                        $dom[$key]['bgcolor'] = TCPDF_COLORS::convertHTMLColorToDec($dom[$key]['attribute']['bgcolor'], $this->spot_colors);
+                    if (isset($dom[$key]['attribute']['bgcolor']) and (!TCPDFSTATIC::empty_string($dom[$key]['attribute']['bgcolor']))) {
+                        $dom[$key]['bgcolor'] = COLORS::convertHTMLColorToDec($dom[$key]['attribute']['bgcolor'], $this->spot_colors);
                     }
                     // set stroke color attribute
-                    if (isset($dom[$key]['attribute']['strokecolor']) and (!TCPDF_STATIC::empty_string($dom[$key]['attribute']['strokecolor']))) {
-                        $dom[$key]['strokecolor'] = TCPDF_COLORS::convertHTMLColorToDec($dom[$key]['attribute']['strokecolor'], $this->spot_colors);
+                    if (isset($dom[$key]['attribute']['strokecolor']) and (!TCPDFSTATIC::empty_string($dom[$key]['attribute']['strokecolor']))) {
+                        $dom[$key]['strokecolor'] = COLORS::convertHTMLColorToDec($dom[$key]['attribute']['strokecolor'], $this->spot_colors);
                     }
                     // check for width attribute
                     if (isset($dom[$key]['attribute']['width'])) {
@@ -17280,7 +17236,7 @@ class TCPDF
                         $dom[$key]['height'] = $dom[$key]['attribute']['height'];
                     }
                     // check for text alignment
-                    if (isset($dom[$key]['attribute']['align']) and (!TCPDF_STATIC::empty_string($dom[$key]['attribute']['align'])) and ($dom[$key]['value'] !== 'img')) {
+                    if (isset($dom[$key]['attribute']['align']) and (!TCPDFSTATIC::empty_string($dom[$key]['attribute']['align'])) and ($dom[$key]['value'] !== 'img')) {
                         $dom[$key]['align'] = strtoupper($dom[$key]['attribute']['align'][0]);
                     }
                     // check for text rendering mode (the following attributes do not exist in HTML)
@@ -17320,18 +17276,17 @@ class TCPDF
                         }
                     } elseif (!$this->isunicode) {
                         switch ($dom[$dom[$key]['parent']]['text-transform']) {
-                            case 'capitalize': {
+                            case 'capitalize':
                                 $element = ucwords(strtolower($element));
                                 break;
-                            }
-                            case 'uppercase': {
+
+                            case 'uppercase':
                                 $element = strtoupper($element);
                                 break;
-                            }
-                            case 'lowercase': {
+
+                            case 'lowercase':
                                 $element = strtolower($element);
                                 break;
-                            }
                         }
                     }
                 }
@@ -17524,7 +17479,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         $this->listordered = [];
         $this->listcount = [];
         $this->lispacer = '';
-        if ((TCPDF_STATIC::empty_string($this->lasth)) or ($reseth)) {
+        if ((TCPDFSTATIC::empty_string($this->lasth)) or ($reseth)) {
             // reset row height
             $this->resetLastH();
         }
@@ -17613,7 +17568,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             }
             // print THEAD block
             if (($dom[$key]['value'] == 'tr') and isset($dom[$key]['thead']) and $dom[$key]['thead']) {
-                if (isset($dom[$key]['parent']) and isset($dom[$dom[$key]['parent']]['thead']) and !TCPDF_STATIC::empty_string($dom[$dom[$key]['parent']]['thead'])) {
+                if (isset($dom[$key]['parent']) and isset($dom[$dom[$key]['parent']]['thead']) and !TCPDFSTATIC::empty_string($dom[$dom[$key]['parent']]['thead'])) {
                     $this->inthead = true;
                     // print table header (thead)
                     $this->writeHTML($this->thead, false, false, false, false, '');
@@ -17867,7 +17822,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 if (isset($dom[$key]['align'])) {
                     $lalign = $dom[$key]['align'];
                 }
-                if (TCPDF_STATIC::empty_string($lalign)) {
+                if (TCPDFSTATIC::empty_string($lalign)) {
                     $lalign = $align;
                 }
             }
@@ -17936,35 +17891,35 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         $no = 0; // number of spaces on a line contained on a single block
                         if ($this->isRTLTextDir()) { // RTL
                             // remove left space if exist
-                            $pos1 = TCPDF_STATIC::revstrpos($pmid, '[(');
+                            $pos1 = TCPDFSTATIC::revstrpos($pmid, '[(');
                             if ($pos1 > 0) {
                                 $pos1 = intval($pos1);
                                 if ($this->isUnicodeFont()) {
-                                    $pos2 = intval(TCPDF_STATIC::revstrpos($pmid, '[('.chr(0).chr(32)));
+                                    $pos2 = intval(TCPDFSTATIC::revstrpos($pmid, '[('.chr(0).chr(32)));
                                     $spacelen = 2;
                                 } else {
-                                    $pos2 = intval(TCPDF_STATIC::revstrpos($pmid, '[('.chr(32)));
+                                    $pos2 = intval(TCPDFSTATIC::revstrpos($pmid, '[('.chr(32)));
                                     $spacelen = 1;
                                 }
                                 if ($pos1 == $pos2) {
                                     $pmid = substr($pmid, 0, ($pos1 + 2)).substr($pmid, ($pos1 + 2 + $spacelen));
                                     if (substr($pmid, $pos1, 4) == '[()]') {
                                         $linew -= $one_space_width;
-                                    } elseif ($pos1 == strpos($pmid, '[(')) {
+                                    } elseif ($pos1 === strpos($pmid, '[(')) {
                                         $no = 1;
                                     }
                                 }
                             }
                         } else { // LTR
                             // remove right space if exist
-                            $pos1 = TCPDF_STATIC::revstrpos($pmid, ')]');
+                            $pos1 = TCPDFSTATIC::revstrpos($pmid, ')]');
                             if ($pos1 > 0) {
                                 $pos1 = intval($pos1);
                                 if ($this->isUnicodeFont()) {
-                                    $pos2 = intval(TCPDF_STATIC::revstrpos($pmid, chr(0).chr(32).')]')) + 2;
+                                    $pos2 = intval(TCPDFSTATIC::revstrpos($pmid, chr(0).chr(32).')]')) + 2;
                                     $spacelen = 2;
                                 } else {
-                                    $pos2 = intval(TCPDF_STATIC::revstrpos($pmid, chr(32).')]')) + 1;
+                                    $pos2 = intval(TCPDFSTATIC::revstrpos($pmid, chr(32).')]')) + 1;
                                     $spacelen = 1;
                                 }
                                 if ($pos1 == $pos2) {
@@ -18080,7 +18035,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                                         case 'Td':
                                         case 'cm':
                                         case 'm':
-                                        case 'l': {
+                                        case 'l':
                                             // get current X position
                                             preg_match('/([0-9\.\+\-]*)[\s]('.$strpiece[1][0].')[\s]('.$strpiece[2][0].')([\s]*)/x', $pmid, $xmatches);
                                             if (!isset($xmatches[1])) {
@@ -18102,10 +18057,10 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                                                 unset($pmatch, $newpmid);
                                             }
                                             break;
-                                        }
-                                        case 're': {
+
+                                        case 're':
                                             // justify block
-                                            if (!TCPDF_STATIC::empty_string($this->lispacer)) {
+                                            if (!TCPDFSTATIC::empty_string($this->lispacer)) {
                                                 $this->lispacer = '';
                                                 continue;
                                             }
@@ -18149,8 +18104,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                                                 unset($pmatch, $newpmid, $newx, $neww);
                                             }
                                             break;
-                                        }
-                                        case 'c': {
+
+                                        case 'c':
                                             // get current X position
                                             preg_match('/([0-9\.\+\-]*)[\s]([0-9\.\+\-]*)[\s]([0-9\.\+\-]*)[\s]([0-9\.\+\-]*)[\s]([0-9\.\+\-]*)[\s]('.$strpiece[1][0].')[\s](c)([\s]*)/x', $pmid, $xmatches);
                                             if (!isset($xmatches[1])) {
@@ -18167,7 +18122,6 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                                                 unset($pmatch, $newpmid, $newx1, $newx2, $newx3);
                                             }
                                             break;
-                                        }
                                     }
                                     // shift the annotations and links
                                     $cxpos = ($currentxpos / $this->k);
@@ -18622,7 +18576,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 }
             } elseif (strlen($dom[$key]['value']) > 0) {
                 // print list-item
-                if (!TCPDF_STATIC::empty_string($this->lispacer) and ($this->lispacer != '^')) {
+                if (!TCPDFSTATIC::empty_string($this->lispacer) and ($this->lispacer != '^')) {
                     $this->SetFont($pfontname, $pfontstyle, $pfontsize);
                     $this->resetLastH();
                     $minstartliney = $this->y;
@@ -18721,7 +18675,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                                     $tmp_fontsize = isset($dom[$nkey]['fontsize']) ? $dom[$nkey]['fontsize'] : $this->FontSizePt;
                                     $same_textdir = ($dom[$nkey]['dir'] == $dom[$key]['dir']);
                                 } else {
-                                    $nextstr = TCPDF_STATIC::pregSplit('/'.$this->re_space['p'].'+/', $this->re_space['m'], $dom[$nkey]['value']);
+                                    $nextstr = TCPDFSTATIC::pregSplit('/'.$this->re_space['p'].'+/', $this->re_space['m'], $dom[$nkey]['value']);
                                     if (isset($nextstr[0]) and $same_textdir) {
                                         $wadj += $this->GetStringWidth($nextstr[0], $tmp_fontname, $tmp_fontstyle, $tmp_fontsize);
                                         if (isset($nextstr[1])) {
@@ -18734,7 +18688,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                         if (($wadj > 0) and (($strlinelen + $wadj) >= $cwa)) {
                             $wadj = 0;
-                            $nextstr = TCPDF_STATIC::pregSplit('/'.$this->re_space['p'].'/', $this->re_space['m'], $dom[$key]['value']);
+                            $nextstr = TCPDFSTATIC::pregSplit('/'.$this->re_space['p'].'/', $this->re_space['m'], $dom[$key]['value']);
                             $numblks = count($nextstr);
                             if ($numblks > 1) {
                                 // try to split on blank spaces
@@ -18883,35 +18837,35 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $no = 0; // number of spaces on a line contained on a single block
                 if ($this->isRTLTextDir()) { // RTL
                     // remove left space if exist
-                    $pos1 = TCPDF_STATIC::revstrpos($pmid, '[(');
+                    $pos1 = TCPDFSTATIC::revstrpos($pmid, '[(');
                     if ($pos1 > 0) {
                         $pos1 = intval($pos1);
                         if ($this->isUnicodeFont()) {
-                            $pos2 = intval(TCPDF_STATIC::revstrpos($pmid, '[('.chr(0).chr(32)));
+                            $pos2 = intval(TCPDFSTATIC::revstrpos($pmid, '[('.chr(0).chr(32)));
                             $spacelen = 2;
                         } else {
-                            $pos2 = intval(TCPDF_STATIC::revstrpos($pmid, '[('.chr(32)));
+                            $pos2 = intval(TCPDFSTATIC::revstrpos($pmid, '[('.chr(32)));
                             $spacelen = 1;
                         }
                         if ($pos1 == $pos2) {
                             $pmid = substr($pmid, 0, ($pos1 + 2)).substr($pmid, ($pos1 + 2 + $spacelen));
                             if (substr($pmid, $pos1, 4) == '[()]') {
                                 $linew -= $one_space_width;
-                            } elseif ($pos1 == strpos($pmid, '[(')) {
+                            } elseif ($pos1 === strpos($pmid, '[(')) {
                                 $no = 1;
                             }
                         }
                     }
                 } else { // LTR
                     // remove right space if exist
-                    $pos1 = TCPDF_STATIC::revstrpos($pmid, ')]');
+                    $pos1 = TCPDFSTATIC::revstrpos($pmid, ')]');
                     if ($pos1 > 0) {
                         $pos1 = intval($pos1);
                         if ($this->isUnicodeFont()) {
-                            $pos2 = intval(TCPDF_STATIC::revstrpos($pmid, chr(0).chr(32).')]')) + 2;
+                            $pos2 = intval(TCPDFSTATIC::revstrpos($pmid, chr(0).chr(32).')]')) + 2;
                             $spacelen = 2;
                         } else {
-                            $pos2 = intval(TCPDF_STATIC::revstrpos($pmid, chr(32).')]')) + 1;
+                            $pos2 = intval(TCPDFSTATIC::revstrpos($pmid, chr(32).')]')) + 1;
                             $spacelen = 1;
                         }
                         if ($pos1 == $pos2) {
@@ -19063,14 +19017,14 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         }
         // Opening tag
         switch ($tag['value']) {
-            case 'table': {
+            case 'table':
                 $cp = 0;
                 $cs = 0;
                 $dom[$key]['rowspans'] = [];
                 if (!isset($dom[$key]['attribute']['nested']) or ($dom[$key]['attribute']['nested'] != 'true')) {
                     $this->htmlvspace = 0;
                     // set table header
-                    if (!TCPDF_STATIC::empty_string($dom[$key]['thead'])) {
+                    if (!TCPDFSTATIC::empty_string($dom[$key]['thead'])) {
                         // set table header
                         $this->thead = $dom[$key]['thead'];
                         if (!isset($this->theadMargins) or (empty($this->theadMargins))) {
@@ -19104,13 +19058,13 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->checkPageBreak($this->PageBreakTrigger + 1);
                 }
                 break;
-            }
-            case 'tr': {
+
+            case 'tr':
                 // array of columns positions
                 $dom[$key]['cellpos'] = [];
                 break;
-            }
-            case 'hr': {
+
+            case 'hr':
                 if ((isset($tag['height'])) and ($tag['height'] != '')) {
                     $hrHeight = $this->getHTMLUnitToUnits($tag['height'], 1, 'px');
                 } else {
@@ -19134,14 +19088,14 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $this->SetLineWidth($prevlinewidth);
                 $this->addHTMLVertSpace(max($hbc, ($hrHeight / 2)), 0, $cell, !isset($dom[($key + 1)]));
                 break;
-            }
-            case 'a': {
+
+            case 'a':
                 if (array_key_exists('href', $tag['attribute'])) {
                     $this->HREF['url'] = $tag['attribute']['href'];
                 }
                 break;
-            }
-            case 'img': {
+
+            case 'img':
                 if (!empty($tag['attribute']['src'])) {
                     if ($tag['attribute']['src'][0] === '@') {
                         // data stream
@@ -19149,7 +19103,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         $type = '';
                     } else {
                         // get image type
-                        $type = TCPDF_IMAGES::getImageFileType($tag['attribute']['src']);
+                        $type = IMAGES::getImageFileType($tag['attribute']['src']);
                     }
                     if (!isset($tag['width'])) {
                         $tag['width'] = 0;
@@ -19163,27 +19117,26 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         $tag['attribute']['align'] = 'bottom';
                     //}
                     switch ($tag['attribute']['align']) {
-                        case 'top': {
+                        case 'top':
                             $align = 'T';
                             break;
-                        }
-                        case 'middle': {
+
+                        case 'middle':
                             $align = 'M';
                             break;
-                        }
-                        case 'bottom': {
+
+                        case 'bottom':
                             $align = 'B';
                             break;
-                        }
-                        default: {
+
+                        default:
                             $align = 'B';
                             break;
-                        }
                     }
                     $prevy = $this->y;
                     $xpos = $this->x;
                     $imglink = '';
-                    if (isset($this->HREF['url']) and !TCPDF_STATIC::empty_string($this->HREF['url'])) {
+                    if (isset($this->HREF['url']) and !TCPDFSTATIC::empty_string($this->HREF['url'])) {
                         $imglink = $this->HREF['url'];
                         if ($imglink[0] == '#') {
                             // convert url to internal link
@@ -19224,23 +19177,22 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         $this->Image($tag['attribute']['src'], $xpos, $this->y, $iw, $ih, '', $imglink, $align, false, 300, '', false, false, $border, false, false, true);
                     }
                     switch ($align) {
-                        case 'T': {
+                        case 'T':
                             $this->y = $prevy;
                             break;
-                        }
-                        case 'M': {
+
+                        case 'M':
                             $this->y = (($this->img_rb_y + $prevy - ($this->getCellHeight($tag['fontsize'] / $this->k))) / 2);
                             break;
-                        }
-                        case 'B': {
+
+                        case 'B':
                             $this->y = $this->img_rb_y - ($this->getCellHeight($tag['fontsize'] / $this->k) - ($this->getFontDescent($tag['fontname'], $tag['fontstyle'], $tag['fontsize']) * $this->cell_height_ratio));
                             break;
-                        }
                     }
                 }
                 break;
-            }
-            case 'dl': {
+
+            case 'dl':
                 ++$this->listnum;
                 if ($this->listnum == 1) {
                     $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
@@ -19248,12 +19200,12 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->addHTMLVertSpace(0, 0, $cell, $firsttag);
                 }
                 break;
-            }
-            case 'dt': {
+
+            case 'dt':
                 $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
                 break;
-            }
-            case 'dd': {
+
+            case 'dd':
                 if ($this->rtl) {
                     $this->rMargin += $this->listindent;
                 } else {
@@ -19262,9 +19214,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 ++$this->listindentlevel;
                 $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
                 break;
-            }
+
             case 'ul':
-            case 'ol': {
+            case 'ol':
                 ++$this->listnum;
                 if ($tag['value'] == 'ol') {
                     $this->listordered[$this->listnum] = true;
@@ -19292,18 +19244,18 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->addHTMLVertSpace(0, 0, $cell, $firsttag);
                 }
                 break;
-            }
-            case 'li': {
+
+            case 'li':
                 if ($key > 2) {
                     $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
                 }
                 if ($this->listordered[$this->listnum]) {
                     // ordered item
-                    if (isset($parent['attribute']['type']) and !TCPDF_STATIC::empty_string($parent['attribute']['type'])) {
+                    if (isset($parent['attribute']['type']) and !TCPDFSTATIC::empty_string($parent['attribute']['type'])) {
                         $this->lispacer = $parent['attribute']['type'];
-                    } elseif (isset($parent['listtype']) and !TCPDF_STATIC::empty_string($parent['listtype'])) {
+                    } elseif (isset($parent['listtype']) and !TCPDFSTATIC::empty_string($parent['listtype'])) {
                         $this->lispacer = $parent['listtype'];
-                    } elseif (isset($this->lisymbol) and !TCPDF_STATIC::empty_string($this->lisymbol)) {
+                    } elseif (isset($this->lisymbol) and !TCPDFSTATIC::empty_string($this->lisymbol)) {
                         $this->lispacer = $this->lisymbol;
                     } else {
                         $this->lispacer = '#';
@@ -19314,19 +19266,19 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     }
                 } else {
                     // unordered item
-                    if (isset($parent['attribute']['type']) and !TCPDF_STATIC::empty_string($parent['attribute']['type'])) {
+                    if (isset($parent['attribute']['type']) and !TCPDFSTATIC::empty_string($parent['attribute']['type'])) {
                         $this->lispacer = $parent['attribute']['type'];
-                    } elseif (isset($parent['listtype']) and !TCPDF_STATIC::empty_string($parent['listtype'])) {
+                    } elseif (isset($parent['listtype']) and !TCPDFSTATIC::empty_string($parent['listtype'])) {
                         $this->lispacer = $parent['listtype'];
-                    } elseif (isset($this->lisymbol) and !TCPDF_STATIC::empty_string($this->lisymbol)) {
+                    } elseif (isset($this->lisymbol) and !TCPDFSTATIC::empty_string($this->lisymbol)) {
                         $this->lispacer = $this->lisymbol;
                     } else {
                         $this->lispacer = '!';
                     }
                 }
                 break;
-            }
-            case 'blockquote': {
+
+            case 'blockquote':
                 if ($this->rtl) {
                     $this->rMargin += $this->listindent;
                 } else {
@@ -19335,43 +19287,43 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 ++$this->listindentlevel;
                 $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
                 break;
-            }
-            case 'br': {
+
+            case 'br':
                 $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
                 break;
-            }
-            case 'div': {
+
+            case 'div':
                 $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
                 break;
-            }
-            case 'p': {
+
+            case 'p':
                 $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
                 break;
-            }
-            case 'pre': {
+
+            case 'pre':
                 $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
                 $this->premode = true;
                 break;
-            }
-            case 'sup': {
+
+            case 'sup':
                 $this->SetXY($this->GetX(), $this->GetY() - ((0.7 * $this->FontSizePt) / $this->k));
                 break;
-            }
-            case 'sub': {
+
+            case 'sub':
                 $this->SetXY($this->GetX(), $this->GetY() + ((0.3 * $this->FontSizePt) / $this->k));
                 break;
-            }
+
             case 'h1':
             case 'h2':
             case 'h3':
             case 'h4':
             case 'h5':
-            case 'h6': {
+            case 'h6':
                 $this->addHTMLVertSpace($hbz, $hb, $cell, $firsttag);
                 break;
-            }
+
             // Form fields (since 4.8.000 - 2009-09-07)
-            case 'form': {
+            case 'form':
                 if (isset($tag['attribute']['action'])) {
                     $this->form_action = $tag['attribute']['action'];
                 } else {
@@ -19388,26 +19340,26 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->form_mode = 'post';
                 }
                 break;
-            }
-            case 'input': {
-                if (isset($tag['attribute']['name']) and !TCPDF_STATIC::empty_string($tag['attribute']['name'])) {
+
+            case 'input':
+                if (isset($tag['attribute']['name']) and !TCPDFSTATIC::empty_string($tag['attribute']['name'])) {
                     $name = $tag['attribute']['name'];
                 } else {
                     break;
                 }
                 $prop = [];
                 $opt = [];
-                if (isset($tag['attribute']['readonly']) and !TCPDF_STATIC::empty_string($tag['attribute']['readonly'])) {
+                if (isset($tag['attribute']['readonly']) and !TCPDFSTATIC::empty_string($tag['attribute']['readonly'])) {
                     $prop['readonly'] = true;
                 }
-                if (isset($tag['attribute']['value']) and !TCPDF_STATIC::empty_string($tag['attribute']['value'])) {
+                if (isset($tag['attribute']['value']) and !TCPDFSTATIC::empty_string($tag['attribute']['value'])) {
                     $value = $tag['attribute']['value'];
                 }
-                if (isset($tag['attribute']['maxlength']) and !TCPDF_STATIC::empty_string($tag['attribute']['maxlength'])) {
+                if (isset($tag['attribute']['maxlength']) and !TCPDFSTATIC::empty_string($tag['attribute']['maxlength'])) {
                     $opt['maxlen'] = intval($tag['attribute']['maxlength']);
                 }
                 $h = $this->getCellHeight($this->FontSize);
-                if (isset($tag['attribute']['size']) and !TCPDF_STATIC::empty_string($tag['attribute']['size'])) {
+                if (isset($tag['attribute']['size']) and !TCPDFSTATIC::empty_string($tag['attribute']['size'])) {
                     $w = intval($tag['attribute']['size']) * $this->GetStringWidth(chr(32)) * 2;
                 } else {
                     $w = $h;
@@ -19419,51 +19371,50 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 }
                 if (isset($tag['align'])) {
                     switch ($tag['align']) {
-                        case 'C': {
+                        case 'C':
                             $opt['q'] = 1;
                             break;
-                        }
-                        case 'R': {
+
+                        case 'R':
                             $opt['q'] = 2;
                             break;
-                        }
+
                         case 'L':
-                            default: {
+                        default:
                             break;
-                            }
                     }
                 }
                 switch ($tag['attribute']['type']) {
-                    case 'text': {
+                    case 'text':
                         if (isset($value)) {
                             $opt['v'] = $value;
                         }
                         $this->TextField($name, $w, $h, $prop, $opt, '', '', false);
                         break;
-                    }
-                    case 'password': {
+
+                    case 'password':
                         if (isset($value)) {
                             $opt['v'] = $value;
                         }
                         $prop['password'] = 'true';
                         $this->TextField($name, $w, $h, $prop, $opt, '', '', false);
                         break;
-                    }
-                    case 'checkbox': {
+
+                    case 'checkbox':
                         if (!isset($value)) {
                             break;
                         }
                         $this->CheckBox($name, $w, $checked, $prop, $opt, $value, '', '', false);
                         break;
-                    }
-                    case 'radio': {
+
+                    case 'radio':
                         if (!isset($value)) {
                             break;
                         }
                         $this->RadioButton($name, $w, $prop, $opt, $value, $checked, '', '', false);
                         break;
-                    }
-                    case 'submit': {
+
+                    case 'submit':
                         if (!isset($value)) {
                             $value = 'submit';
                         }
@@ -19481,8 +19432,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                         $this->Button($name, $w, $h, $value, $action, $prop, $opt, '', '', false);
                         break;
-                    }
-                    case 'reset': {
+
+                    case 'reset':
                         if (!isset($value)) {
                             $value = 'reset';
                         }
@@ -19491,8 +19442,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         $prop = ['lineWidth'=>1, 'borderStyle'=>'beveled', 'fillColor'=>[196, 196, 196], 'strokeColor'=>[255, 255, 255]];
                         $this->Button($name, $w, $h, $value, ['S'=>'ResetForm'], $prop, $opt, '', '', false);
                         break;
-                    }
-                    case 'file': {
+
+                    case 'file':
                         $prop['fileSelect'] = 'true';
                         $this->TextField($name, $w, $h, $prop, $opt, '', '', false);
                         if (!isset($value)) {
@@ -19504,18 +19455,18 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         $jsaction = 'var f=this.getField(\''.$name.'\'); f.browseForFileToSubmit();';
                         $this->Button('FB_'.$name, $w, $h, $value, $jsaction, $prop, $opt, '', '', false);
                         break;
-                    }
-                    case 'hidden': {
+
+                    case 'hidden':
                         if (isset($value)) {
                             $opt['v'] = $value;
                         }
                         $opt['f'] = ['invisible', 'hidden'];
                         $this->TextField($name, 0, 0, $prop, $opt, '', '', false);
                         break;
-                    }
-                    case 'image': {
+
+                    case 'image':
                         // THIS TYPE MUST BE FIXED
-                        if (isset($tag['attribute']['src']) and !TCPDF_STATIC::empty_string($tag['attribute']['src'])) {
+                        if (isset($tag['attribute']['src']) and !TCPDFSTATIC::empty_string($tag['attribute']['src'])) {
                             $img = $tag['attribute']['src'];
                         } else {
                             break;
@@ -19529,8 +19480,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                         $this->Button($name, $w, $h, $value, $jsaction, $prop, $opt, '', '', false);
                         break;
-                    }
-                    case 'button': {
+
+                    case 'button':
                         if (!isset($value)) {
                             $value = ' ';
                         }
@@ -19544,30 +19495,29 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                         $this->Button($name, $w, $h, $value, $jsaction, $prop, $opt, '', '', false);
                         break;
-                    }
                 }
                 break;
-            }
-            case 'textarea': {
+
+            case 'textarea':
                 $prop = [];
                 $opt = [];
-                if (isset($tag['attribute']['readonly']) and !TCPDF_STATIC::empty_string($tag['attribute']['readonly'])) {
+                if (isset($tag['attribute']['readonly']) and !TCPDFSTATIC::empty_string($tag['attribute']['readonly'])) {
                     $prop['readonly'] = true;
                 }
-                if (isset($tag['attribute']['name']) and !TCPDF_STATIC::empty_string($tag['attribute']['name'])) {
+                if (isset($tag['attribute']['name']) and !TCPDFSTATIC::empty_string($tag['attribute']['name'])) {
                     $name = $tag['attribute']['name'];
                 } else {
                     break;
                 }
-                if (isset($tag['attribute']['value']) and !TCPDF_STATIC::empty_string($tag['attribute']['value'])) {
+                if (isset($tag['attribute']['value']) and !TCPDFSTATIC::empty_string($tag['attribute']['value'])) {
                     $opt['v'] = $tag['attribute']['value'];
                 }
-                if (isset($tag['attribute']['cols']) and !TCPDF_STATIC::empty_string($tag['attribute']['cols'])) {
+                if (isset($tag['attribute']['cols']) and !TCPDFSTATIC::empty_string($tag['attribute']['cols'])) {
                     $w = intval($tag['attribute']['cols']) * $this->GetStringWidth(chr(32)) * 2;
                 } else {
                     $w = 40;
                 }
-                if (isset($tag['attribute']['rows']) and !TCPDF_STATIC::empty_string($tag['attribute']['rows'])) {
+                if (isset($tag['attribute']['rows']) and !TCPDFSTATIC::empty_string($tag['attribute']['rows'])) {
                     $h = intval($tag['attribute']['rows']) * $this->getCellHeight($this->FontSize);
                 } else {
                     $h = 10;
@@ -19575,21 +19525,21 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $prop['multiline'] = 'true';
                 $this->TextField($name, $w, $h, $prop, $opt, '', '', false);
                 break;
-            }
-            case 'select': {
+
+            case 'select':
                 $h = $this->getCellHeight($this->FontSize);
-                if (isset($tag['attribute']['size']) and !TCPDF_STATIC::empty_string($tag['attribute']['size'])) {
+                if (isset($tag['attribute']['size']) and !TCPDFSTATIC::empty_string($tag['attribute']['size'])) {
                     $h *= ($tag['attribute']['size'] + 1);
                 }
                 $prop = [];
                 $opt = [];
-                if (isset($tag['attribute']['name']) and !TCPDF_STATIC::empty_string($tag['attribute']['name'])) {
+                if (isset($tag['attribute']['name']) and !TCPDFSTATIC::empty_string($tag['attribute']['name'])) {
                     $name = $tag['attribute']['name'];
                 } else {
                     break;
                 }
                 $w = 0;
-                if (isset($tag['attribute']['opt']) and !TCPDF_STATIC::empty_string($tag['attribute']['opt'])) {
+                if (isset($tag['attribute']['opt']) and !TCPDFSTATIC::empty_string($tag['attribute']['opt'])) {
                     $options = explode('#!NwL!#', $tag['attribute']['opt']);
                     $values = [];
                     foreach ($options as $val) {
@@ -19613,8 +19563,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->ComboBox($name, $w, $h, $values, $prop, $opt, '', '', false);
                 }
                 break;
-            }
-            case 'tcpdf': {
+
+            case 'tcpdf':
                 if (defined('K_TCPDF_CALLS_IN_HTML') and (K_TCPDF_CALLS_IN_HTML === true)) {
                     // Special tag used to call TCPDF methods
                     if (isset($tag['attribute']['method'])) {
@@ -19631,10 +19581,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     }
                 }
                 break;
-            }
-            default: {
+
+            default:
                 break;
-            }
         }
         // define tags that support borders and background colors
         $bordertags = ['blockquote','br','dd','dl','div','dt','h1','h2','h3','h4','h5','h6','hr','li','ol','p','pre','ul','tcpdf','table'];
@@ -19710,7 +19659,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         }
         // Closing tag
         switch ($tag['value']) {
-            case 'tr': {
+            case 'tr':
                 $table_el = $dom[($dom[$key]['parent'])]['parent'];
                 if (!isset($parent['endy'])) {
                     $dom[($dom[$key]['parent'])]['endy'] = $this->y;
@@ -19793,12 +19742,12 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     }
                 }
                 break;
-            }
+
             case 'tablehead':
                 // closing tag used for the thead part
                 $in_table_head = true;
                 $this->inthead = false;
-                case 'table': {
+            case 'table':
                     $table_el = $parent;
                     // set default border
                     if (isset($table_el['attribute']['border']) and ($table_el['attribute']['border'] > 0)) {
@@ -19880,9 +19829,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                             $starty = $y;
                             $w = abs($cellpos['endx'] - $cellpos['startx']);
                             // get border modes
-                            $border_start = TCPDF_STATIC::getBorderMode($border, $position = 'start', $this->opencell);
-                            $border_end = TCPDF_STATIC::getBorderMode($border, $position = 'end', $this->opencell);
-                            $border_middle = TCPDF_STATIC::getBorderMode($border, $position = 'middle', $this->opencell);
+                            $border_start = TCPDFSTATIC::getBorderMode($border, $position = 'start', $this->opencell);
+                            $border_end = TCPDFSTATIC::getBorderMode($border, $position = 'end', $this->opencell);
+                            $border_middle = TCPDFSTATIC::getBorderMode($border, $position = 'middle', $this->opencell);
                             // design borders around HTML cells.
                             for ($page = $startpage; $page <= $endpage; ++$page) { // for each page
                                 $ccode = '';
@@ -20080,112 +20029,112 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     $parent = $table_el;
+                    break;
+
+            case 'a':
+                $this->HREF = '';
                 break;
-                }
-                case 'a': {
-                    $this->HREF = '';
+
+            case 'sup':
+                $this->SetXY($this->GetX(), $this->GetY() + ((0.7 * $parent['fontsize']) / $this->k));
                 break;
-                }
-                case 'sup': {
-                    $this->SetXY($this->GetX(), $this->GetY() + ((0.7 * $parent['fontsize']) / $this->k));
+
+            case 'sub':
+                $this->SetXY($this->GetX(), $this->GetY() - ((0.3 * $parent['fontsize']) / $this->k));
                 break;
-                }
-                case 'sub': {
-                    $this->SetXY($this->GetX(), $this->GetY() - ((0.3 * $parent['fontsize']) / $this->k));
+
+            case 'div':
+                $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
                 break;
+
+            case 'blockquote':
+                if ($this->rtl) {
+                    $this->rMargin -= $this->listindent;
+                } else {
+                    $this->lMargin -= $this->listindent;
                 }
-                case 'div': {
+                --$this->listindentlevel;
+                $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
+                break;
+
+            case 'p':
+                $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
+                break;
+
+            case 'pre':
+                $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
+                $this->premode = false;
+                break;
+
+            case 'dl':
+                --$this->listnum;
+                if ($this->listnum <= 0) {
+                    $this->listnum = 0;
                     $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
-                break;
-                }
-                case 'blockquote': {
-                    if ($this->rtl) {
-                        $this->rMargin -= $this->listindent;
-                    } else {
-                        $this->lMargin -= $this->listindent;
-                    }
-                    --$this->listindentlevel;
-                    $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
-                break;
-                }
-                case 'p': {
-                    $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
-                break;
-                }
-                case 'pre': {
-                    $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
-                    $this->premode = false;
-                break;
-                }
-                case 'dl': {
-                    --$this->listnum;
-                    if ($this->listnum <= 0) {
-                        $this->listnum = 0;
-                        $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
-                    } else {
-                        $this->addHTMLVertSpace(0, 0, $cell, false, $lasttag);
-                    }
-                    $this->resetLastH();
-                break;
-                }
-                case 'dt': {
-                    $this->lispacer = '';
+                } else {
                     $this->addHTMLVertSpace(0, 0, $cell, false, $lasttag);
-                break;
                 }
-                case 'dd': {
-                    $this->lispacer = '';
-                    if ($this->rtl) {
-                        $this->rMargin -= $this->listindent;
-                    } else {
-                        $this->lMargin -= $this->listindent;
-                    }
-                    --$this->listindentlevel;
-                    $this->addHTMLVertSpace(0, 0, $cell, false, $lasttag);
+                $this->resetLastH();
                 break;
-                }
-                case 'ul':
-                case 'ol': {
-                    --$this->listnum;
-                    $this->lispacer = '';
-                    if ($this->rtl) {
-                        $this->rMargin -= $this->listindent;
-                    } else {
-                        $this->lMargin -= $this->listindent;
-                    }
-                    --$this->listindentlevel;
-                    if ($this->listnum <= 0) {
-                        $this->listnum = 0;
-                        $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
-                    } else {
-                        $this->addHTMLVertSpace(0, 0, $cell, false, $lasttag);
-                    }
-                    $this->resetLastH();
+
+            case 'dt':
+                $this->lispacer = '';
+                $this->addHTMLVertSpace(0, 0, $cell, false, $lasttag);
                 break;
+
+            case 'dd':
+                $this->lispacer = '';
+                if ($this->rtl) {
+                    $this->rMargin -= $this->listindent;
+                } else {
+                    $this->lMargin -= $this->listindent;
                 }
-                case 'li': {
-                    $this->lispacer = '';
-                    $this->addHTMLVertSpace(0, 0, $cell, false, $lasttag);
+                --$this->listindentlevel;
+                $this->addHTMLVertSpace(0, 0, $cell, false, $lasttag);
                 break;
+
+            case 'ul':
+            case 'ol':
+                --$this->listnum;
+                $this->lispacer = '';
+                if ($this->rtl) {
+                    $this->rMargin -= $this->listindent;
+                } else {
+                    $this->lMargin -= $this->listindent;
                 }
-                case 'h1':
-                case 'h2':
-                case 'h3':
-                case 'h4':
-                case 'h5':
-                case 'h6': {
+                --$this->listindentlevel;
+                if ($this->listnum <= 0) {
+                    $this->listnum = 0;
                     $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
-                break;
+                } else {
+                    $this->addHTMLVertSpace(0, 0, $cell, false, $lasttag);
                 }
+                $this->resetLastH();
+                break;
+
+            case 'li':
+                $this->lispacer = '';
+                $this->addHTMLVertSpace(0, 0, $cell, false, $lasttag);
+                break;
+
+            case 'h1':
+            case 'h2':
+            case 'h3':
+            case 'h4':
+            case 'h5':
+            case 'h6':
+                $this->addHTMLVertSpace($hbz, $hb, $cell, false, $lasttag);
+                break;
+
             // Form fields (since 4.8.000 - 2009-09-07)
-                case 'form': {
-                    $this->form_action = '';
-                    $this->form_enctype = 'application/x-www-form-urlencoded';
+            case 'form':
+                $this->form_action = '';
+                $this->form_enctype = 'application/x-www-form-urlencoded';
                 break;
-                }
-                default : {
+
+            default :
                 break;
-                }
+
         }
         // draw border and background (if any)
         $this->drawHTMLTagBorder($parent, $xmax);
@@ -20274,9 +20223,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         if (isset($tag['border']) and !empty($tag['border'])) {
             // get border style
             $border = $tag['border'];
-            if (!TCPDF_STATIC::empty_string($this->thead) and (!$this->inthead)) {
+            if (!TCPDFSTATIC::empty_string($this->thead) and (!$this->inthead)) {
                 // border for table header
-                $border = TCPDF_STATIC::getBorderMode($border, $position = 'middle', $this->opencell);
+                $border = TCPDFSTATIC::getBorderMode($border, $position = 'middle', $this->opencell);
             }
         }
         if (isset($tag['bgcolor']) and ($tag['bgcolor'] !== false)) {
@@ -20330,9 +20279,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             $this->num_columns = 1;
         }
         // get border modes
-        $border_start = TCPDF_STATIC::getBorderMode($border, $position = 'start', $this->opencell);
-        $border_end = TCPDF_STATIC::getBorderMode($border, $position = 'end', $this->opencell);
-        $border_middle = TCPDF_STATIC::getBorderMode($border, $position = 'middle', $this->opencell);
+        $border_start = TCPDFSTATIC::getBorderMode($border, $position = 'start', $this->opencell);
+        $border_end = TCPDFSTATIC::getBorderMode($border, $position = 'end', $this->opencell);
+        $border_middle = TCPDFSTATIC::getBorderMode($border, $position = 'middle', $this->opencell);
         // temporary disable page regions
         $temp_page_regions = $this->page_regions;
         $this->page_regions = [];
@@ -20604,53 +20553,52 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         }
         switch ($unit) {
             // percentage
-            case '%': {
+            case '%':
                 $retval = (($value * $refsize) / 100);
                 break;
-            }
+
             // relative-size
-            case 'em': {
+            case 'em':
                 $retval = ($value * $refsize);
                 break;
-            }
+
             // height of lower case 'x' (about half the font-size)
-            case 'ex': {
+            case 'ex':
                 $retval = ($value * ($refsize / 2));
                 break;
-            }
+
             // absolute-size
-            case 'in': {
+            case 'in':
                 $retval = (($value * $this->dpi) / $k);
                 break;
-            }
+
             // centimeters
-            case 'cm': {
+            case 'cm':
                 $retval = (($value / 2.54 * $this->dpi) / $k);
                 break;
-            }
+
             // millimeters
-            case 'mm': {
+            case 'mm':
                 $retval = (($value / 25.4 * $this->dpi) / $k);
                 break;
-            }
+
             // one pica is 12 points
-            case 'pc': {
+            case 'pc':
                 $retval = (($value * 12) / $k);
                 break;
-            }
+
             // points
-            case 'pt': {
+            case 'pt':
                 $retval = ($value / $k);
                 break;
-            }
+
             // pixels
-            case 'px': {
+            case 'px':
                 $retval = $this->pixelsToUnits($value);
                 if ($points) {
                     $retval *= $this->k;
                 }
                 break;
-            }
         }
         return $retval;
     }
@@ -20695,10 +20643,10 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         }
         switch ($listtype) {
             // unordered types
-            case 'none': {
+            case 'none':
                 break;
-            }
-            case 'disc': {
+
+            case 'disc':
                 $r = $size / 6;
                 $lspace += (2 * $r);
                 if ($this->rtl) {
@@ -20708,8 +20656,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 }
                 $this->Circle(($this->x + $r), ($this->y + ($this->lasth / 2)), $r, 0, 360, 'F', [], $color, 8);
                 break;
-            }
-            case 'circle': {
+
+            case 'circle':
                 $r = $size / 6;
                 $lspace += (2 * $r);
                 if ($this->rtl) {
@@ -20722,8 +20670,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $this->Circle(($this->x + $r), ($this->y + ($this->lasth / 2)), ($r * (1 - (1/6))), 0, 360, 'D', $new_line_style, [], 8);
                 $this->_out($prev_line_style); // restore line settings
                 break;
-            }
-            case 'square': {
+
+            case 'square':
                 $l = $size / 3;
                 $lspace += $l;
                 if ($this->rtl) {
@@ -20734,8 +20682,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 }
                 $this->Rect($this->x, ($this->y + (($this->lasth - $l) / 2)), $l, $l, 'F', [], $color);
                 break;
-            }
-            case 'img': {
+
+            case 'img':
                 // 1=>type, 2=>width, 3=>height, 4=>image.ext
                 $lspace += $img[2];
                 if ($this->rtl) {
@@ -20747,93 +20695,91 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $imgtype = strtolower($img[1]);
                 $prev_y = $this->y;
                 switch ($imgtype) {
-                    case 'svg': {
+                    case 'svg':
                         $this->ImageSVG($img[4], $this->x, ($this->y + (($this->lasth - $img[3]) / 2)), $img[2], $img[3], '', 'T', '', 0, false);
                         break;
-                    }
+
                     case 'ai':
-                    case 'eps': {
+                    case 'eps':
                         $this->ImageEps($img[4], $this->x, ($this->y + (($this->lasth - $img[3]) / 2)), $img[2], $img[3], '', true, 'T', '', 0, false);
                         break;
-                    }
-                    default: {
+
+                    default:
                         $this->Image($img[4], $this->x, ($this->y + (($this->lasth - $img[3]) / 2)), $img[2], $img[3], $img[1], '', 'T', false, 300, '', false, false, 0, false, false, false);
                         break;
-                    }
                 }
                 $this->y = $prev_y;
                 break;
-            }
+
             // ordered types
             // $this->listcount[$this->listnum];
             // $textitem
             case '1':
-            case 'decimal': {
+            case 'decimal':
                 $textitem = $this->listcount[$this->listnum];
                 break;
-            }
-            case 'decimal-leading-zero': {
+
+            case 'decimal-leading-zero':
                 $textitem = sprintf('%02d', $this->listcount[$this->listnum]);
                 break;
-            }
+
             case 'i':
-            case 'lower-roman': {
-                $textitem = strtolower(TCPDF_STATIC::intToRoman($this->listcount[$this->listnum]));
+            case 'lower-roman':
+                $textitem = strtolower(TCPDFSTATIC::intToRoman($this->listcount[$this->listnum]));
                 break;
-            }
+
             case 'I':
-            case 'upper-roman': {
-                $textitem = TCPDF_STATIC::intToRoman($this->listcount[$this->listnum]);
+            case 'upper-roman':
+                $textitem = TCPDFSTATIC::intToRoman($this->listcount[$this->listnum]);
                 break;
-                }
+
             case 'a':
             case 'lower-alpha':
-            case 'lower-latin': {
+            case 'lower-latin':
                 $textitem = chr(97 + $this->listcount[$this->listnum] - 1);
                 break;
-            }
+
             case 'A':
             case 'upper-alpha':
-            case 'upper-latin': {
+            case 'upper-latin':
                 $textitem = chr(65 + $this->listcount[$this->listnum] - 1);
                 break;
-            }
-            case 'lower-greek': {
-                $textitem = TCPDF_FONTS::unichr((945 + $this->listcount[$this->listnum] - 1), $this->isunicode);
+
+            case 'lower-greek':
+                $textitem = FONTS::unichr((945 + $this->listcount[$this->listnum] - 1), $this->isunicode);
                 break;
-            }
+
             /*
 			// Types to be implemented (special handling)
-			case 'hebrew': {
+			case 'hebrew':
 				break;
-			}
-			case 'armenian': {
+
+			case 'armenian':
 				break;
-			}
-			case 'georgian': {
+
+			case 'georgian':
 				break;
-			}
-			case 'cjk-ideographic': {
+
+			case 'cjk-ideographic':
 				break;
-			}
-			case 'hiragana': {
+
+			case 'hiragana':
 				break;
-			}
-			case 'katakana': {
+
+			case 'katakana':
 				break;
-			}
-			case 'hiragana-iroha': {
+
+			case 'hiragana-iroha':
 				break;
-			}
-			case 'katakana-iroha': {
+
+			case 'katakana-iroha':
 				break;
-			}
 			*/
             default: {
                 $textitem = $this->listcount[$this->listnum];
             }
         }
-        if (!TCPDF_STATIC::empty_string($textitem)) {
+        if (!TCPDFSTATIC::empty_string($textitem)) {
             // Check whether we need a new page or new column
             $prev_y = $this->y;
             $h = $this->getCellHeight($this->FontSize);
@@ -20986,7 +20932,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             $this->num_columns = $gvars['num_columns'];
         }
         $this->_out(''.$this->linestyleWidth.' '.$this->linestyleCap.' '.$this->linestyleJoin.' '.$this->linestyleDash.' '.$this->DrawColor.' '.$this->FillColor.'');
-        if (!TCPDF_STATIC::empty_string($this->FontFamily)) {
+        if (!TCPDFSTATIC::empty_string($this->FontFamily)) {
             $this->SetFont($this->FontFamily, $this->FontStyle, $this->FontSizePt);
         }
     }
@@ -21645,13 +21591,13 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         $page_fill_start = false;
         $page_fill_end = false;
         $current_column = $this->current_column;
-        if (TCPDF_STATIC::empty_string($numbersfont)) {
+        if (TCPDFSTATIC::empty_string($numbersfont)) {
             $numbersfont = $this->default_monospaced_font;
         }
-        if (TCPDF_STATIC::empty_string($filler)) {
+        if (TCPDFSTATIC::empty_string($filler)) {
             $filler = ' ';
         }
-        if (TCPDF_STATIC::empty_string($page)) {
+        if (TCPDFSTATIC::empty_string($page)) {
             $gap = ' ';
         } else {
             $gap = '';
@@ -21723,7 +21669,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $tw = $this->w - $this->rMargin - $this->x;
             }
             $this->SetFont($numbersfont, $fontstyle, $fontsize);
-            if (TCPDF_STATIC::empty_string($page)) {
+            if (TCPDFSTATIC::empty_string($page)) {
                 $pagenum = $outline['p'];
             } else {
                 // placemark to be replaced with the correct number
@@ -21774,7 +21720,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             }
         }
         $maxpage = max($maxpage, $page_last);
-        if (!TCPDF_STATIC::empty_string($page)) {
+        if (!TCPDFSTATIC::empty_string($page)) {
             for ($p = $page_first; $p <= $page_last; ++$p) {
                 // get page data
                 $temppage = $this->getPageBuffer($p);
@@ -21789,15 +21735,15 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     } else {
                         $np = $n;
                     }
-                    $na = TCPDF_STATIC::formatTOCPageNumber(($this->starting_page_number + $np - 1));
-                    $nu = TCPDF_FONTS::UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
+                    $na = TCPDFSTATIC::formatTOCPageNumber(($this->starting_page_number + $np - 1));
+                    $nu = FONTS::UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
                     // replace aliases with numbers
                     foreach ($pnalias['u'] as $u) {
                         $sfill = str_repeat($filler, max(0, (strlen($u) - strlen($nu.' '))));
                         if ($this->rtl) {
-                            $nr = $nu.TCPDF_FONTS::UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
+                            $nr = $nu.FONTS::UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
                         } else {
-                            $nr = TCPDF_FONTS::UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
+                            $nr = FONTS::UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
                         }
                         $temppage = str_replace($u, $nr, $temppage);
                     }
@@ -21868,7 +21814,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         foreach ($this->outlines as $key => $outline) {
             // get HTML template
             $row = $templates[$outline['l']];
-            if (TCPDF_STATIC::empty_string($page)) {
+            if (TCPDFSTATIC::empty_string($page)) {
                 $pagenum = $outline['p'];
             } else {
                 // placemark to be replaced with the correct number
@@ -21911,7 +21857,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             }
         }
         $maxpage = max($maxpage, $page_last);
-        if (!TCPDF_STATIC::empty_string($page)) {
+        if (!TCPDFSTATIC::empty_string($page)) {
             for ($p = $page_first; $p <= $page_last; ++$p) {
                 // get page data
                 $temppage = $this->getPageBuffer($p);
@@ -21926,16 +21872,16 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     } else {
                         $np = $n;
                     }
-                    $na = TCPDF_STATIC::formatTOCPageNumber(($this->starting_page_number + $np - 1));
-                    $nu = TCPDF_FONTS::UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
+                    $na = TCPDFSTATIC::formatTOCPageNumber(($this->starting_page_number + $np - 1));
+                    $nu = FONTS::UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
                     // replace aliases with numbers
                     foreach ($pnalias['u'] as $u) {
                         if ($correct_align) {
                             $sfill = str_repeat($filler, (strlen($u) - strlen($nu.' ')));
                             if ($this->rtl) {
-                                $nr = $nu.TCPDF_FONTS::UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
+                                $nr = $nu.FONTS::UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
                             } else {
-                                $nr = TCPDF_FONTS::UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
+                                $nr = FONTS::UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
                             }
                         } else {
                             $nr = $nu;
@@ -21985,7 +21931,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         $this->start_transaction_page = $this->page;
         $this->start_transaction_y = $this->y;
         // clone current object
-        $this->objcopy = TCPDF_STATIC::objclone($this);
+        $this->objcopy = TCPDFSTATIC::objclone($this);
     }
 
     /**
@@ -22045,7 +21991,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             if (($width == 0) or ($width > $maxwidth)) {
                 $width = $maxwidth;
             }
-            if (TCPDF_STATIC::empty_string($y)) {
+            if (TCPDFSTATIC::empty_string($y)) {
                 $y = $this->y;
             }
             // space between columns
@@ -22144,7 +22090,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         // fix for HTML mode
         $this->newline = true;
         // print HTML table header (if any)
-        if ((!TCPDF_STATIC::empty_string($this->thead)) and (!$this->inthead)) {
+        if ((!TCPDFSTATIC::empty_string($this->thead)) and (!$this->inthead)) {
             if ($enable_thead) {
                 // print table header
                 $this->writeHTML($this->thead, false, false, false, false, '');
@@ -22324,7 +22270,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         if ($numchars <= $charmin) {
             return $word;
         }
-        $word_string = TCPDF_FONTS::UTF8ArrSubString($word, '', '', $this->isunicode);
+        $word_string = FONTS::UTF8ArrSubString($word, '', '', $this->isunicode);
         // some words will be returned as-is
         $pattern = '/^([a-zA-Z0-9_\.\-]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/';
         if (preg_match($pattern, $word_string) > 0) {
@@ -22337,7 +22283,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             return $word;
         }
         if (isset($dictionary[$word_string])) {
-            return TCPDF_FONTS::UTF8StringToArray($dictionary[$word_string], $this->isunicode, $this->CurrentFont);
+            return FONTS::UTF8StringToArray($dictionary[$word_string], $this->isunicode, $this->CurrentFont);
         }
         // surround word with '_' characters
         $tmpword = array_merge([46], $word, [46]);
@@ -22346,9 +22292,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         for ($pos = 0; $pos < $maxpos; ++$pos) {
             $imax = min(($tmpnumchars - $pos), $charmax);
             for ($i = 1; $i <= $imax; ++$i) {
-                $subword = strtolower(TCPDF_FONTS::UTF8ArrSubString($tmpword, $pos, ($pos + $i), $this->isunicode));
+                $subword = strtolower(FONTS::UTF8ArrSubString($tmpword, $pos, ($pos + $i), $this->isunicode));
                 if (isset($patterns[$subword])) {
-                    $pattern = TCPDF_FONTS::UTF8StringToArray($patterns[$subword], $this->isunicode, $this->CurrentFont);
+                    $pattern = FONTS::UTF8StringToArray($patterns[$subword], $this->isunicode, $this->CurrentFont);
                     $pattern_length = count($pattern);
                     $digits = 1;
                     for ($j = 0; $j < $pattern_length; ++$j) {
@@ -22406,18 +22352,18 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         $intag = false; // true if we are inside an HTML tag
         $skip = false; // true to skip hyphenation
         if (!is_array($patterns)) {
-            $patterns = TCPDF_STATIC::getHyphenPatternsFromTEX($patterns);
+            $patterns = TCPDFSTATIC::getHyphenPatternsFromTEX($patterns);
         }
         // get array of characters
-        $unichars = TCPDF_FONTS::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
+        $unichars = FONTS::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
         // for each char
         foreach ($unichars as $char) {
-            if ((!$intag) and (!$skip) and TCPDF_FONT_DATA::$uni_type[$char] == 'L') {
+            if ((!$intag) and (!$skip) and FONT\DATA::$uni_type[$char] == 'L') {
                 // letter character
                 $word[] = $char;
             } else {
                 // other type of character
-                if (!TCPDF_STATIC::empty_string($word)) {
+                if (!TCPDFSTATIC::empty_string($word)) {
                     // hypenate the word
                     $txtarr = array_merge($txtarr, $this->hyphenateWord($word, $patterns, $dictionary, $leftmin, $rightmin, $charmin, $charmax));
                     $word = [];
@@ -22449,12 +22395,12 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 }
             }
         }
-        if (!TCPDF_STATIC::empty_string($word)) {
+        if (!TCPDFSTATIC::empty_string($word)) {
             // hypenate the word
             $txtarr = array_merge($txtarr, $this->hyphenateWord($word, $patterns, $dictionary, $leftmin, $rightmin, $charmin, $charmax));
         }
         // convert char array to string and return
-        return TCPDF_FONTS::UTF8ArrSubString($txtarr, '', '', $this->isunicode);
+        return FONTS::UTF8ArrSubString($txtarr, '', '', $this->isunicode);
     }
 
     /**
@@ -22792,10 +22738,10 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         if (!empty($this->xobjects[$id]['annotations'])) {
             foreach ($this->xobjects[$id]['annotations'] as $annot) {
                 // transform original coordinates
-                $coordlt = TCPDF_STATIC::getTransformationMatrixProduct($tm, [1, 0, 0, 1, ($annot['x'] * $this->k), (-$annot['y'] * $this->k)]);
+                $coordlt = TCPDFSTATIC::getTransformationMatrixProduct($tm, [1, 0, 0, 1, ($annot['x'] * $this->k), (-$annot['y'] * $this->k)]);
                 $ax = ($coordlt[4] / $this->k);
                 $ay = ($this->h - $h - ($coordlt[5] / $this->k));
-                $coordrb = TCPDF_STATIC::getTransformationMatrixProduct($tm, [1, 0, 0, 1, (($annot['x'] + $annot['w']) * $this->k), ((-$annot['y'] - $annot['h']) * $this->k)]);
+                $coordrb = TCPDFSTATIC::getTransformationMatrixProduct($tm, [1, 0, 0, 1, (($annot['x'] + $annot['w']) * $this->k), ((-$annot['y'] - $annot['h']) * $this->k)]);
                 $aw = ($coordrb[4] / $this->k) - $ax;
                 $ah = ($this->h - $h - ($coordrb[5] / $this->k)) - $ay;
                 $this->Annotation($ax, $ay, $aw, $ah, $annot['text'], $annot['opt'], $annot['spaces']);
@@ -22803,28 +22749,27 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         }
         // set pointer to align the next text/objects
         switch ($align) {
-            case 'T': {
+            case 'T':
                 $this->y = $y;
                 $this->x = $rb_x;
                 break;
-            }
-            case 'M': {
+
+            case 'M':
                 $this->y = $y + round($h/2);
                 $this->x = $rb_x;
                 break;
-            }
-            case 'B': {
+
+            case 'B':
                 $this->y = $rb_y;
                 $this->x = $rb_x;
                 break;
-            }
-            case 'N': {
+
+            case 'N':
                 $this->SetY($rb_y);
                 break;
-            }
-            default:{
+
+            default:
                 break;
-            }
         }
     }
 
@@ -23089,7 +23034,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             $svgdata = substr($file, 1);
         } else { // SVG file
             $this->svgdir = dirname($file);
-            $svgdata = TCPDF_STATIC::fileGetContents($file);
+            $svgdata = TCPDFSTATIC::fileGetContents($file);
         }
         if ($svgdata === false) {
             $this->Error('SVG file not found: '.$file);
@@ -23145,21 +23090,20 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 if (preg_match('/[\s]+preserveAspectRatio[\s]*=[\s]*"([^"]*)"/si', $regs[1], $tmp)) {
                     $aspect_ratio = preg_split('/[\s]+/si', $tmp[1]);
                     switch (count($aspect_ratio)) {
-                        case 3: {
+                        case 3:
                             $aspect_ratio_align = $aspect_ratio[1];
                             $aspect_ratio_ms = $aspect_ratio[2];
                             break;
-                        }
-                        case 2: {
+
+                        case 2:
                             $aspect_ratio_align = $aspect_ratio[0];
                             $aspect_ratio_ms = $aspect_ratio[1];
                             break;
-                        }
-                        case 1: {
+
+                        case 1:
                             $aspect_ratio_align = $aspect_ratio[0];
                             $aspect_ratio_ms = 'meet';
                             break;
-                        }
                     }
                 }
             }
@@ -23253,35 +23197,33 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             }
             // correct X alignment
             switch (substr($aspect_ratio_align, 1, 3)) {
-                case 'Min': {
+                case 'Min':
                     // do nothing
                     break;
-                }
-                case 'Max': {
+
+                case 'Max':
                     $svgoffset_x += (($w * $this->k) - ($ow * $this->k * $svgscale_x));
                     break;
-                }
+
                 default:
-                case 'Mid': {
+                case 'Mid':
                     $svgoffset_x += ((($w * $this->k) - ($ow * $this->k * $svgscale_x)) / 2);
                     break;
-                }
             }
             // correct Y alignment
             switch (substr($aspect_ratio_align, 5)) {
-                case 'Min': {
+                case 'Min':
                     // do nothing
                     break;
-                }
-                case 'Max': {
+
+                case 'Max':
                     $svgoffset_y -= (($h * $this->k) - ($oh * $this->k * $svgscale_y));
                     break;
-                }
+
                 default:
-                case 'Mid': {
+                case 'Mid':
                     $svgoffset_y -= ((($h * $this->k) - ($oh * $this->k * $svgscale_y)) / 2);
                     break;
-                }
             }
         }
         // store current page break mode
@@ -23337,26 +23279,26 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         }
         // set pointer to align the next text/objects
         switch ($align) {
-            case 'T':{
+            case 'T':
                 $this->y = $y;
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'M':{
+
+            case 'M':
                 $this->y = $y + round($h/2);
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'B':{
+
+            case 'B':
                 $this->y = $this->img_rb_y;
                 $this->x = $this->img_rb_x;
                 break;
-            }
-            case 'N':{
+
+            case 'N':
                 $this->SetY($this->img_rb_y);
                 break;
-            }
-            default:{
+
+            default:
                 // restore pointer to starting position
                 $this->x = $gvars['x'];
                 $this->y = $gvars['y'];
@@ -23371,7 +23313,6 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $this->fwPt = $gvars['fwPt'];
                 $this->fhPt = $gvars['fhPt'];
                 break;
-            }
         }
         $this->endlinex = $this->img_rb_x;
         // restore page break
@@ -23450,10 +23391,10 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             $this->setAlpha($svgstyle['opacity'], 'Normal', $svgstyle['opacity'], false);
         }
         // color
-        $fill_color = TCPDF_COLORS::convertHTMLColorToDec($svgstyle['color'], $this->spot_colors);
+        $fill_color = COLORS::convertHTMLColorToDec($svgstyle['color'], $this->spot_colors);
         $this->SetFillColorArray($fill_color);
         // text color
-        $text_color = TCPDF_COLORS::convertHTMLColorToDec($svgstyle['text-color'], $this->spot_colors);
+        $text_color = COLORS::convertHTMLColorToDec($svgstyle['text-color'], $this->spot_colors);
         $this->SetTextColorArray($text_color);
         // clip
         if (preg_match('/rect\(([a-z0-9\-\.]*)[\s]*([a-z0-9\-\.]*)[\s]*([a-z0-9\-\.]*)[\s]*([a-z0-9\-\.]*)\)/si', $svgstyle['clip'], $regs)) {
@@ -23577,7 +23518,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $this->Gradient($gradient['type'], $gradient['coords'], $gradient['stops'], [], false);
             }
         } elseif ($svgstyle['fill'] != 'none') {
-            $fill_color = TCPDF_COLORS::convertHTMLColorToDec($svgstyle['fill'], $this->spot_colors);
+            $fill_color = COLORS::convertHTMLColorToDec($svgstyle['fill'], $this->spot_colors);
             if ($svgstyle['fill-opacity'] != 1) {
                 $this->setAlpha($this->alpha['CA'], 'Normal', $svgstyle['fill-opacity'], false);
             }
@@ -23596,7 +23537,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $this->setAlpha($rgba_matches[1], 'Normal', $this->alpha['ca'], false);
             }
             $stroke_style = [
-                'color' => TCPDF_COLORS::convertHTMLColorToDec($svgstyle['stroke'], $this->spot_colors),
+                'color' => COLORS::convertHTMLColorToDec($svgstyle['stroke'], $this->spot_colors),
                 'width' => $this->getHTMLUnitToUnits($svgstyle['stroke-width'], 0, $this->svgunit, false),
                 'cap' => $svgstyle['stroke-linecap'],
                 'join' => $svgstyle['stroke-linejoin']
@@ -23652,52 +23593,49 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         $font_stretch = $this->getCSSFontStretching($font_stretch, $svgstyle['font-stretch']);
         $font_spacing = $this->getCSSFontSpacing($font_spacing, $svgstyle['letter-spacing']);
         switch ($font_style) {
-            case 'italic': {
+            case 'italic':
                 $font_style = 'I';
                 break;
-            }
-            case 'oblique': {
+
+            case 'oblique':
                 $font_style = 'I';
                 break;
-            }
+
+            case 'normal':
             default:
-            case 'normal': {
                 $font_style = '';
                 break;
-            }
         }
         switch ($font_weight) {
             case 'bold':
-            case 'bolder': {
+            case 'bolder':
                 $font_style .= 'B';
                 break;
-            }
-            case 'normal': {
+
+            case 'normal':
                 if ((substr($font_family, -1) == 'I') and (substr($font_family, -2, 1) == 'B')) {
                     $font_family = substr($font_family, 0, -2).'I';
                 } elseif (substr($font_family, -1) == 'B') {
                     $font_family = substr($font_family, 0, -1);
                 }
                 break;
-            }
         }
         switch ($svgstyle['text-decoration']) {
-            case 'underline': {
+            case 'underline':
                 $font_style .= 'U';
                 break;
-            }
-            case 'overline': {
+
+            case 'overline':
                 $font_style .= 'O';
                 break;
-            }
-            case 'line-through': {
+
+            case 'line-through':
                 $font_style .= 'D';
                 break;
-            }
+
             default:
-            case 'none': {
+            case 'none':
                 break;
-            }
         }
         $this->SetFont($font_family, $font_style, $font_size);
         $this->setFontStretching($font_stretch);
@@ -23729,7 +23667,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
              return;
         }
         // set fill/stroke style
-        $op = TCPDF_STATIC::getPathPaintOperator($style, '');
+        $op = TCPDFSTATIC::getPathPaintOperator($style, '');
         if (empty($op)) {
             return;
         }
@@ -23780,7 +23718,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             $x0 = $x;
             $y0 = $y;
             switch (strtoupper($cmd)) {
-                case 'M': { // moveto
+                case 'M': // moveto
                     foreach ($params as $ck => $cp) {
                         if (($ck % 2) == 0) {
                             $x = $cp + $xoffset;
@@ -23807,8 +23745,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     break;
-                }
-                case 'L': { // lineto
+
+                case 'L': // lineto
                     foreach ($params as $ck => $cp) {
                         if (($ck % 2) == 0) {
                             $x = $cp + $xoffset;
@@ -23830,8 +23768,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     break;
-                }
-                case 'H': { // horizontal lineto
+
+                case 'H': // horizontal lineto
                     foreach ($params as $ck => $cp) {
                         $x = $cp + $xoffset;
                         if ((abs($x0 - $x) >= $minlen) or (abs($y0 - $y) >= $minlen)) {
@@ -23846,8 +23784,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     break;
-                }
-                case 'V': { // vertical lineto
+
+                case 'V': // vertical lineto
                     foreach ($params as $ck => $cp) {
                         $y = $cp + $yoffset;
                         if ((abs($x0 - $x) >= $minlen) or (abs($y0 - $y) >= $minlen)) {
@@ -23862,8 +23800,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     break;
-                }
-                case 'C': { // curveto
+
+                case 'C': // curveto
                     foreach ($params as $ck => $cp) {
                         $params[$ck] = $cp;
                         if ((($ck + 1) % 6) == 0) {
@@ -23885,8 +23823,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     break;
-                }
-                case 'S': { // shorthand/smooth curveto
+
+                case 'S': // shorthand/smooth curveto
                     foreach ($params as $ck => $cp) {
                         $params[$ck] = $cp;
                         if ((($ck + 1) % 4) == 0) {
@@ -23913,8 +23851,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     break;
-                }
-                case 'Q': { // quadratic Bezier curveto
+
+                case 'Q': // quadratic Bezier curveto
                     foreach ($params as $ck => $cp) {
                         $params[$ck] = $cp;
                         if ((($ck + 1) % 4) == 0) {
@@ -23939,8 +23877,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     break;
-                }
-                case 'T': { // shorthand/smooth quadratic Bezier curveto
+
+                case 'T': // shorthand/smooth quadratic Bezier curveto
                     foreach ($params as $ck => $cp) {
                         $params[$ck] = $cp;
                         if (($ck % 2) != 0) {
@@ -23970,8 +23908,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     break;
-                }
-                case 'A': { // elliptical arc
+
+                case 'A': // elliptical arc
                     foreach ($params as $ck => $cp) {
                         $params[$ck] = $cp;
                         if ((($ck + 1) % 7) == 0) {
@@ -24024,8 +23962,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                                 $cx = ($cax * $cos_ang) - ($cay * $sin_ang) + (($x0 + $x) / 2);
                                 $cy = ($cax * $sin_ang) + ($cay * $cos_ang) + (($y0 + $y) / 2);
                                 // get angles
-                                $angs = TCPDF_STATIC::getVectorsAngle(1, 0, (($xa - $cax) / $rx), (($cay - $ya) / $ry));
-                                $dang = TCPDF_STATIC::getVectorsAngle((($xa - $cax) / $rx), (($ya - $cay) / $ry), ((-$xa - $cax) / $rx), ((-$ya - $cay) / $ry));
+                                $angs = TCPDFSTATIC::getVectorsAngle(1, 0, (($xa - $cax) / $rx), (($cay - $ya) / $ry));
+                                $dang = TCPDFSTATIC::getVectorsAngle((($xa - $cax) / $rx), (($ya - $cay) / $ry), ((-$xa - $cax) / $rx), ((-$ya - $cay) / $ry));
                                 if (($fs == 0) and ($dang > 0)) {
                                     $dang -= (2 * M_PI);
                                 } elseif (($fs == 1) and ($dang < 0)) {
@@ -24062,11 +24000,10 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     break;
-                }
-                case 'Z': {
+
+                case 'Z':
                     $this->_out('h');
                     break;
-                }
             }
             $firstcmd = false;
         } // end foreach
@@ -24136,23 +24073,23 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             // default fill attribute for clipping
             $attribs['fill'] = 'none';
         }
-        if (isset($attribs['style']) and !TCPDF_STATIC::empty_string($attribs['style']) and ($attribs['style'][0] != ';')) {
+        if (isset($attribs['style']) and !TCPDFSTATIC::empty_string($attribs['style']) and ($attribs['style'][0] != ';')) {
             // fix style for regular expression
             $attribs['style'] = ';'.$attribs['style'];
         }
         foreach ($prev_svgstyle as $key => $val) {
-            if (in_array($key, TCPDF_IMAGES::$svginheritprop)) {
+            if (in_array($key, IMAGES::$svginheritprop)) {
                 // inherit previous value
                 $svgstyle[$key] = $val;
             }
-            if (isset($attribs[$key]) and !TCPDF_STATIC::empty_string($attribs[$key])) {
+            if (isset($attribs[$key]) and !TCPDFSTATIC::empty_string($attribs[$key])) {
                 // specific attribute settings
                 if ($attribs[$key] == 'inherit') {
                     $svgstyle[$key] = $val;
                 } else {
                     $svgstyle[$key] = $attribs[$key];
                 }
-            } elseif (isset($attribs['style']) and !TCPDF_STATIC::empty_string($attribs['style'])) {
+            } elseif (isset($attribs['style']) and !TCPDFSTATIC::empty_string($attribs['style'])) {
                 // CSS style syntax
                 $attrval = [];
                 if (preg_match('/[;\"\s]{1}'.$key.'[\s]*:[\s]*([^;\"]*)/si', $attribs['style'], $attrval) and isset($attrval[1])) {
@@ -24171,7 +24108,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             $tm = [1,0,0,1,0,0];
         }
         if (isset($attribs['transform']) and !empty($attribs['transform'])) {
-            $tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, TCPDF_STATIC::getSVGTransformMatrix($attribs['transform']));
+            $tm = TCPDFSTATIC::getTransformationMatrixProduct($tm, TCPDFSTATIC::getSVGTransformMatrix($attribs['transform']));
         }
         $svgstyle['transfmatrix'] = $tm;
         $invisible = false;
@@ -24181,12 +24118,12 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
         }
         // process tag
         switch ($name) {
-            case 'defs': {
+            case 'defs':
                 $this->svgdefsmode = true;
                 break;
-            }
+
             // clipPath
-            case 'clipPath': {
+            case 'clipPath':
                 if ($invisible) {
                     break;
                 }
@@ -24198,8 +24135,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $this->svgclippaths[$this->svgclipid] = [];
                 $this->svgcliptm[$this->svgclipid] = $tm;
                 break;
-            }
-            case 'svg': {
+
+            case 'svg':
                 // start of SVG object
                 if (++$this->svg_tag_depth <= 1) {
                     break;
@@ -24212,7 +24149,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $svgW = (isset($attribs['width'])?$attribs['width']:0);
                 $svgH = (isset($attribs['height'])?$attribs['height']:0);
                 // set x, y position using transform matrix
-                $tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, [ 1, 0, 0, 1, $svgX, $svgY]);
+                $tm = TCPDFSTATIC::getTransformationMatrixProduct($tm, [ 1, 0, 0, 1, $svgX, $svgY]);
                 $this->SVGTransform($tm);
                 // set clipping for width and height
                 $x = 0;
@@ -24270,14 +24207,14 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                             $hr = $wr;
                         }
                         $newtm = [$wr, 0, 0, $hr, (($wr * ($ax - $vx)) - $svgX), (($hr * ($ay - $vy)) - $svgY)];
-                        $tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, $newtm);
+                        $tm = TCPDFSTATIC::getTransformationMatrixProduct($tm, $newtm);
                         $this->SVGTransform($tm);
                     }
                 }
                 $this->setSVGStyles($svgstyle, $prev_svgstyle);
                 break;
-            }
-            case 'g': {
+
+            case 'g':
                 // group together related graphics elements
                 array_push($this->svgstyles, $svgstyle);
                 $this->StartTransform();
@@ -24285,12 +24222,12 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $y = (isset($attribs['y'])?$attribs['y']:0);
                 $w = 1;//(isset($attribs['width'])?$attribs['width']:1);
                 $h = 1;//(isset($attribs['height'])?$attribs['height']:1);
-                $tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, [$w, 0, 0, $h, $x, $y]);
+                $tm = TCPDFSTATIC::getTransformationMatrixProduct($tm, [$w, 0, 0, $h, $x, $y]);
                 $this->SVGTransform($tm);
                 $this->setSVGStyles($svgstyle, $prev_svgstyle);
                 break;
-            }
-            case 'linearGradient': {
+
+            case 'linearGradient':
                 if ($this->pdfa_mode) {
                     break;
                 }
@@ -24321,7 +24258,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $x2 = (isset($attribs['x2'])?$attribs['x2']:'100');
                 $y2 = (isset($attribs['y2'])?$attribs['y2']:'0');
                 if (isset($attribs['gradientTransform'])) {
-                    $this->svggradients[$this->svggradientid]['gradientTransform'] = TCPDF_STATIC::getSVGTransformMatrix($attribs['gradientTransform']);
+                    $this->svggradients[$this->svggradientid]['gradientTransform'] = TCPDFSTATIC::getSVGTransformMatrix($attribs['gradientTransform']);
                 }
                 $this->svggradients[$this->svggradientid]['coords'] = [$x1, $y1, $x2, $y2];
                 if (isset($attribs['xlink:href']) and !empty($attribs['xlink:href'])) {
@@ -24329,8 +24266,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->svggradients[$this->svggradientid]['xref'] = substr($attribs['xlink:href'], 1);
                 }
                 break;
-            }
-            case 'radialGradient': {
+
+            case 'radialGradient':
                 if ($this->pdfa_mode) {
                     break;
                 }
@@ -24362,7 +24299,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $fy = (isset($attribs['fy']) ? $attribs['fy'] : $cy);
                 $r = (isset($attribs['r']) ? $attribs['r'] : 0.5);
                 if (isset($attribs['gradientTransform'])) {
-                    $this->svggradients[$this->svggradientid]['gradientTransform'] = TCPDF_STATIC::getSVGTransformMatrix($attribs['gradientTransform']);
+                    $this->svggradients[$this->svggradientid]['gradientTransform'] = TCPDFSTATIC::getSVGTransformMatrix($attribs['gradientTransform']);
                 }
                 $this->svggradients[$this->svggradientid]['coords'] = [$cx, $cy, $fx, $fy, $r];
                 if (isset($attribs['xlink:href']) and !empty($attribs['xlink:href'])) {
@@ -24370,8 +24307,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->svggradients[$this->svggradientid]['xref'] = substr($attribs['xlink:href'], 1);
                 }
                 break;
-            }
-            case 'stop': {
+
+            case 'stop':
                 // gradient stops
                 if (substr($attribs['offset'], -1) == '%') {
                     $offset = floatval(substr($attribs['offset'], -1)) / 100;
@@ -24381,13 +24318,13 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         $offset /= 100;
                     }
                 }
-                $stop_color = isset($svgstyle['stop-color'])?TCPDF_COLORS::convertHTMLColorToDec($svgstyle['stop-color'], $this->spot_colors):'black';
+                $stop_color = isset($svgstyle['stop-color'])?COLORS::convertHTMLColorToDec($svgstyle['stop-color'], $this->spot_colors):'black';
                 $opacity = isset($svgstyle['stop-opacity'])?$svgstyle['stop-opacity']:1;
                 $this->svggradients[$this->svggradientid]['stops'][] = ['offset' => $offset, 'color' => $stop_color, 'opacity' => $opacity];
                 break;
-            }
+
             // paths
-            case 'path': {
+            case 'path':
                 if ($invisible) {
                     break;
                 }
@@ -24398,7 +24335,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         $y = (isset($attribs['y'])?$attribs['y']:0);
                         $w = (isset($attribs['width'])?$attribs['width']:1);
                         $h = (isset($attribs['height'])?$attribs['height']:1);
-                        $tm = TCPDF_STATIC::getTransformationMatrixProduct($tm, [$w, 0, 0, $h, $x, $y]);
+                        $tm = TCPDFSTATIC::getTransformationMatrixProduct($tm, [$w, 0, 0, $h, $x, $y]);
                         if ($clipping) {
                             $this->SVGTransform($tm);
                             $this->SVGPath($d, 'CNZ');
@@ -24414,9 +24351,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     }
                 }
                 break;
-            }
+
             // shapes
-            case 'rect': {
+            case 'rect':
                 if ($invisible) {
                     break;
                 }
@@ -24439,8 +24376,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->StopTransform();
                 }
                 break;
-            }
-            case 'circle': {
+
+            case 'circle':
                 if ($invisible) {
                     break;
                 }
@@ -24464,8 +24401,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->StopTransform();
                 }
                 break;
-            }
-            case 'ellipse': {
+
+            case 'ellipse':
                 if ($invisible) {
                     break;
                 }
@@ -24490,8 +24427,8 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->StopTransform();
                 }
                 break;
-            }
-            case 'line': {
+
+            case 'line':
                 if ($invisible) {
                     break;
                 }
@@ -24511,9 +24448,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->StopTransform();
                 }
                 break;
-            }
+
             case 'polyline':
-            case 'polygon': {
+            case 'polygon':
                 if ($invisible) {
                     break;
                 }
@@ -24568,9 +24505,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     }
                 }
                 break;
-            }
+
             // image
-            case 'image': {
+            case 'image':
                 if ($invisible) {
                     break;
                 }
@@ -24591,7 +24528,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         $img = '@'.base64_decode(substr($img, strlen($m[0])));
                     } else {
                         // fix image path
-                        if (!TCPDF_STATIC::empty_string($this->svgdir) and (($img[0] == '.') or (basename($img) == $img))) {
+                        if (!TCPDFSTATIC::empty_string($this->svgdir) and (($img[0] == '.') or (basename($img) == $img))) {
                             // replace relative path with full server path
                             $img = $this->svgdir.'/'.$img;
                         }
@@ -24603,7 +24540,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                         }
                     }
                     // get image type
-                    $imgtype = TCPDF_IMAGES::getImageFileType($img);
+                    $imgtype = IMAGES::getImageFileType($img);
                     if (($imgtype == 'eps') or ($imgtype == 'ai')) {
                         $this->ImageEps($img, $x, $y, $w, $h);
                     } elseif ($imgtype == 'svg') {
@@ -24636,10 +24573,10 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $this->StopTransform();
                 }
                 break;
-            }
+
             // text
             case 'text':
-            case 'tspan': {
+            case 'tspan':
                 if (isset($this->svgtextmode['text-anchor']) and !empty($this->svgtext)) {
                     // @TODO: unsupported feature
                 }
@@ -24696,9 +24633,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                 $this->x = $x;
                 $this->y = $y;
                 break;
-            }
+
             // use
-            case 'use': {
+            case 'use':
                 if (isset($attribs['xlink:href']) and !empty($attribs['xlink:href'])) {
                     $svgdefid = substr($attribs['xlink:href'], 1);
                     if (isset($this->svgdefs[$svgdefid])) {
@@ -24728,10 +24665,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     }
                 }
                 break;
-            }
-            default: {
+
+            default:
                 break;
-            }
         } // end of switch
         // process child elements
         if (!empty($attribs['child_elements'])) {
@@ -24781,28 +24717,28 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
             return;
         }
         switch ($name) {
-            case 'defs': {
+            case 'defs':
                 $this->svgdefsmode = false;
                 break;
-            }
+
             // clipPath
-            case 'clipPath': {
+            case 'clipPath':
                 $this->svgclipmode = false;
                 break;
-            }
-            case 'svg': {
+
+            case 'svg':
                 if (--$this->svg_tag_depth <= 0) {
                     break;
                 }
-            }
-            case 'g': {
+
+            case 'g':
                 // ungroup: remove last style from array
                 array_pop($this->svgstyles);
                 $this->StopTransform();
                 break;
-            }
+
             case 'text':
-            case 'tspan': {
+            case 'tspan':
                 if ($this->svgtextmode['invisible']) {
                     // This implementation must be fixed to following the rule:
                     // If the 'visibility' property is set to hidden on a 'tspan', 'tref' or 'altGlyph' element, then the text is invisible but still takes up space in text layout calculations.
@@ -24852,10 +24788,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     array_pop($this->svgstyles);
                 }
                 break;
-            }
-            default: {
+
+            default:
                 break;
-            }
         }
     }
 

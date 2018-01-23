@@ -31,6 +31,7 @@
 // Description : This is a PHP class for decoding common PDF filters (PDF 32000-2008 - 7.4 Filters).
 //
 //============================================================+
+namespace TCPDF;
 
 /**
  * @file
@@ -41,21 +42,27 @@
  */
 
 /**
- * @class TCPDF_FILTERS
+ * @class TCPDF\FILTERS
  * This is a PHP class for decoding common PDF filters (PDF 32000-2008 - 7.4 Filters).<br>
  * @package com.tecnick.tcpdf
  * @brief This is a PHP class for decoding common PDF filters.
  * @version 1.0.001
  * @author Nicola Asuni - info@tecnick.com
  */
-class TCPDF_FILTERS
+class FILTERS
 {
 
     /**
      * Define a list of available filter decoders.
      * @private static
      */
-    private static $available_filters = ['ASCIIHexDecode', 'ASCII85Decode', 'LZWDecode', 'FlateDecode', 'RunLengthDecode'];
+    private static $available_filters = [
+        'ASCIIHexDecode',
+        'ASCII85Decode',
+        'LZWDecode',
+        'FlateDecode',
+        'RunLengthDecode'
+    ];
 
 // -----------------------------------------------------------------------------
 
@@ -81,50 +88,38 @@ class TCPDF_FILTERS
     public static function decodeFilter($filter, $data)
     {
         switch ($filter) {
-            case 'ASCIIHexDecode': {
+            case 'ASCIIHexDecode':
                 return self::decodeFilterASCIIHexDecode($data);
-                break;
-            }
-            case 'ASCII85Decode': {
+
+            case 'ASCII85Decode':
                 return self::decodeFilterASCII85Decode($data);
-                break;
-            }
-            case 'LZWDecode': {
+
+            case 'LZWDecode':
                 return self::decodeFilterLZWDecode($data);
-                break;
-            }
-            case 'FlateDecode': {
+
+            case 'FlateDecode':
                 return self::decodeFilterFlateDecode($data);
-                break;
-            }
-            case 'RunLengthDecode': {
+
+            case 'RunLengthDecode':
                 return self::decodeFilterRunLengthDecode($data);
-                break;
-            }
-            case 'CCITTFaxDecode': {
+
+            case 'CCITTFaxDecode':
                 return self::decodeFilterCCITTFaxDecode($data);
-                break;
-            }
-            case 'JBIG2Decode': {
+
+            case 'JBIG2Decode':
                 return self::decodeFilterJBIG2Decode($data);
-                break;
-            }
-            case 'DCTDecode': {
+
+            case 'DCTDecode':
                 return self::decodeFilterDCTDecode($data);
-                break;
-            }
-            case 'JPXDecode': {
+
+            case 'JPXDecode':
                 return self::decodeFilterJPXDecode($data);
-                break;
-            }
-            case 'Crypt': {
+
+            case 'Crypt':
                 return self::decodeFilterCrypt($data);
-                break;
-            }
-            default: {
+
+            default:
                 return self::decodeFilterStandard($data);
-                break;
-            }
         }
     }
 
@@ -249,30 +244,32 @@ class TCPDF_FILTERS
         }
         // last tuple (if any)
         switch ($group_pos) {
-            case 4: {
+            case 4:
                 $decoded .= chr($tuple >> 24).chr($tuple >> 16).chr($tuple >> 8);
                 break;
-                }
-            case 3: {
+
+            case 3:
                 $decoded .= chr($tuple >> 24).chr($tuple >> 16);
                 break;
-                }
-            case 2: {
+
+            case 2:
                 $decoded .= chr($tuple >> 24);
                 break;
-                }
-            case 1: {
+
+            case 1:
                 self::Error('decodeFilterASCII85Decode: invalid code');
                 break;
-            }
         }
         return $decoded;
     }
 
     /**
      * LZWDecode
-     * Decompresses data encoded using the LZW (Lempel-Ziv-Welch) adaptive compression method, reproducing the original text or binary data.
+     * Decompresses data encoded using the LZW (Lempel-Ziv-Welch) adaptive compression method,
+     * reproducing the original text or binary data.
+     *
      * @param $data (string) Data to decode.
+     *
      * @return Decoded data string.
      * @since 1.0.000 (2011-05-23)
      * @public static
@@ -408,8 +405,11 @@ class TCPDF_FILTERS
 
     /**
      * CCITTFaxDecode (NOT IMPLEMETED - RETURN AN EXCEPTION)
-     * Decompresses data encoded using the CCITT facsimile standard, reproducing the original data (typically monochrome image data at 1 bit per pixel).
+     * Decompresses data encoded using the CCITT facsimile standard, reproducing the original data
+     * (typically monochrome image data at 1 bit per pixel).
+     *
      * @param $data (string) Data to decode.
+     *
      * @return Decoded data string.
      * @since 1.0.000 (2011-05-23)
      * @public static
@@ -422,8 +422,11 @@ class TCPDF_FILTERS
 
     /**
      * JBIG2Decode (NOT IMPLEMETED - RETURN AN EXCEPTION)
-     * Decompresses data encoded using the JBIG2 standard, reproducing the original monochrome (1 bit per pixel) image data (or an approximation of that data).
+     * Decompresses data encoded using the JBIG2 standard, reproducing the original monochrome
+     * (1 bit per pixel) image data (or an approximation of that data).
+     *
      * @param $data (string) Data to decode.
+     *
      * @return Decoded data string.
      * @since 1.0.000 (2011-05-23)
      * @public static
@@ -436,8 +439,11 @@ class TCPDF_FILTERS
 
     /**
      * DCTDecode (NOT IMPLEMETED - RETURN AN EXCEPTION)
-     * Decompresses data encoded using a DCT (discrete cosine transform) technique based on the JPEG standard, reproducing image sample data that approximates the original data.
+     * Decompresses data encoded using a DCT (discrete cosine transform) technique based on the JPEG standard,
+     * reproducing image sample data that approximates the original data.
+     *
      * @param $data (string) Data to decode.
+     *
      * @return Decoded data string.
      * @since 1.0.000 (2011-05-23)
      * @public static
@@ -473,7 +479,6 @@ class TCPDF_FILTERS
     public static function decodeFilterCrypt($data)
     {
         self::Error('~decodeFilterCrypt: this method has not been yet implemented');
-        //return $data;
     }
 
     // --- END FILTERS SECTION -------------------------------------------------
@@ -486,7 +491,7 @@ class TCPDF_FILTERS
      */
     public static function Error($msg)
     {
-        throw new Exception('TCPDF_PARSER ERROR: '.$msg);
+        throw new \Exception('TCPDF_PARSER ERROR: '.$msg);
     }
 } // END OF TCPDF_FILTERS CLASS
 

@@ -31,7 +31,7 @@
 //               common 1D barcodes to be used with TCPDF.
 //
 //============================================================+
-
+namespace TCPDF;
 /**
  * @file
  * PHP class to creates array representations for common 1D barcodes to be used with TCPDF.
@@ -84,27 +84,6 @@ class TCPDFBarcode
     public function getBarcodeArray()
     {
         return $this->barcode_array;
-    }
-
-    /**
-     * Send barcode as SVG image object to the standard output.
-     * @param $w (int) Minimum width of a single bar in user units.
-     * @param $h (int) Height of barcode in user units.
-     * @param $color (string) Foreground color (in SVG format) for bar elements (background is transparent).
-     * @public
-     */
-    public function getBarcodeSVG($w = 2, $h = 30, $color = 'black')
-    {
-        // send headers
-        $code = $this->getBarcodeSVGcode($w, $h, $color);
-        header('Content-Type: application/svg+xml');
-        header('Cache-Control: public, must-revalidate, max-age=0'); // HTTP/1.1
-        header('Pragma: public');
-        header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
-        header('Content-Disposition: inline; filename="'.md5($code).'.svg";');
-        //header('Content-Length: '.strlen($code));
-        echo $code;
     }
 
     /**
@@ -166,26 +145,6 @@ class TCPDFBarcode
         }
         $html .= '</div>'."\n";
         return $html;
-    }
-
-    /**
-     * Send a PNG image representation of barcode (requires GD or Imagick library).
-     * @param $w (int) Width of a single bar element in pixels.
-     * @param $h (int) Height of a single bar element in pixels.
-     * @param $color (array) RGB (0-255) foreground color for bar elements (background is transparent).
-     * @public
-     */
-    public function getBarcodePNG($w = 2, $h = 30, $color = [0,0,0])
-    {
-        $data = $this->getBarcodePngData($w, $h, $color);
-        // send headers
-        header('Content-Type: image/png');
-        header('Cache-Control: public, must-revalidate, max-age=0'); // HTTP/1.1
-        header('Pragma: public');
-        header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
-        //header('Content-Length: '.strlen($data));
-        echo $data;
     }
 
     /**

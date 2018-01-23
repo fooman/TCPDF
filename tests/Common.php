@@ -1,6 +1,6 @@
 <?php
 
-class Common extends \PHPUnit_Framework_TestCase
+class Common extends \PHPUnit\Framework\TestCase
 {
 
     protected $tmpFileName = false;
@@ -63,7 +63,7 @@ class Common extends \PHPUnit_Framework_TestCase
 
     public function tearDown()
     {
-        //$this->removeTmpFile();
+        $this->removeTmpFile();
     }
 
 }

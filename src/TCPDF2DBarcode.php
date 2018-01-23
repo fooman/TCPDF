@@ -31,7 +31,7 @@
 //               2D barcodes to be used with TCPDF.
 //
 //============================================================+
-
+namespace TCPDF;
 /**
  * @file
  * PHP class to creates array representations for 2D barcodes to be used with TCPDF.
@@ -78,27 +78,6 @@ class TCPDF2DBarcode
     public function getBarcodeArray()
     {
         return $this->barcode_array;
-    }
-
-    /**
-     * Send barcode as SVG image object to the standard output.
-     * @param $w (int) Width of a single rectangle element in user units.
-     * @param $h (int) Height of a single rectangle element in user units.
-     * @param $color (string) Foreground color (in SVG format) for bar elements (background is transparent).
-     * @public
-     */
-    public function getBarcodeSVG($w = 3, $h = 3, $color = 'black')
-    {
-        // send headers
-        $code = $this->getBarcodeSVGcode($w, $h, $color);
-        header('Content-Type: application/svg+xml');
-        header('Cache-Control: public, must-revalidate, max-age=0'); // HTTP/1.1
-        header('Pragma: public');
-        header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
-        header('Content-Disposition: inline; filename="'.md5($code).'.svg";');
-        //header('Content-Length: '.strlen($code));
-        echo $code;
     }
 
     /**
@@ -166,27 +145,6 @@ class TCPDF2DBarcode
         }
         $html .= '</div>'."\n";
         return $html;
-    }
-
-    /**
-     * Send a PNG image representation of barcode (requires GD or Imagick library).
-     * @param $w (int) Width of a single rectangle element in pixels.
-     * @param $h (int) Height of a single rectangle element in pixels.
-     * @param $color (array) RGB (0-255) foreground color for bar elements (background is transparent).
-     * @public
-     */
-    public function getBarcodePNG($w = 3, $h = 3, $color = [0,0,0])
-    {
-        $data = $this->getBarcodePngData($w, $h, $color);
-        // send headers
-        header('Content-Type: image/png');
-        header('Cache-Control: public, must-revalidate, max-age=0'); // HTTP/1.1
-        header('Pragma: public');
-        header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-        header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
-        //header('Content-Length: '.strlen($data));
-        echo $data;
-
     }
 
     /**
@@ -263,14 +221,12 @@ class TCPDF2DBarcode
         $qrtype = strtoupper($mode[0]);
         switch ($qrtype) {
             case 'DATAMATRIX': { // DATAMATRIX (ISO/IEC 16022)
-                require_once(dirname(__FILE__).'/include/barcodes/datamatrix.php');
-                $qrcode = new Datamatrix($code);
+                $qrcode = new Barcodes\Datamatrix($code);
                 $this->barcode_array = $qrcode->getBarcodeArray();
                 $this->barcode_array['code'] = $code;
                 break;
             }
             case 'PDF417': { // PDF417 (ISO/IEC 15438:2006)
-                require_once(dirname(__FILE__).'/include/barcodes/pdf417.php');
                 if (!isset($mode[1]) or ($mode[1] === '')) {
                     $aspectratio = 2; // default aspect ratio (width / height)
                 } else {
@@ -295,17 +251,16 @@ class TCPDF2DBarcode
                         }
                     }
                 }
-                $qrcode = new PDF417($code, $ecl, $aspectratio, $macro);
+                $qrcode = new Barcodes\PDF417($code, $ecl, $aspectratio, $macro);
                 $this->barcode_array = $qrcode->getBarcodeArray();
                 $this->barcode_array['code'] = $code;
                 break;
             }
             case 'QRCODE': { // QR-CODE
-                require_once(dirname(__FILE__).'/include/barcodes/qrcode.php');
                 if (!isset($mode[1]) or (!in_array($mode[1], ['L','M','Q','H']))) {
                     $mode[1] = 'L'; // Ddefault: Low error correction
                 }
-                $qrcode = new QRcode($code, strtoupper($mode[1]));
+                $qrcode = new Barcodes\QRcode($code, strtoupper($mode[1]));
                 $this->barcode_array = $qrcode->getBarcodeArray();
                 $this->barcode_array['code'] = $code;
                 break;

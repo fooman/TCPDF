@@ -60,7 +60,7 @@ class Example010Test extends Common
 /**
  * Extend TCPDF to work with multiple columns
  */
-class MC_TCPDF extends TCPDF {
+class MC_TCPDF extends TCPDF\TCPDF {
 
     /**
      * Print chapter

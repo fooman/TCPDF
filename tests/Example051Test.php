@@ -102,7 +102,7 @@ class Example051Test extends Common
 }
 
 // Extend the TCPDF class to create custom Header and Footer
-class MYPDF051 extends TCPDF {
+class MYPDF051 extends TCPDF\TCPDF {
     //Page header
     public function Header() {
         // get the current page break margin

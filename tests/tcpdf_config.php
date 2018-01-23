@@ -212,11 +212,6 @@ define('K_THAI_TOPCHARS', true);
  */
 define('K_TCPDF_CALLS_IN_HTML', true);
 
-/**
- * If true and PHP version is greater than 5, then the Error() method throw new exception instead of terminating the execution.
- */
-define('K_TCPDF_THROW_EXCEPTION_ERROR', true);
-
 //============================================================+
 // END OF FILE
 //============================================================+

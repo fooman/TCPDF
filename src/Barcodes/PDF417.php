@@ -42,7 +42,7 @@
 //		Maximum Data Characters:     1850 text, 2710 digits, 1108 bytes
 //
 //============================================================+
-
+namespace TCPDF\Barcodes;
 /**
  * @file
  * Class to create PDF417 barcode arrays for TCPDF class.
@@ -76,7 +76,6 @@ if (!defined('PDF417DEFS')) {
      * Vertical quiet zone in modules
      */
     define('QUIETV', 2);
-
 } // end of definitions
 
 // #*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#*#

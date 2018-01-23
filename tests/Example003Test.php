@@ -1,7 +1,8 @@
 <?php
 
 // Extend the TCPDF class to create custom Header and Footer
-class MYPDF003 extends TCPDF {
+class MYPDF003 extends TCPDF\TCPDF
+{
 
     //Page header
     public function Header() {

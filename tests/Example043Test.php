@@ -8,7 +8,7 @@ class Example043Test extends Common
     public function testPdfOutput()
     {
 // create new PDF document
-        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', true);
+        $pdf = new TCPDF\TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', true);
 
 // set document information
         $pdf->SetCreator(PDF_CREATOR);

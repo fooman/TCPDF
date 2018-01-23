@@ -8,7 +8,7 @@ class Example019Test extends Common
     public function testPdfOutput()
     {
 // create new PDF document
-        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, false, 'ISO-8859-1', false);
+        $pdf = new TCPDF\TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, false, 'ISO-8859-1', false);
 
 // Set document information dictionary in unicode mode
         $pdf->SetDocInfoUnicode(true);

@@ -1,3 +1,9 @@
+Unreleased
+Refactored classes and project structure to use namespaces
+Removed K_TCPDF_THROW_EXCEPTION_ERROR - exceptions are always thrown
+Removed TCPDFBarcode::getBarcodeSVG(), TCPDFBarcode::getBarcodePNG()
+Removed TCPDF2DBarcode::getBarcodePNG() TCPDF2DBarcode::getBarcodeSVG()
+
 6.2.12 (2015-09-12)
 	- fix composer package name to tecnickcom/tcpdf
 
