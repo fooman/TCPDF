@@ -20,13 +20,14 @@ class Common extends \PHPUnit\Framework\TestCase
     protected function setUp()
     {
         $this->tmpFileName = sprintf(sys_get_temp_dir() . '/example_%s_%s.pdf', static::EXAMPLE_NR, uniqid());
-        $this->expectedPdf = sprintf(sys_get_temp_dir() . '/_expected_pdfs/example_%s.pdf', static::EXAMPLE_NR);
+        $this->expectedPdf = sprintf(__DIR__. '/_expected_pdfs/example_%s.pdf', static::EXAMPLE_NR);
     }
 
 
     public function comparePdfs($pdf)
     {
         $pdf->Output($this->tmpFileName, 'F');
+        $this->assertFileExists($this->tmpFileName);
         $this->_comparePdfs($this->tmpFileName, $this->expectedPdf, static::NR_PDF_PAGES);
     }
 
