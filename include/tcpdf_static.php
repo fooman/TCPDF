@@ -55,7 +55,7 @@ class TCPDF_STATIC {
 	 * Current TCPDF version.
 	 * @private static
 	 */
-	private static $tcpdf_version = '6.2.13';
+	private static $tcpdf_version = '6.2.22';
 
 	/**
 	 * String alias for total number of pages.
@@ -1770,39 +1770,6 @@ class TCPDF_STATIC {
 		return $angle;
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ====================================================================================================================
-// REIMPLEMENTED
-// ====================================================================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	/**
 	 * Split string by a regular expression.
 	 * This is a wrapper for the preg_split function to avoid the bug: https://bugs.php.net/bug.php?id=45850
@@ -1851,6 +1818,33 @@ class TCPDF_STATIC {
 	}
 
 	/**
+	 * Wrapper for file_exists.
+	 * Checks whether a file or directory exists.
+	 * Only allows some protocols and local files.
+	 * @param filename (string) Path to the file or directory. 
+	 * @return Returns TRUE if the file or directory specified by filename exists; FALSE otherwise.  
+	 * @public static
+	 */
+	public static function file_exists($filename) {
+		if (strpos($filename, '://') > 0) {
+			$wrappers = stream_get_wrappers();
+			foreach ($wrappers as $wrapper) {
+				if (($wrapper === 'http') || ($wrapper === 'https')) {
+					continue;
+				}
+				if (stripos($filename, $wrapper.'://') === 0) {
+					return false;
+				}
+			}
+		}
+		if (!@file_exists($filename)) {
+			// try to encode spaces on filename
+			$filename = str_replace(' ', '%20', $filename);
+		}
+		return @file_exists($filename);
+	}
+
+	/**
 	 * Reads entire file into a string.
 	 * The file can be also an URL.
 	 * @param $file (string) Name of the file or URL to read.
@@ -1861,7 +1855,59 @@ class TCPDF_STATIC {
 	 */
 	public static function fileGetContents($file) {
 		$alt = array($file);
+		//
+		if ((strlen($file) > 1)
+		    && ($file[0] === '/')
+		    && ($file[1] !== '/')
+		    && !empty($_SERVER['DOCUMENT_ROOT'])
+		    && ($_SERVER['DOCUMENT_ROOT'] !== '/')
+		) {
+		    $findroot = strpos($file, $_SERVER['DOCUMENT_ROOT']);
+		    if (($findroot === false) || ($findroot > 1)) {
+			$alt[] = htmlspecialchars_decode(urldecode($_SERVER['DOCUMENT_ROOT'].$file));
+		    }
+		}
+		//
+		$protocol = 'http';
+		if (!empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) != 'off')) {
+		    $protocol .= 's';
+		}
+		//
+		$url = $file;
+		if (preg_match('%^//%', $url) && !empty($_SERVER['HTTP_HOST'])) {
+			$url = $protocol.':'.str_replace(' ', '%20', $url);
+		}
+		$url = htmlspecialchars_decode($url);
+		$alt[] = $url;
+		//
+		if (preg_match('%^(https?)://%', $url)
+		    && empty($_SERVER['HTTP_HOST'])
+		    && empty($_SERVER['DOCUMENT_ROOT'])
+		) {
+			$urldata = parse_url($url);
+			if (empty($urldata['query'])) {
+				$host = $protocol.'://'.$_SERVER['HTTP_HOST'];
+				if (strpos($url, $host) === 0) {
+				    // convert URL to full server path
+				    $tmp = str_replace($host, $_SERVER['DOCUMENT_ROOT'], $url);
+				    $alt[] = htmlspecialchars_decode(urldecode($tmp));
+				}
+			}
+		}
+		//
+		if (isset($_SERVER['SCRIPT_URI'])
+		    && !preg_match('%^(https?|ftp)://%', $file)
+		    && !preg_match('%^//%', $file)
+		) {
+		    $urldata = @parse_url($_SERVER['SCRIPT_URI']);
+		    $alt[] = $urldata['scheme'].'://'.$urldata['host'].(($file[0] == '/') ? '' : '/').$file;
+		}
+		//
+		$alt = array_unique($alt);
 		foreach ($alt as $path) {
+			if (!self::file_exists($path)) {
+				return false;
+			}
 			$ret = @file_get_contents($path);
 			if ($ret !== false) {
 			    return $ret;
@@ -1894,8 +1940,6 @@ class TCPDF_STATIC {
 		}
 		return false;
 	}
-
-    
 
 	/**
 	 * Get ULONG from string (Big Endian 32-bit unsigned integer).
