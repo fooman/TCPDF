@@ -1,6 +1,6 @@
 <?php
 
-class Common extends \PHPUnit_Framework_TestCase
+class Common extends \PHPUnit\Framework\TestCase
 {
 
     protected $tmpFileName = false;
