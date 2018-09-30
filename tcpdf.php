@@ -1988,7 +1988,7 @@ class TCPDF {
 	 */
 	public function __destruct() {
 		// cleanup
-		$this->_destroy(true);
+		$this->_destroy(true, true);
 	}
 
 	/**
