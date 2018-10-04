@@ -46,6 +46,9 @@ class Common extends \PHPUnit\Framework\TestCase
     protected function _pdfPageToImage($input, $page)
     {
         $path = $input . '[' . $page . ']';
+        if (!extension_loaded('imagick')) {
+            $this->markTestIncomplete('The Php Imagick extension is needed to perform this test');
+        }
         $image = new \Imagick();
         $image->readImage($path);
         return $image;
