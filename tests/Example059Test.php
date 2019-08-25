@@ -134,7 +134,7 @@ class Example059Test extends Common
 /**
  * TCPDF class extension with custom header and footer for TOC page
  */
-class TOC_TCPDF extends TCPDF {
+class TOC_TCPDF extends \Fooman\Tcpdf\Tcpdf {
 
     /**
      * Overwrite Header() method.

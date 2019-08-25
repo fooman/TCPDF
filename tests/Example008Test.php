@@ -11,9 +11,6 @@ class Example008Test extends Common
         $this->markTestIncomplete(
             'Free Serif is not part of this repository.'
         );
-
-
     }
-
 
 }

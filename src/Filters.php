@@ -1,6 +1,6 @@
 <?php
 //============================================================+
-// File name   : tcpdf_filters.php
+// File name   : Filters.php
 // Version     : 1.0.001
 // Begin       : 2011-05-23
 // Last Update : 2014-04-25
@@ -31,6 +31,7 @@
 // Description : This is a PHP class for decoding common PDF filters (PDF 32000-2008 - 7.4 Filters).
 //
 //============================================================+
+namespace Fooman\Tcpdf;
 
 /**
  * @file
@@ -41,14 +42,14 @@
  */
 
 /**
- * @class TCPDF_FILTERS
+ * @class Filters
  * This is a PHP class for decoding common PDF filters (PDF 32000-2008 - 7.4 Filters).<br>
  * @package com.tecnick.tcpdf
  * @brief This is a PHP class for decoding common PDF filters.
  * @version 1.0.001
  * @author Nicola Asuni - info@tecnick.com
  */
-class TCPDF_FILTERS {
+class Filters {
 
 	/**
 	 * Define a list of available filter decoders.
@@ -474,7 +475,7 @@ class TCPDF_FILTERS {
 		throw new Exception('TCPDF_PARSER ERROR: '.$msg);
 	}
 
-} // END OF TCPDF_FILTERS CLASS
+} // END OF Filters CLASS
 
 //============================================================+
 // END OF FILE

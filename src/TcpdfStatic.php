@@ -1,6 +1,6 @@
 <?php
 //============================================================+
-// File name   : tcpdf_static.php
+// File name   : TcpdfStatic.php
 // Version     : 1.1.3
 // Begin       : 2002-08-03
 // Last Update : 2015-04-28
@@ -32,7 +32,7 @@
 //   Static methods used by the TCPDF class.
 //
 //============================================================+
-
+namespace Fooman\Tcpdf;
 /**
  * @file
  * This is a PHP class that contains static methods for the TCPDF class.<br>
@@ -42,20 +42,20 @@
  */
 
 /**
- * @class TCPDF_STATIC
+ * @class TcpdfStatic
  * Static methods used by the TCPDF class.
  * @package com.tecnick.tcpdf
  * @brief PHP class for generating PDF documents without requiring external extensions.
  * @version 1.1.1
  * @author Nicola Asuni - info@tecnick.com
  */
-class TCPDF_STATIC {
+class TcpdfStatic {
 
 	/**
 	 * Current TCPDF version.
 	 * @private static
 	 */
-	private static $tcpdf_version = '6.3.2';
+	private static $tcpdf_version = '7.0.0';
 
 	/**
 	 * String alias for total number of pages.
@@ -293,7 +293,7 @@ class TCPDF_STATIC {
 	 * @public static
 	 */
 	public static function getObjFilename($type='tmp', $file_id='') {
-		return tempnam(K_PATH_CACHE, '__tcpdf_'.$file_id.'_'.$type.'_'.md5(TCPDF_STATIC::getRandomSeed()).'_');
+		return tempnam(K_PATH_CACHE, '__tcpdf_'.$file_id.'_'.$type.'_'.md5(TcpdfStatic::getRandomSeed()).'_');
 	}
 
 	/**
@@ -818,7 +818,7 @@ class TCPDF_STATIC {
 			if (is_array($prop['fillColor'])) {
 				$opt['mk']['bg'] = $prop['fillColor'];
 			} else {
-				$opt['mk']['bg'] = TCPDF_COLORS::convertHTMLColorToDec($prop['fillColor'], $spot_colors);
+				$opt['mk']['bg'] = Colors::convertHTMLColorToDec($prop['fillColor'], $spot_colors);
 			}
 		}
 		// strokeColor: Specifies the stroke color for a field that is used to stroke the rectangle of the field with a line as large as the line width.
@@ -826,7 +826,7 @@ class TCPDF_STATIC {
 			if (is_array($prop['strokeColor'])) {
 				$opt['mk']['bc'] = $prop['strokeColor'];
 			} else {
-				$opt['mk']['bc'] = TCPDF_COLORS::convertHTMLColorToDec($prop['strokeColor'], $spot_colors);
+				$opt['mk']['bc'] = Colors::convertHTMLColorToDec($prop['strokeColor'], $spot_colors);
 			}
 		}
 		// rotation: The rotation of a widget in counterclockwise increments.
@@ -1530,7 +1530,7 @@ class TCPDF_STATIC {
 		// create new language array of patterns
 		$patterns = array();
 		foreach($patterns_array as $val) {
-			if (!TCPDF_STATIC::empty_string($val)) {
+			if (!TcpdfStatic::empty_string($val)) {
 				$val = trim($val);
 				$val = str_replace('\'', '\\\'', $val);
 				$key = preg_replace('/[0-9]+/', '', $val);
@@ -2605,7 +2605,7 @@ class TCPDF_STATIC {
 	}
 
 
-} // END OF TCPDF_STATIC CLASS
+} // END OF TcpdfStatic CLASS
 
 //============================================================+
 // END OF FILE

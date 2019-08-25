@@ -1,6 +1,6 @@
 <?php
 //============================================================+
-// File name   : pdf417.php
+// File name   : PDF417.php
 // Version     : 1.0.005
 // Begin       : 2010-06-03
 // Last Update : 2014-04-25
@@ -42,7 +42,7 @@
 //		Maximum Data Characters:     1850 text, 2710 digits, 1108 bytes
 //
 //============================================================+
-
+namespace Fooman\Tcpdf\Barcodes;
 /**
  * @file
  * Class to create PDF417 barcode arrays for TCPDF class.

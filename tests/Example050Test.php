@@ -13,7 +13,7 @@ class Example050Test extends Common
 
 
 // create new PDF document
-        $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $pdf = new Fooman\Tcpdf\Tcpdf(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // set document information
         $pdf->SetCreator(PDF_CREATOR);
@@ -57,7 +57,7 @@ class Example050Test extends Common
         $pdf->AddPage();
 
 // print a message
-        $txt = "You can also export 2D barcodes in other formats (PNG, SVG, HTML). Check the examples inside the barcode directory.\n";
+        $txt = "You can also export 2D Barcodes in other formats (PNG, SVG, HTML). Check the examples inside the barcode directory.\n";
         $pdf->MultiCell(70, 50, $txt, 0, 'J', false, 1, 125, 30, true, 0, false, true, 0, 'T', false);
 
 

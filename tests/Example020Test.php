@@ -81,7 +81,7 @@ Fusce et felis vitae diam lobortis sollicitudin. Aenean tincidunt accumsan nisi,
 }
 
 // extend TCPF with custom functions
-class MYPDF020 extends TCPDF {
+class MYPDF020 extends \Fooman\Tcpdf\Tcpdf {
 
     public function MultiRow($left, $right) {
         // MultiCell($w, $h, $txt, $border=0, $align='J', $fill=0, $ln=1, $x='', $y='', $reseth=true, $stretch=0)

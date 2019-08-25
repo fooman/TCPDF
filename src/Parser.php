@@ -1,6 +1,6 @@
 <?php
 //============================================================+
-// File name   : tcpdf_parser.php
+// File name   : Parser.php
 // Version     : 1.0.16
 // Begin       : 2011-05-23
 // Last Update : 2015-04-28
@@ -31,7 +31,7 @@
 // Description : This is a PHP class for parsing PDF documents.
 //
 //============================================================+
-
+namespace Fooman\Tcpdf;
 /**
  * @file
  * This is a PHP class for parsing PDF documents.<br>
@@ -40,18 +40,16 @@
  * @version 1.0.15
  */
 
-// include class for decoding filters
-require_once(dirname(__FILE__).'/include/tcpdf_filters.php');
 
 /**
- * @class TCPDF_PARSER
+ * @class Parser
  * This is a PHP class for parsing PDF documents.<br>
  * @package com.tecnick.tcpdf
  * @brief This is a PHP class for parsing PDF documents..
  * @version 1.0.15
  * @author Nicola Asuni - info@tecnick.com
  */
-class TCPDF_PARSER {
+class Parser {
 
 	/**
 	 * Raw content of the PDF document.
@@ -776,9 +774,9 @@ class TCPDF_PARSER {
 		// decode the stream
 		$remaining_filters = array();
 		foreach ($filters as $filter) {
-			if (in_array($filter, TCPDF_FILTERS::getAvailableFilters())) {
+			if (in_array($filter, Filters::getAvailableFilters())) {
 				try {
-					$stream = TCPDF_FILTERS::decodeFilter($filter, $stream);
+					$stream = Filters::decodeFilter($filter, $stream);
 				} catch (Exception $e) {
 					$emsg = $e->getMessage();
 					if ((($emsg[0] == '~') AND !$this->cfg['ignore_missing_filter_decoders'])

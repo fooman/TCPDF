@@ -1,6 +1,6 @@
 <?php
 //============================================================+
-// File name   : tcpdf_barcodes_1d.php
+// File name   : TcpdfBarcode.php
 // Version     : 1.0.027
 // Begin       : 2008-06-09
 // Last Update : 2014-10-20
@@ -28,26 +28,26 @@
 // -------------------------------------------------------------------
 //
 // Description : PHP class to creates array representations for
-//               common 1D barcodes to be used with TCPDF.
+//               common 1D Barcodes to be used with TCPDF.
 //
 //============================================================+
-
+namespace Fooman\Tcpdf;
 /**
  * @file
- * PHP class to creates array representations for common 1D barcodes to be used with TCPDF.
+ * PHP class to creates array representations for common 1D Barcodes to be used with TCPDF.
  * @package com.tecnick.tcpdf
  * @author Nicola Asuni
  * @version 1.0.027
  */
 
 /**
- * @class TCPDFBarcode
- * PHP class to creates array representations for common 1D barcodes to be used with TCPDF (http://www.tcpdf.org).<br>
+ * @class TcpdfBarcode
+ * PHP class to creates array representations for common 1D Barcodes to be used with TCPDF (http://www.tcpdf.org).<br>
  * @package com.tecnick.tcpdf
  * @version 1.0.027
  * @author Nicola Asuni
  */
-class TCPDFBarcode {
+class TcpdfBarcode {
 
 	/**
 	 * Array representation of barcode.
@@ -57,7 +57,7 @@ class TCPDFBarcode {
 
 	/**
 	 * This is the class constructor.
-	 * Return an array representations for common 1D barcodes:<ul>
+	 * Return an array representations for common 1D Barcodes:<ul>
 	 * <li>$arrcode['code'] code to be printed on text label</li>
 	 * <li>$arrcode['maxh'] max barcode height</li>
 	 * <li>$arrcode['maxw'] max barcode width</li>
@@ -729,7 +729,7 @@ class TCPDFBarcode {
 	}
 
 	/**
-	 * Checksum for standard 2 of 5 barcodes.
+	 * Checksum for standard 2 of 5 Barcodes.
 	 * @param $code (string) code to process.
 	 * @return int checksum.
 	 * @protected
@@ -811,7 +811,7 @@ class TCPDFBarcode {
 	}
 
 	/**
-	 * Standard 2 of 5 barcodes.
+	 * Standard 2 of 5 Barcodes.
 	 * Used in airline ticket marking, photofinishing
 	 * Contains digits (0 to 9) and encodes the data only in the width of bars.
 	 * @param $code (string) code to represent.
@@ -883,7 +883,7 @@ class TCPDFBarcode {
 	}
 
 	/**
-	 * Interleaved 2 of 5 barcodes.
+	 * Interleaved 2 of 5 Barcodes.
 	 * Compact numeric code, widely used in industry, air cargo
 	 * Contains digits (0 to 9) and encodes the data in the width of both bars and spaces.
 	 * @param $code (string) code to represent.
@@ -948,7 +948,7 @@ class TCPDFBarcode {
 	}
 
 	/**
-	 * C128 barcodes.
+	 * C128 Barcodes.
 	 * Very capable code, excellent density, high reliability; in very wide use world-wide
 	 * @param $code (string) code to represent.
 	 * @param $type (string) barcode type: A, B, C or empty for automatic switch (AUTO mode)
@@ -1315,7 +1315,7 @@ class TCPDFBarcode {
 	}
 
 	/**
-	 * EAN13 and UPC-A barcodes.
+	 * EAN13 and UPC-A Barcodes.
 	 * EAN13: European Article Numbering international retail product code
 	 * UPC-A: Universal product code seen on almost all retail products in the USA and Canada
 	 * UPC-E: Short version of UPC symbol
@@ -1585,7 +1585,7 @@ class TCPDFBarcode {
 	}
 
 	/**
-	 * POSTNET and PLANET barcodes.
+	 * POSTNET and PLANET Barcodes.
 	 * Used by U.S. Postal Service for automated mail sorting
 	 * @param $code (string) zip code to represent. Must be a string containing a zip code of the form DDDDD or DDDDD-DDDD.
 	 * @param $planet (boolean) if true print the PLANET barcode, otherwise print POSTNET
@@ -1810,7 +1810,7 @@ class TCPDFBarcode {
 	}
 
 	/**
-	 * CODABAR barcodes.
+	 * CODABAR Barcodes.
 	 * Older code often used in library systems, sometimes in blood banks
 	 * @param $code (string) code to represent.
 	 * @return array barcode representation.
@@ -1866,7 +1866,7 @@ class TCPDFBarcode {
 	}
 
 	/**
-	 * CODE11 barcodes.
+	 * CODE11 Barcodes.
 	 * Used primarily for labeling telecommunications equipment
 	 * @param $code (string) code to represent.
 	 * @return array barcode representation.

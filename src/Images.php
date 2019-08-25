@@ -1,6 +1,6 @@
 <?php
 //============================================================+
-// File name   : tcpdf_images.php
+// File name   : Images.php
 // Version     : 1.0.005
 // Begin       : 2002-08-03
 // Last Update : 2014-11-15
@@ -32,7 +32,7 @@
 //   Static image methods used by the TCPDF class.
 //
 //============================================================+
-
+namespace Fooman\Tcpdf;
 /**
  * @file
  * This is a PHP class that contains static image methods for the TCPDF class.<br>
@@ -42,14 +42,14 @@
  */
 
 /**
- * @class TCPDF_IMAGES
+ * @class Images
  * Static image methods used by the TCPDF class.
  * @package com.tecnick.tcpdf
  * @brief PHP class for generating PDF documents without requiring external extensions.
  * @version 1.0.005
  * @author Nicola Asuni - info@tecnick.com
  */
-class TCPDF_IMAGES {
+class Images {
 
 	/**
 	 * Array of hinheritable SVG properties.
@@ -78,7 +78,7 @@ class TCPDF_IMAGES {
 		}
 		if (empty($type)) {
 			$fileinfo = pathinfo($imgfile);
-			if (isset($fileinfo['extension']) AND (!TCPDF_STATIC::empty_string($fileinfo['extension']))) {
+			if (isset($fileinfo['extension']) AND (!TcpdfStatic::empty_string($fileinfo['extension']))) {
 				$type = strtolower(trim($fileinfo['extension']));
 			}
 		}
@@ -161,7 +161,7 @@ class TCPDF_IMAGES {
 	 */
 	public static function _parsejpeg($file) {
 		// check if is a local file
-		if (!@TCPDF_STATIC::file_exists($file)) {
+		if (!@TcpdfStatic::file_exists($file)) {
 			return false;
 		}
 		$a = getimagesize($file);
@@ -208,7 +208,7 @@ class TCPDF_IMAGES {
 		$offset = 0;
 		while (($pos = strpos($data, "ICC_PROFILE\0", $offset)) !== false) {
 			// get ICC sequence length
-			$length = (TCPDF_STATIC::_getUSHORT($data, ($pos - 2)) - 16);
+			$length = (TcpdfStatic::_getUSHORT($data, ($pos - 2)) - 16);
 			// marker sequence number
 			$msn = max(1, ord($data[($pos + 12)]));
 			// number of markers (total of APP2 used)
@@ -255,8 +255,8 @@ class TCPDF_IMAGES {
 			//Incorrect PNG file
 			return false;
 		}
-		$w = TCPDF_STATIC::_freadint($f);
-		$h = TCPDF_STATIC::_freadint($f);
+		$w = TcpdfStatic::_freadint($f);
+		$h = TcpdfStatic::_freadint($f);
 		$bpc = ord(fread($f, 1));
 		$ct = ord(fread($f, 1));
 		if ($ct == 0) {
@@ -293,16 +293,16 @@ class TCPDF_IMAGES {
 		$trns = '';
 		$data = '';
 		$icc = false;
-		$n = TCPDF_STATIC::_freadint($f);
+		$n = TcpdfStatic::_freadint($f);
 		do {
 			$type = fread($f, 4);
 			if ($type == 'PLTE') {
 				// read palette
-				$pal = TCPDF_STATIC::rfread($f, $n);
+				$pal = TcpdfStatic::rfread($f, $n);
 				fread($f, 4);
 			} elseif ($type == 'tRNS') {
 				// read transparency info
-				$t = TCPDF_STATIC::rfread($f, $n);
+				$t = TcpdfStatic::rfread($f, $n);
 				if ($ct == 0) { // DeviceGray
 					$trns = array(ord($t[1]));
 				} elseif ($ct == 2) { // DeviceRGB
@@ -318,7 +318,7 @@ class TCPDF_IMAGES {
 				fread($f, 4);
 			} elseif ($type == 'IDAT') {
 				// read image data block
-				$data .= TCPDF_STATIC::rfread($f, $n);
+				$data .= TcpdfStatic::rfread($f, $n);
 				fread($f, 4);
 			} elseif ($type == 'iCCP') {
 				// skip profile name
@@ -333,16 +333,16 @@ class TCPDF_IMAGES {
 					return false;
 				}
 				// read ICC Color Profile
-				$icc = TCPDF_STATIC::rfread($f, ($n - $len - 2));
+				$icc = TcpdfStatic::rfread($f, ($n - $len - 2));
 				// decompress profile
 				$icc = gzuncompress($icc);
 				fread($f, 4);
 			} elseif ($type == 'IEND') {
 				break;
 			} else {
-				TCPDF_STATIC::rfread($f, $n + 4);
+				TcpdfStatic::rfread($f, $n + 4);
 			}
-			$n = TCPDF_STATIC::_freadint($f);
+			$n = TcpdfStatic::_freadint($f);
 		} while ($n);
 		if (($colspace == 'Indexed') AND (empty($pal))) {
 			// Missing palette
@@ -353,7 +353,7 @@ class TCPDF_IMAGES {
 		return array('w' => $w, 'h' => $h, 'ch' => $channels, 'icc' => $icc, 'cs' => $colspace, 'bpc' => $bpc, 'f' => 'FlateDecode', 'parms' => $parms, 'pal' => $pal, 'trns' => $trns, 'data' => $data);
 	}
 
-} // END OF TCPDF_IMAGES CLASS
+} // END OF Images CLASS
 
 //============================================================+
 // END OF FILE

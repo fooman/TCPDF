@@ -1,6 +1,6 @@
 <?php
 //============================================================+
-// File name   : tcpdf_colors.php
+// File name   : Colors.php
 // Version     : 1.0.004
 // Begin       : 2002-04-09
 // Last Update : 2014-04-25
@@ -30,7 +30,7 @@
 // Description : Array of WEB safe colors
 //
 //============================================================+
-
+namespace Fooman\Tcpdf;
 /**
  * @file
  * PHP color class for TCPDF
@@ -39,13 +39,13 @@
  */
 
 /**
- * @class TCPDF_COLORS
+ * @class Colors
  * PHP color class for TCPDF
  * @package com.tecnick.tcpdf
  * @version 1.0.004
  * @author Nicola Asuni - info@tecnick.com
  */
-class TCPDF_COLORS {
+class Colors {
 
 	/**
 	 * Array of WEB safe colors
@@ -455,7 +455,7 @@ class TCPDF_COLORS {
 	}
 
 
-} // END OF TCPDF_COLORS CLASS
+} // END OF Colors CLASS
 
 //============================================================+
 // END OF FILE
