@@ -57,7 +57,7 @@ if (!defined('K_PATH_MAIN')) {
 }
 
 if (!defined('K_PATH_FONTS')) {
-	define ('K_PATH_FONTS', K_PATH_MAIN.'fonts/');
+	define ('K_PATH_FONTS', K_PATH_MAIN.'../fonts/');
 }
 
 if (!defined('K_PATH_URL')) {
