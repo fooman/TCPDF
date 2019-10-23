@@ -1972,7 +1972,7 @@ class Tcpdf {
 		// set default JPEG quality
 		$this->jpeg_quality = 75;
 		// initialize some settings
-		Fonts::utf8Bidi(array(''), '', false, $this->isunicode, $this->CurrentFont);
+		Fonts::utf8Bidi(array(), '', false, $this->isunicode, $this->CurrentFont);
 		// set default font
 		$this->SetFont($this->FontFamily, $this->FontStyle, $this->FontSizePt);
 		$this->setHeaderFont(array($this->FontFamily, $this->FontStyle, $this->FontSizePt));
