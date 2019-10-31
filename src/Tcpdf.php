@@ -1841,7 +1841,7 @@ class Tcpdf {
 	 * @public
 	 * @see getPageSizeFromFormat(), setPageFormat()
 	 */
-	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false) {
+	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false, $config = null) {
 		// TCPDF configuration
 		require_once __DIR__ . '/tcpdf_autoconfig.php';
 
