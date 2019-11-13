@@ -1887,7 +1887,7 @@ class Tcpdf {
 		$this->gradients = array();
 		$this->InFooter = false;
 		$this->lasth = 0;
-		$this->FontFamily = defined('PDF_FONT_NAME_MAIN')?PDF_FONT_NAME_MAIN:'helvetica';
+		$this->FontFamily = $config->getPdfFontNameMain();
 		$this->FontStyle = '';
 		$this->FontSizePt = 12;
 		$this->underline = false;
