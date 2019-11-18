@@ -1821,6 +1821,8 @@ class Tcpdf {
 	 */
 	protected $gdgammacache = array();
 
+	protected $config = null;
+
 	//------------------------------------------------------------
 	// METHODS
 	//------------------------------------------------------------
@@ -1844,6 +1846,7 @@ class Tcpdf {
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false, $config = null) {
 		// TCPDF configuration
 		require_once __DIR__ . '/tcpdf_autoconfig.php';
+		$this->config = $config;
 
 		/* Set internal character encoding to ASCII */
 		if (function_exists('mb_internal_encoding') AND mb_internal_encoding()) {
@@ -1887,7 +1890,7 @@ class Tcpdf {
 		$this->gradients = array();
 		$this->InFooter = false;
 		$this->lasth = 0;
-		$this->FontFamily = $config->getPdfFontNameMain();
+		$this->FontFamily = $this->config->getPdfFontNameMain();
 		$this->FontStyle = '';
 		$this->FontSizePt = 12;
 		$this->underline = false;
@@ -2981,7 +2984,7 @@ class Tcpdf {
 			$this->y = $this->h - (1 / $this->k);
 			$this->lMargin = 0;
 			$this->_outSaveGraphicsState();
-			$font = defined('PDF_FONT_NAME_MAIN')?PDF_FONT_NAME_MAIN:'helvetica';
+			$font = $this->config->getPdfFontNameMain();
 			$this->SetFont($font, '', 1);
 			$this->setTextRenderingMode(0, false, false);
 			$msg = "\x50\x6f\x77\x65\x72\x65\x64\x20\x62\x79\x20\x54\x43\x50\x44\x46\x20\x28\x77\x77\x77\x2e\x74\x63\x70\x64\x66\x2e\x6f\x72\x67\x29";
@@ -3416,14 +3419,14 @@ class Tcpdf {
 			} else {
 				$this->x = $this->original_lMargin;
 			}
-			if (($headerdata['logo']) AND ($headerdata['logo'] != K_BLANK_IMAGE)) {
-				$imgtype = Images::getImageFileType(K_PATH_IMAGES.$headerdata['logo']);
+			if (($headerdata['logo']) AND ($headerdata['logo'] != $this->config->getKBlankImage())) {
+				$imgtype = Images::getImageFileType($this->config->getKPathImages().$headerdata['logo']);
 				if (($imgtype == 'eps') OR ($imgtype == 'ai')) {
-					$this->ImageEps(K_PATH_IMAGES.$headerdata['logo'], '', '', $headerdata['logo_width']);
+					$this->ImageEps($this->config->getKPathImages().$headerdata['logo'], '', '', $headerdata['logo_width']);
 				} elseif ($imgtype == 'svg') {
-					$this->ImageSVG(K_PATH_IMAGES.$headerdata['logo'], '', '', $headerdata['logo_width']);
+					$this->ImageSVG($this->config->getKPathImages().$headerdata['logo'], '', '', $headerdata['logo_width']);
 				} else {
-					$this->Image(K_PATH_IMAGES.$headerdata['logo'], '', '', $headerdata['logo_width']);
+					$this->Image($this->config->getKPathImages().$headerdata['logo'], '', '', $headerdata['logo_width']);
 				}
 				$imgy = $this->getImageRBY();
 			} else {
@@ -5255,7 +5258,7 @@ class Tcpdf {
 					$unicode = Fonts::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont); // array of UTF-8 unicode values
 					$unicode = Fonts::utf8Bidi($unicode, '', $this->tmprtl, $this->isunicode, $this->CurrentFont);
 					// replace thai chars (if any)
-					if (defined('K_THAI_TOPCHARS') AND (K_THAI_TOPCHARS == true)) {
+					if ($this->config->getKThaiTopchars() AND ($this->config->getKThaiTopchars() == true)) {
 						// number of chars
 						$numchars = count($unicode);
 						// po pla, for far, for fan
@@ -7009,9 +7012,9 @@ class Tcpdf {
 			}
 		} elseif (($ismask === false) AND ($imgmask === false) AND (strpos($file, '__tcpdf_'.$this->file_id.'_imgmask_') === FALSE)) {
 			// create temp image file (without alpha channel)
-			$tempfile_plain = K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
+			$tempfile_plain = $this->config->getKPathCache().'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
 			// create temp alpha file
-			$tempfile_alpha = K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
+			$tempfile_alpha = $this->config->getKPathCache().'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
 			// check for cached images
 			if (in_array($tempfile_plain, $this->imagekeys)) {
 				// get existing image data
@@ -7266,9 +7269,9 @@ class Tcpdf {
 			$filehash = md5($file);
 		}
 		// create temp image file (without alpha channel)
-		$tempfile_plain = K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
+		$tempfile_plain = $this->config->getKPathCache().'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
 		// create temp alpha file
-		$tempfile_alpha = K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
+		$tempfile_alpha = $this->config->getKPathCache().'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
 		$parsed = false;
 		$parse_error = '';
 		// ImageMagick extension
@@ -7780,10 +7783,10 @@ class Tcpdf {
 		if ($destroyall AND !$preserve_objcopy) {
 			self::$cleaned_ids[$this->file_id] = true;
 			// remove all temporary files
-			if ($handle = opendir(K_PATH_CACHE)) {
+			if ($handle = opendir($this->config->getKPathCache())) {
 				while ( false !== ( $file_name = readdir( $handle ) ) ) {
 					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0) {
-						unlink(K_PATH_CACHE.$file_name);
+						unlink($this->config->getKPathCache().$file_name);
 					}
 				}
 				closedir($handle);
@@ -16923,7 +16926,7 @@ class Tcpdf {
 					}
 					if (($dom[$key]['value'] == 'small') OR ($dom[$key]['value'] == 'sup') OR ($dom[$key]['value'] == 'sub')) {
 						if (!isset($dom[$key]['attribute']['size']) AND !isset($dom[$key]['style']['font-size'])) {
-							$dom[$key]['fontsize'] = $dom[$key]['fontsize'] * K_SMALL_RATIO;
+							$dom[$key]['fontsize'] = $dom[$key]['fontsize'] * $this->config->getKSmallRatio();
 						}
 					}
 					if (($dom[$key]['value'] == 'strong') OR ($dom[$key]['value'] == 'b')) {
@@ -18889,10 +18892,10 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 						$testscrtype = @parse_url($imgsrc);
 						if (empty($testscrtype['query'])) {
 							// convert URL to server path
-							$imgsrc = str_replace(K_PATH_URL, K_PATH_MAIN, $imgsrc);
+							$imgsrc = str_replace($this->config->getKPathUrl(), $this->config->getKPathMain(), $imgsrc);
 						} elseif (preg_match('|^https?://|', $imgsrc) !== 1) {
 							// convert URL to server path
-							$imgsrc = str_replace(K_PATH_MAIN, K_PATH_URL, $imgsrc);
+							$imgsrc = str_replace($this->config->getKPathMain(), $this->config->getKPathUrl(), $imgsrc);
 						}
 					}
 					// get image type
@@ -19361,7 +19364,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 				break;
 			}
 			case 'tcpdf': {
-				if (defined('K_TCPDF_CALLS_IN_HTML') AND (K_TCPDF_CALLS_IN_HTML === true)) {
+				if ($this->config->getKTcpdfCallsInHtml() AND ($this->config->getKTcpdfCallsInHtml() === true)) {
 					// Special tag used to call TCPDF methods
 					if (isset($tag['attribute']['method'])) {
 						$tcpdf_method = $tag['attribute']['method'];
