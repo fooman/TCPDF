@@ -1845,7 +1845,6 @@ class Tcpdf {
 	 */
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false, $config = null) {
 		// TCPDF configuration
-		require_once __DIR__ . '/tcpdf_autoconfig.php';
 		$this->config = $config;
 
 		/* Set internal character encoding to ASCII */

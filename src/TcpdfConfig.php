@@ -20,7 +20,6 @@ class TcpdfConfig
             'K_TCPDF_THROW_EXCEPTION_ERROR' => true,
             'K_PATH_MAIN' => __DIR__ .'/',
             'K_THAI_TOPCHARS' => true,
-            'K_TCPDF_CALLS_IN_HTML' => false,
             'K_SMALL_RATIO' => 2/3
         ];
 
