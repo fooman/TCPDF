@@ -4,11 +4,38 @@ class Common extends \PHPUnit\Framework\TestCase
 {
 
     protected $tmpFileName = false;
+    protected $expectedPdf;
+
+    protected $config;
 
     const MEAN_SQUARE_ALLOWED_DIFF = 0.00003;
 
     const EXAMPLE_NR = '';
     const NR_PDF_PAGES = 1;
+
+    const PDF_PAGE_ORIENTATION = 'P';
+    const PDF_UNIT = 'mm';
+    const PDF_PAGE_FORMAT ='A4';
+    const PDF_CREATOR = 'TCPDF';
+    const PDF_HEADER_LOGO = 'tcpdf_logo.jpg';
+    const PDF_HEADER_LOGO_WIDTH = 30;
+    const PDF_HEADER_TITLE = 'TCPDF Example';
+    const PDF_HEADER_STRING = "by Nicola Asuni - Tecnick.com\nwww.tcpdf.org";
+
+    const PDF_FONT_NAME_MAIN = 'helvetica';
+    const PDF_FONT_SIZE_MAIN = 10;
+    const PDF_FONT_NAME_DATA ='helvetica';
+    const PDF_FONT_SIZE_DATA = 8;
+    const PDF_FONT_MONOSPACED = 'courier';
+
+    const PDF_MARGIN_HEADER = 5;
+    const PDF_MARGIN_FOOTER = 10;
+    const PDF_MARGIN_TOP = 27;
+    const PDF_MARGIN_BOTTOM =25;
+    const PDF_MARGIN_LEFT = 15;
+    const PDF_MARGIN_RIGHT =15;
+
+    const PDF_IMAGE_SCALE_RATIO = 1.25;
 
     protected $langSettings = [
             'a_meta_charset'  => 'UTF-8',
@@ -21,6 +48,16 @@ class Common extends \PHPUnit\Framework\TestCase
     {
         $this->tmpFileName = sprintf(__DIR__ . '/example_%s_%s.pdf', static::EXAMPLE_NR, uniqid());
         $this->expectedPdf = sprintf(__DIR__ . '/_expected_pdfs/example_%s.pdf', static::EXAMPLE_NR);
+        $this->config = new \Fooman\Tcpdf\TcpdfConfig(
+            [
+                'PDF_HEADER_LOGO'=> self::PDF_HEADER_LOGO,
+                'K_PATH_IMAGES'=>__DIR__ .'/images/',
+                'K_PATH_CACHE' => sys_get_temp_dir().'/',
+                'K_CELL_HEIGHT_RATIO' => 1.25,
+                'HEAD_MAGNIFICATION' => 1.1,
+                'K_TITLE_MAGNIFICATION'=> 1.3
+            ]
+        );
     }
 
 

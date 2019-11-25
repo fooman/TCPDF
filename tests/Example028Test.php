@@ -10,10 +10,10 @@ class Example028Test extends Common
     {
 
 // create new PDF document
-        $pdf = new Fooman\Tcpdf\Tcpdf(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $pdf = new Fooman\Tcpdf\Tcpdf(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, true, 'UTF-8', false, false, $this->config);
 
 // set document information
-        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetCreator(self::PDF_CREATOR);
         $pdf->SetAuthor('Nicola Asuni');
         $pdf->SetTitle('TCPDF Example 028');
         $pdf->SetSubject('TCPDF Tutorial');
@@ -24,16 +24,16 @@ class Example028Test extends Common
         $pdf->setPrintFooter(false);
 
 // set default monospaced font
-        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+        $pdf->SetDefaultMonospacedFont(self::PDF_FONT_MONOSPACED);
 
 // set margins
-        $pdf->SetMargins(10, PDF_MARGIN_TOP, 10);
+        $pdf->SetMargins(10, self::PDF_MARGIN_TOP, 10);
 
 // set auto page breaks
-        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        $pdf->SetAutoPageBreak(TRUE, self::PDF_MARGIN_BOTTOM);
 
 // set image scale factor
-        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+        $pdf->setImageScale(self::PDF_IMAGE_SCALE_RATIO);
 
         // set some language-dependent strings (optional)
         $pdf->setLanguageArray($this->langSettings);

@@ -13,23 +13,23 @@ class Example051Test extends Common
 
 
 // create new PDF document
-        $pdf = new MYPDF051(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
+        $pdf = new MYPDF051(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, true, 'UTF-8', false, false, $this->config);
 
 // set document information
-        $pdf->SetCreator(PDF_CREATOR);
+        $pdf->SetCreator(self::PDF_CREATOR);
         $pdf->SetAuthor('Nicola Asuni');
         $pdf->SetTitle('TCPDF Example 051');
         $pdf->SetSubject('TCPDF Tutorial');
         $pdf->SetKeywords('TCPDF, PDF, example, test, guide');
 
 // set header and footer fonts
-        $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
+        $pdf->setHeaderFont(Array(self::PDF_FONT_NAME_MAIN, '', self::PDF_FONT_SIZE_MAIN));
 
 // set default monospaced font
-        $pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+        $pdf->SetDefaultMonospacedFont(self::PDF_FONT_MONOSPACED);
 
 // set margins
-        $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
+        $pdf->SetMargins(self::PDF_MARGIN_LEFT, self::PDF_MARGIN_TOP, self::PDF_MARGIN_RIGHT);
         $pdf->SetHeaderMargin(0);
         $pdf->SetFooterMargin(0);
 
@@ -37,10 +37,10 @@ class Example051Test extends Common
         $pdf->setPrintFooter(false);
 
 // set auto page breaks
-        $pdf->SetAutoPageBreak(TRUE, PDF_MARGIN_BOTTOM);
+        $pdf->SetAutoPageBreak(TRUE, self::PDF_MARGIN_BOTTOM);
 
 // set image scale factor
-        $pdf->setImageScale(PDF_IMAGE_SCALE_RATIO);
+        $pdf->setImageScale(self::PDF_IMAGE_SCALE_RATIO);
 
         // set some language-dependent strings (optional)
         $pdf->setLanguageArray($this->langSettings);

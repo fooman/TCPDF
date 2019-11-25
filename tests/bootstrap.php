@@ -1,6 +1,5 @@
 <?php
 
-require_once('tcpdf_config.php');
 require_once('Common.php');
 
 call_user_func(
