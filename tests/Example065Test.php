@@ -11,7 +11,7 @@ class Example065Test extends Common
     {
 
 // create new PDF document
-        $pdf = new Fooman\Tcpdf\Tcpdf(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, true, 'UTF-8', false, true);
+        $pdf = new Fooman\Tcpdf\Tcpdf(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, true, 'UTF-8', false, true, $this->config);
 
 // set document information
         $pdf->SetCreator(self::PDF_CREATOR);

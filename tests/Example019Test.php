@@ -8,7 +8,7 @@ class Example019Test extends Common
     public function testPdfOutput()
     {
 // create new PDF document
-        $pdf = new Fooman\Tcpdf\Tcpdf(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, false, 'ISO-8859-1', false);
+        $pdf = new Fooman\Tcpdf\Tcpdf(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, false, 'ISO-8859-1', false, false, $this->config);
 
 // Set document information dictionary in unicode mode
         $pdf->SetDocInfoUnicode(true);

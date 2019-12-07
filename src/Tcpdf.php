@@ -24274,10 +24274,10 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 						$testscrtype = @parse_url($img);
 						if (empty($testscrtype['query'])) {
 							// convert URL to server path
-							$img = str_replace(K_PATH_URL, K_PATH_MAIN, $img);
+							$img = str_replace($this->config->getKPathUrl(), $this->config->getKPathMain(), $img);
 						} elseif (preg_match('|^https?://|', $img) !== 1) {
 							// convert server path to URL
-							$img = str_replace(K_PATH_MAIN, K_PATH_URL, $img);
+							$img = str_replace($this->config->getKPathMain(), $this->config->getKPathUrl(), $img);
 						}
 					}
 					// get image type

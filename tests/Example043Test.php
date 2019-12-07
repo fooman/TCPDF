@@ -8,7 +8,7 @@ class Example043Test extends Common
     public function testPdfOutput()
     {
 // create new PDF document
-        $pdf = new Fooman\Tcpdf\Tcpdf(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, true, 'UTF-8', true);
+        $pdf = new Fooman\Tcpdf\Tcpdf(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, true, 'UTF-8', true, false, $this->config);
 
 // set document information
         $pdf->SetCreator(self::PDF_CREATOR);

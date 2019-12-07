@@ -6,10 +6,8 @@ class TcpdfConfig
 {
     private $config = [];
 
-    public function __construct(
-        array $config,
-        Fonts $fonts
-    ) {
+    public function __construct(array $config)
+    {
         $this->config = $config;
 
         $defaultConfig = [

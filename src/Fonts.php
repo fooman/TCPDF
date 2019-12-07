@@ -55,7 +55,7 @@ class Fonts {
 
 	protected $config;
 
-	public function __construct(array $config)
+	public function __construct(TcpdfConfig $config)
 	{
 		$this->config = $config;
     }
