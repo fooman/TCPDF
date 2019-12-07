@@ -1823,6 +1823,8 @@ class Tcpdf {
 
 	protected $config = null;
 
+	protected $fontsObject = null;
+
 	//------------------------------------------------------------
 	// METHODS
 	//------------------------------------------------------------
@@ -1846,6 +1848,7 @@ class Tcpdf {
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false, $config = null) {
 		// TCPDF configuration
 		$this->config = $config;
+		$this->fontsObject = new Fonts($config);
 
 		/* Set internal character encoding to ASCII */
 		if (function_exists('mb_internal_encoding') AND mb_internal_encoding()) {
@@ -1974,7 +1977,7 @@ class Tcpdf {
 		// set default JPEG quality
 		$this->jpeg_quality = 75;
 		// initialize some settings
-		Fonts::utf8Bidi(array(), '', false, $this->isunicode, $this->CurrentFont);
+		$this->fontsObject->utf8Bidi(array(), '', false, $this->isunicode, $this->CurrentFont);
 		// set default font
 		$this->SetFont($this->FontFamily, $this->FontStyle, $this->FontSizePt);
 		$this->setHeaderFont(array($this->FontFamily, $this->FontStyle, $this->FontSizePt));
@@ -4047,7 +4050,7 @@ class Tcpdf {
 	 * @since 1.2
 	 */
 	public function GetStringWidth($s, $fontname='', $fontstyle='', $fontsize=0, $getarray=false) {
-		return $this->GetArrStringWidth(Fonts::utf8Bidi(Fonts::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $fontsize, $getarray);
+		return $this->GetArrStringWidth($this->fontsObject->utf8Bidi($this->fontsObject->UTF8StringToArray($s, $this->isunicode, $this->CurrentFont), $s, $this->tmprtl, $this->isunicode, $this->CurrentFont), $fontname, $fontstyle, $fontsize, $getarray);
 	}
 
 	/**
@@ -4072,7 +4075,7 @@ class Tcpdf {
 		}
 		// convert UTF-8 array to Latin1 if required
 		if ($this->isunicode AND (!$this->isUnicodeFont())) {
-			$sa = Fonts::UTF8ArrToLatin1Arr($sa);
+			$sa = $this->fontsObject->UTF8ArrToLatin1Arr($sa);
 		}
 		$w = 0; // total width
 		$wa = array(); // array of characters widths
@@ -4151,7 +4154,7 @@ class Tcpdf {
 	 */
 	public function GetNumChars($s) {
 		if ($this->isUnicodeFont()) {
-			return count(Fonts::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont));
+			return count($this->fontsObject->UTF8StringToArray($s, $this->isunicode, $this->CurrentFont));
 		}
 		return strlen($s);
 	}
@@ -4162,7 +4165,7 @@ class Tcpdf {
 	 * @since 4.0.013 (2008-07-28)
 	 */
 	protected function getFontsList() {
-		if (($fontsdir = opendir(Fonts::_getfontpath())) !== false) {
+		if (($fontsdir = opendir($this->fontsObject->_getfontpath())) !== false) {
 			while (($file = readdir($fontsdir)) !== false) {
 				if (substr($file, -4) == '.php') {
 					array_push($this->fontlist, strtolower(basename($file, '.php')));
@@ -4277,12 +4280,12 @@ class Tcpdf {
 		if (TcpdfStatic::empty_string($fontfile) OR (!@TcpdfStatic::file_exists($fontfile))) {
 			// build a standard filenames for specified font
 			$tmp_fontfile = str_replace(' ', '', $family).strtolower($style).'.php';
-			$fontfile = Fonts::getFontFullPath($tmp_fontfile, $fontdir);
+			$fontfile = $this->fontsObject->getFontFullPath($tmp_fontfile, $fontdir);
 			if (TcpdfStatic::empty_string($fontfile)) {
 				$missing_style = true;
 				// try to remove the style part
 				$tmp_fontfile = str_replace(' ', '', $family).'.php';
-				$fontfile = Fonts::getFontFullPath($tmp_fontfile, $fontdir);
+				$fontfile = $this->fontsObject->getFontFullPath($tmp_fontfile, $fontdir);
 			}
 		}
 		// include font file
@@ -4626,7 +4629,7 @@ class Tcpdf {
 	public function isCharDefined($char, $font='', $style='') {
 		if (is_string($char)) {
 			// get character code
-			$char = Fonts::UTF8StringToArray($char, $this->isunicode, $this->CurrentFont);
+			$char = $this->fontsObject->UTF8StringToArray($char, $this->isunicode, $this->CurrentFont);
 			$char = $char[0];
 		}
 		if (TcpdfStatic::empty_string($font)) {
@@ -4659,7 +4662,7 @@ class Tcpdf {
 		}
 		$fontdata = $this->AddFont($font, $style);
 		$fontinfo = $this->getFontBuffer($fontdata['fontkey']);
-		$uniarr = Fonts::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
+		$uniarr = $this->fontsObject->UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
 		foreach ($uniarr as $k => $chr) {
 			if (!isset($fontinfo['cw'][$chr])) {
 				// this character is missing on the selected font
@@ -4678,7 +4681,7 @@ class Tcpdf {
 				}
 			}
 		}
-		return Fonts::UniArrSubString(Fonts::UTF8ArrayToUniArray($uniarr, $this->isunicode));
+		return $this->fontsObject->UniArrSubString($this->fontsObject->UTF8ArrayToUniArray($uniarr, $this->isunicode));
 	}
 
 	/**
@@ -5088,7 +5091,7 @@ class Tcpdf {
 	 */
 	protected function getCellCode($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='', $stretch=0, $ignore_min_height=false, $calign='T', $valign='M') {
 		// replace 'NO-BREAK SPACE' (U+00A0) character with a simple space
-		$txt = str_replace(Fonts::unichr(160, $this->isunicode), ' ', $txt);
+		$txt = str_replace($this->fontsObject->unichr(160, $this->isunicode), ' ', $txt);
 		$prev_cell_margin = $this->cell_margin;
 		$prev_cell_padding = $this->cell_padding;
 		$txt = TcpdfStatic::removeSHY($txt, $this->isunicode);
@@ -5252,10 +5255,10 @@ class Tcpdf {
 			$txt2 = $txt;
 			if ($this->isunicode) {
 				if (($this->CurrentFont['type'] == 'core') OR ($this->CurrentFont['type'] == 'TrueType') OR ($this->CurrentFont['type'] == 'Type1')) {
-					$txt2 = Fonts::UTF8ToLatin1($txt2, $this->isunicode, $this->CurrentFont);
+					$txt2 = $this->fontsObject->UTF8ToLatin1($txt2, $this->isunicode, $this->CurrentFont);
 				} else {
-					$unicode = Fonts::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont); // array of UTF-8 unicode values
-					$unicode = Fonts::utf8Bidi($unicode, '', $this->tmprtl, $this->isunicode, $this->CurrentFont);
+					$unicode = $this->fontsObject->UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont); // array of UTF-8 unicode values
+					$unicode = $this->fontsObject->utf8Bidi($unicode, '', $this->tmprtl, $this->isunicode, $this->CurrentFont);
 					// replace thai chars (if any)
 					if ($this->config->getKThaiTopchars() AND ($this->config->getKThaiTopchars() == true)) {
 						// number of chars
@@ -5347,7 +5350,7 @@ class Tcpdf {
 						// update font subsetchars
 						$this->setFontSubBuffer($this->CurrentFont['fontkey'], 'subsetchars', $this->CurrentFont['subsetchars']);
 					} // end of K_THAI_TOPCHARS
-					$txt2 = Fonts::arrUTF8ToUTF16BE($unicode, false);
+					$txt2 = $this->fontsObject->arrUTF8ToUTF16BE($unicode, false);
 				}
 			}
 			$txt2 = TcpdfStatic::_escape($txt2);
@@ -5478,7 +5481,7 @@ class Tcpdf {
 						$xshift += $this->GetArrStringWidth($uniarr); // + shift justification
 					} else {
 						// character to print
-						$topchr = Fonts::arrUTF8ToUTF16BE($uniarr, false);
+						$topchr = $this->fontsObject->arrUTF8ToUTF16BE($uniarr, false);
 						$topchr = TcpdfStatic::_escape($topchr);
 						$s .= sprintf(' BT %F %F Td [(%s)] TJ ET', ($xdk + ($xshift * $k)), $ty, $topchr);
 					}
@@ -6177,7 +6180,7 @@ class Tcpdf {
 		}
 		$lines = 1;
 		$sum = 0;
-		$chars = Fonts::utf8Bidi(Fonts::UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont), $txt, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+		$chars = $this->fontsObject->utf8Bidi($this->fontsObject->UTF8StringToArray($txt, $this->isunicode, $this->CurrentFont), $txt, $this->tmprtl, $this->isunicode, $this->CurrentFont);
 		$charsWidth = $this->GetArrStringWidth($chars, '', '', 0, true);
 		$length = count($chars);
 		$lastSeparator = -1;
@@ -6186,11 +6189,11 @@ class Tcpdf {
 			$charWidth = $charsWidth[$i];
 			if (($c != 160)
 					AND (($c == 173)
-						OR preg_match($this->re_spaces, Fonts::unichr($c, $this->isunicode))
+						OR preg_match($this->re_spaces, $this->fontsObject->unichr($c, $this->isunicode))
 						OR (($c == 45)
 							AND ($i > 0) AND ($i < ($length - 1))
-							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], Fonts::unichr($chars[($i - 1)], $this->isunicode))
-							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], Fonts::unichr($chars[($i + 1)], $this->isunicode))
+							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], $this->fontsObject->unichr($chars[($i - 1)], $this->isunicode))
+							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], $this->fontsObject->unichr($chars[($i + 1)], $this->isunicode))
 						)
 					)
 				) {
@@ -6328,18 +6331,18 @@ class Tcpdf {
 		// get a char width
 		$chrwidth = $this->GetCharWidth(46); // dot character
 		// get array of unicode values
-		$chars = Fonts::UTF8StringToArray($s, $this->isunicode, $this->CurrentFont);
+		$chars = $this->fontsObject->UTF8StringToArray($s, $this->isunicode, $this->CurrentFont);
 		// calculate maximum width for a single character on string
 		$chrw = $this->GetArrStringWidth($chars, '', '', 0, true);
 		array_walk($chrw, array($this, 'getRawCharWidth'));
 		$maxchwidth = max($chrw);
 		// get array of chars
-		$uchars = Fonts::UTF8ArrayToUniArray($chars, $this->isunicode);
+		$uchars = $this->fontsObject->UTF8ArrayToUniArray($chars, $this->isunicode);
 		// get the number of characters
 		$nb = count($chars);
 		// replacement for SHY character (minus symbol)
 		$shy_replacement = 45;
-		$shy_replacement_char = Fonts::unichr($shy_replacement, $this->isunicode);
+		$shy_replacement_char = $this->fontsObject->unichr($shy_replacement, $this->isunicode);
 		// widht for SHY replacement
 		$shy_replacement_width = $this->GetCharWidth($shy_replacement);
 		// page width
@@ -6392,12 +6395,12 @@ class Tcpdf {
 				} else {
 					$talign = $align;
 				}
-				$tmpstr = Fonts::UniArrSubString($uchars, $j, $i);
+				$tmpstr = $this->fontsObject->UniArrSubString($uchars, $j, $i);
 				if ($firstline) {
 					$startx = $this->x;
 					$tmparr = array_slice($chars, $j, ($i - $j));
 					if ($rtlmode) {
-						$tmparr = Fonts::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+						$tmparr = $this->fontsObject->utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
 					}
 					$linew = $this->GetArrStringWidth($tmparr);
 					unset($tmparr);
@@ -6422,7 +6425,7 @@ class Tcpdf {
 				unset($tmpstr);
 				if ($firstline) {
 					$this->cell_padding = $tmpcellpadding;
-					return (Fonts::UniArrSubString($uchars, $i));
+					return ($this->fontsObject->UniArrSubString($uchars, $i));
 				}
 				++$nl;
 				$j = $i + 1;
@@ -6451,11 +6454,11 @@ class Tcpdf {
 				// \p{Lo} is needed because Chinese characters are packed next to each other without spaces in between.
 				if (($c != 160)
 					AND (($c == 173)
-						OR preg_match($this->re_spaces, Fonts::unichr($c, $this->isunicode))
+						OR preg_match($this->re_spaces, $this->fontsObject->unichr($c, $this->isunicode))
 						OR (($c == 45)
 							AND ($i < ($nb - 1))
-							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], Fonts::unichr($pc, $this->isunicode))
-							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], Fonts::unichr($chars[($i + 1)], $this->isunicode))
+							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], $this->fontsObject->unichr($pc, $this->isunicode))
+							AND @preg_match('/[\p{L}]/'.$this->re_space['m'], $this->fontsObject->unichr($chars[($i + 1)], $this->isunicode))
 						)
 					)
 				) {
@@ -6481,7 +6484,7 @@ class Tcpdf {
 				if ($this->isUnicodeFont() AND ($arabic)) {
 					// with bidirectional algorithm some chars may be changed affecting the line length
 					// *** very slow ***
-					$l = $this->GetArrStringWidth(Fonts::utf8Bidi(array_slice($chars, $j, ($i - $j)), '', $this->tmprtl, $this->isunicode, $this->CurrentFont));
+					$l = $this->GetArrStringWidth($this->fontsObject->utf8Bidi(array_slice($chars, $j, ($i - $j)), '', $this->tmprtl, $this->isunicode, $this->CurrentFont));
 				} else {
 					$l += $this->GetCharWidth($c);
 				}
@@ -6499,16 +6502,16 @@ class Tcpdf {
 							$this->Cell($w, $h, '', 0, 1);
 							$linebreak = true;
 							if ($firstline) {
-								return (Fonts::UniArrSubString($uchars, $j));
+								return ($this->fontsObject->UniArrSubString($uchars, $j));
 							}
 						} else {
 							// truncate the word because do not fit on column
-							$tmpstr = Fonts::UniArrSubString($uchars, $j, $i);
+							$tmpstr = $this->fontsObject->UniArrSubString($uchars, $j, $i);
 							if ($firstline) {
 								$startx = $this->x;
 								$tmparr = array_slice($chars, $j, ($i - $j));
 								if ($rtlmode) {
-									$tmparr = Fonts::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+									$tmparr = $this->fontsObject->utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
 								}
 								$linew = $this->GetArrStringWidth($tmparr);
 								unset($tmparr);
@@ -6530,7 +6533,7 @@ class Tcpdf {
 							unset($tmpstr);
 							if ($firstline) {
 								$this->cell_padding = $tmpcellpadding;
-								return (Fonts::UniArrSubString($uchars, $i));
+								return ($this->fontsObject->UniArrSubString($uchars, $i));
 							}
 							$j = $i;
 							--$i;
@@ -6543,16 +6546,16 @@ class Tcpdf {
 							$endspace = 0;
 						}
 						// check the length of the next string
-						$strrest = Fonts::UniArrSubString($uchars, ($sep + $endspace));
+						$strrest = $this->fontsObject->UniArrSubString($uchars, ($sep + $endspace));
 						$nextstr = TcpdfStatic::pregSplit('/'.$this->re_space['p'].'/', $this->re_space['m'], $this->stringTrim($strrest));
 						if (isset($nextstr[0]) AND ($this->GetStringWidth($nextstr[0]) > $pw)) {
 							// truncate the word because do not fit on a full page width
-							$tmpstr = Fonts::UniArrSubString($uchars, $j, $i);
+							$tmpstr = $this->fontsObject->UniArrSubString($uchars, $j, $i);
 							if ($firstline) {
 								$startx = $this->x;
 								$tmparr = array_slice($chars, $j, ($i - $j));
 								if ($rtlmode) {
-									$tmparr = Fonts::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+									$tmparr = $this->fontsObject->utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
 								}
 								$linew = $this->GetArrStringWidth($tmparr);
 								unset($tmparr);
@@ -6574,7 +6577,7 @@ class Tcpdf {
 							unset($tmpstr);
 							if ($firstline) {
 								$this->cell_padding = $tmpcellpadding;
-								return (Fonts::UniArrSubString($uchars, $i));
+								return ($this->fontsObject->UniArrSubString($uchars, $i));
 							}
 							$j = $i;
 							--$i;
@@ -6595,12 +6598,12 @@ class Tcpdf {
 								$shy_char_left = '';
 								$shy_char_right = '';
 							}
-							$tmpstr = Fonts::UniArrSubString($uchars, $j, ($sep + $endspace));
+							$tmpstr = $this->fontsObject->UniArrSubString($uchars, $j, ($sep + $endspace));
 							if ($firstline) {
 								$startx = $this->x;
 								$tmparr = array_slice($chars, $j, (($sep + $endspace) - $j));
 								if ($rtlmode) {
-									$tmparr = Fonts::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+									$tmparr = $this->fontsObject->utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
 								}
 								$linew = $this->GetArrStringWidth($tmparr);
 								unset($tmparr);
@@ -6627,7 +6630,7 @@ class Tcpdf {
 								}
 								// return the remaining text
 								$this->cell_padding = $tmpcellpadding;
-								return (Fonts::UniArrSubString($uchars, ($sep + $endspace)));
+								return ($this->fontsObject->UniArrSubString($uchars, ($sep + $endspace)));
 							}
 							$i = $sep;
 							$sep = -1;
@@ -6689,12 +6692,12 @@ class Tcpdf {
 					break;
 				}
 			}
-			$tmpstr = Fonts::UniArrSubString($uchars, $j, $nb);
+			$tmpstr = $this->fontsObject->UniArrSubString($uchars, $j, $nb);
 			if ($firstline) {
 				$startx = $this->x;
 				$tmparr = array_slice($chars, $j, ($nb - $j));
 				if ($rtlmode) {
-					$tmparr = Fonts::utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
+					$tmparr = $this->fontsObject->utf8Bidi($tmparr, $tmpstr, $this->tmprtl, $this->isunicode, $this->CurrentFont);
 				}
 				$linew = $this->GetArrStringWidth($tmparr);
 				unset($tmparr);
@@ -6716,7 +6719,7 @@ class Tcpdf {
 			unset($tmpstr);
 			if ($firstline) {
 				$this->cell_padding = $tmpcellpadding;
-				return (Fonts::UniArrSubString($uchars, $nb));
+				return ($this->fontsObject->UniArrSubString($uchars, $nb));
 			}
 			++$nl;
 		}
@@ -7847,10 +7850,10 @@ class Tcpdf {
 		$u = '{'.$a.'}';
 		$alias['u'][] = TcpdfStatic::_escape($u);
 		if ($this->isunicode) {
-			$alias['u'][] = TcpdfStatic::_escape(Fonts::UTF8ToLatin1($u, $this->isunicode, $this->CurrentFont));
-			$alias['u'][] = TcpdfStatic::_escape(Fonts::utf8StrRev($u, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
-			$alias['a'][] = TcpdfStatic::_escape(Fonts::UTF8ToLatin1($a, $this->isunicode, $this->CurrentFont));
-			$alias['a'][] = TcpdfStatic::_escape(Fonts::utf8StrRev($a, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
+			$alias['u'][] = TcpdfStatic::_escape($this->fontsObject->UTF8ToLatin1($u, $this->isunicode, $this->CurrentFont));
+			$alias['u'][] = TcpdfStatic::_escape($this->fontsObject->utf8StrRev($u, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
+			$alias['a'][] = TcpdfStatic::_escape($this->fontsObject->UTF8ToLatin1($a, $this->isunicode, $this->CurrentFont));
+			$alias['a'][] = TcpdfStatic::_escape($this->fontsObject->utf8StrRev($a, false, $this->tmprtl, $this->isunicode, $this->CurrentFont));
 		}
 		$alias['a'][] = TcpdfStatic::_escape($a);
 		return $alias;
@@ -7897,7 +7900,7 @@ class Tcpdf {
 					if ($type == 'u') {
 						$chrdiff = floor(($diff + 12) * $ratio);
 						$shift = str_repeat(' ', $chrdiff);
-						$shift = Fonts::UTF8ToUTF16BE($shift, false, $this->isunicode, $this->CurrentFont);
+						$shift = $this->fontsObject->UTF8ToUTF16BE($shift, false, $this->isunicode, $this->CurrentFont);
 					} else {
 						$chrdiff = floor(($diff + 11) * $ratio);
 						$shift = str_repeat(' ', $chrdiff);
@@ -7933,7 +7936,7 @@ class Tcpdf {
 		$pnalias = $this->getAllInternalPageNumberAliases();
 		$num_pages = $this->numpages;
 		$ptpa = TcpdfStatic::formatPageNumber(($this->starting_page_number + $num_pages - 1));
-		$ptpu = Fonts::UTF8ToUTF16BE($ptpa, false, $this->isunicode, $this->CurrentFont);
+		$ptpu = $this->fontsObject->UTF8ToUTF16BE($ptpa, false, $this->isunicode, $this->CurrentFont);
 		$ptp_num_chars = $this->GetNumChars($ptpa);
 		$pagegroupnum = 0;
 		$groupnum = 0;
@@ -7946,7 +7949,7 @@ class Tcpdf {
 			$pagelen = strlen($temppage);
 			// set replacements for total pages number
 			$pnpa = TcpdfStatic::formatPageNumber(($this->starting_page_number + $n - 1));
-			$pnpu = Fonts::UTF8ToUTF16BE($pnpa, false, $this->isunicode, $this->CurrentFont);
+			$pnpu = $this->fontsObject->UTF8ToUTF16BE($pnpa, false, $this->isunicode, $this->CurrentFont);
 			$pnp_num_chars = $this->GetNumChars($pnpa);
 			$pdiff = 0; // difference used for right shift alignment of page numbers
 			$gdiff = 0; // difference used for right shift alignment of page group numbers
@@ -7955,12 +7958,12 @@ class Tcpdf {
 					$pagegroupnum = 0;
 					++$groupnum;
 					$ptga = TcpdfStatic::formatPageNumber($this->pagegroups[$groupnum]);
-					$ptgu = Fonts::UTF8ToUTF16BE($ptga, false, $this->isunicode, $this->CurrentFont);
+					$ptgu = $this->fontsObject->UTF8ToUTF16BE($ptga, false, $this->isunicode, $this->CurrentFont);
 					$ptg_num_chars = $this->GetNumChars($ptga);
 				}
 				++$pagegroupnum;
 				$pnga = TcpdfStatic::formatPageNumber($pagegroupnum);
-				$pngu = Fonts::UTF8ToUTF16BE($pnga, false, $this->isunicode, $this->CurrentFont);
+				$pngu = $this->fontsObject->UTF8ToUTF16BE($pnga, false, $this->isunicode, $this->CurrentFont);
 				$png_num_chars = $this->GetNumChars($pnga);
 				// replace page numbers
 				$replace = array();
@@ -8819,7 +8822,7 @@ class Tcpdf {
 		TcpdfStatic::set_mqr(false);
 		foreach ($this->FontFiles as $file => $info) {
 			// search and get font file to embedd
-			$fontfile = Fonts::getFontFullPath($file, $info['fontdir']);
+			$fontfile = $this->fontsObject->getFontFullPath($file, $info['fontdir']);
 			if (!TcpdfStatic::empty_string($fontfile)) {
 				$font = file_get_contents($fontfile);
 				$compressed = (substr($file, -2) == '.z');
@@ -8845,7 +8848,7 @@ class Tcpdf {
 						$subsetchars += $fontinfo['subsetchars'];
 					}
 					// rebuild a font subset
-					$font = Fonts::_getTrueTypeFontSubset($font, $subsetchars);
+					$font = $this->fontsObject->_getTrueTypeFontSubset($font, $subsetchars);
 					// calculate new font length
 					$info['length1'] = strlen($font);
 					if ($compressed) {
@@ -9003,7 +9006,7 @@ class Tcpdf {
 		$out .= ' /CIDSystemInfo << '.$cidinfo.' >>';
 		$out .= ' /FontDescriptor '.($this->n + 1).' 0 R';
 		$out .= ' /DW '.$font['dw']; // default width
-		$out .= "\n".Fonts::_putfontwidths($font, 0);
+		$out .= "\n".$this->fontsObject->_putfontwidths($font, 0);
 		if (isset($font['ctg']) AND (!TcpdfStatic::empty_string($font['ctg']))) {
 			$out .= "\n".'/CIDToGIDMap '.($this->n + 2).' 0 R';
 		}
@@ -9037,7 +9040,7 @@ class Tcpdf {
 			// search and get CTG font file to embedd
 			$ctgfile = strtolower($font['ctg']);
 			// search and get ctg font file to embedd
-			$fontfile = Fonts::getFontFullPath($ctgfile, $fontdir);
+			$fontfile = $this->fontsObject->getFontFullPath($ctgfile, $fontdir);
 			if (TcpdfStatic::empty_string($fontfile)) {
 				$this->Error('Font file not found: '.$ctgfile);
 			}
@@ -9111,7 +9114,7 @@ class Tcpdf {
 		$out .= ' /CIDSystemInfo <<'.$cidinfo.'>>';
 		$out .= ' /FontDescriptor '.($this->n + 1).' 0 R';
 		$out .= ' /DW '.$font['dw'];
-		$out .= "\n".Fonts::_putfontwidths($font, $cidoffset);
+		$out .= "\n".$this->fontsObject->_putfontwidths($font, $cidoffset);
 		$out .= ' >>';
 		$out .= "\n".'endobj';
 		$this->_out($out);
@@ -9565,7 +9568,7 @@ class Tcpdf {
 		$prev_encrypted = $this->encrypted;
 		$this->encrypted = false;
 		// set XMP data
-		$xmp = '<?xpacket begin="'.Fonts::unichr(0xfeff, $this->isunicode).'" id="W5M0MpCehiHzreSzNTczkc9d"?>'."\n";
+		$xmp = '<?xpacket begin="'.$this->fontsObject->unichr(0xfeff, $this->isunicode).'" id="W5M0MpCehiHzreSzNTczkc9d"?>'."\n";
 		$xmp .= '<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 4.2.1-c043 52.372728, 2009/01/18-15:08:04">'."\n";
 		$xmp .= "\t".'<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">'."\n";
 		$xmp .= "\t\t".'<rdf:Description rdf:about="" xmlns:dc="http://purl.org/dc/elements/1.1/">'."\n";
@@ -10293,7 +10296,7 @@ class Tcpdf {
 	protected function _textstring($s, $n=0) {
 		if ($this->isunicode) {
 			//Convert string to UTF-16BE
-			$s = Fonts::UTF8ToUTF16BE($s, true, $this->isunicode, $this->CurrentFont);
+			$s = $this->fontsObject->UTF8ToUTF16BE($s, true, $this->isunicode, $this->CurrentFont);
 		}
 		return $this->_datastring($s, $n);
 	}
@@ -10754,9 +10757,9 @@ class Tcpdf {
 	 */
 	protected function _fixAES256Password($password) {
 		$psw = ''; // password to be returned
-		$psw_array = Fonts::utf8Bidi(Fonts::UTF8StringToArray($password, $this->isunicode, $this->CurrentFont), $password, $this->rtl, $this->isunicode, $this->CurrentFont);
+		$psw_array = $this->fontsObject->utf8Bidi($this->fontsObject->UTF8StringToArray($password, $this->isunicode, $this->CurrentFont), $password, $this->rtl, $this->isunicode, $this->CurrentFont);
 		foreach ($psw_array as $c) {
-			$psw .= Fonts::unichr($c, $this->isunicode);
+			$psw .= $this->fontsObject->unichr($c, $this->isunicode);
 		}
 		return substr($psw, 0, 127);
 	}
@@ -16239,8 +16242,8 @@ class Tcpdf {
 	 * @public
 	 */
 	public function getHTMLFontUnits($val, $refsize=12, $parent_size=12, $defaultunit='pt') {
-		$refsize = Fonts::getFontRefSize($refsize);
-		$parent_size = Fonts::getFontRefSize($parent_size, $refsize);
+		$refsize = $this->fontsObject->getFontRefSize($refsize);
+		$parent_size = $this->fontsObject->getFontRefSize($parent_size, $refsize);
 		switch ($val) {
 			case 'xx-small': {
 				$size = ($refsize - 4);
@@ -20532,7 +20535,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 				break;
 			}
 			case 'lower-greek': {
-				$textitem = Fonts::unichr((945 + $this->listcount[$this->listnum] - 1), $this->isunicode);
+				$textitem = $this->fontsObject->unichr((945 + $this->listcount[$this->listnum] - 1), $this->isunicode);
 				break;
 			}
 			/*
@@ -21504,14 +21507,14 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 						$np = $n;
 					}
 					$na = TcpdfStatic::formatTOCPageNumber(($this->starting_page_number + $np - 1));
-					$nu = Fonts::UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
+					$nu = $this->fontsObject->UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
 					// replace aliases with numbers
 					foreach ($pnalias['u'] as $u) {
 						$sfill = str_repeat($filler, max(0, (strlen($u) - strlen($nu.' '))));
 						if ($this->rtl) {
-							$nr = $nu.Fonts::UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
+							$nr = $nu.$this->fontsObject->UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
 						} else {
-							$nr = Fonts::UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
+							$nr = $this->fontsObject->UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
 						}
 						$temppage = str_replace($u, $nr, $temppage);
 					}
@@ -21640,15 +21643,15 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 						$np = $n;
 					}
 					$na = TcpdfStatic::formatTOCPageNumber(($this->starting_page_number + $np - 1));
-					$nu = Fonts::UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
+					$nu = $this->fontsObject->UTF8ToUTF16BE($na, false, $this->isunicode, $this->CurrentFont);
 					// replace aliases with numbers
 					foreach ($pnalias['u'] as $u) {
 						if ($correct_align) {
 							$sfill = str_repeat($filler, (strlen($u) - strlen($nu.' ')));
 							if ($this->rtl) {
-								$nr = $nu.Fonts::UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
+								$nr = $nu.$this->fontsObject->UTF8ToUTF16BE(' '.$sfill, false, $this->isunicode, $this->CurrentFont);
 							} else {
-								$nr = Fonts::UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
+								$nr = $this->fontsObject->UTF8ToUTF16BE($sfill.' ', false, $this->isunicode, $this->CurrentFont).$nu;
 							}
 						} else {
 							$nr = $nu;
@@ -22024,7 +22027,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 		if ($numchars <= $charmin) {
 			return $word;
 		}
-		$word_string = Fonts::UTF8ArrSubString($word, '', '', $this->isunicode);
+		$word_string = $this->fontsObject->UTF8ArrSubString($word, '', '', $this->isunicode);
 		// some words will be returned as-is
 		$pattern = '/^([a-zA-Z0-9_\.\-]+)@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([a-zA-Z0-9\-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/';
 		if (preg_match($pattern, $word_string) > 0) {
@@ -22037,7 +22040,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 			return $word;
 		}
 		if (isset($dictionary[$word_string])) {
-			return Fonts::UTF8StringToArray($dictionary[$word_string], $this->isunicode, $this->CurrentFont);
+			return $this->fontsObject->UTF8StringToArray($dictionary[$word_string], $this->isunicode, $this->CurrentFont);
 		}
 		// surround word with '_' characters
 		$tmpword = array_merge(array(46), $word, array(46));
@@ -22046,9 +22049,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 		for ($pos = 0; $pos < $maxpos; ++$pos) {
 			$imax = min(($tmpnumchars - $pos), $charmax);
 			for ($i = 1; $i <= $imax; ++$i) {
-				$subword = strtolower(Fonts::UTF8ArrSubString($tmpword, $pos, ($pos + $i), $this->isunicode));
+				$subword = strtolower($this->fontsObject->UTF8ArrSubString($tmpword, $pos, ($pos + $i), $this->isunicode));
 				if (isset($patterns[$subword])) {
-					$pattern = Fonts::UTF8StringToArray($patterns[$subword], $this->isunicode, $this->CurrentFont);
+					$pattern = $this->fontsObject->UTF8StringToArray($patterns[$subword], $this->isunicode, $this->CurrentFont);
 					$pattern_length = count($pattern);
 					$digits = 1;
 					for ($j = 0; $j < $pattern_length; ++$j) {
@@ -22108,7 +22111,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 			$patterns = TcpdfStatic::getHyphenPatternsFromTEX($patterns);
 		}
 		// get array of characters
-		$unichars = Fonts::UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
+		$unichars = $this->fontsObject->UTF8StringToArray($text, $this->isunicode, $this->CurrentFont);
 		// for each char
 		foreach ($unichars as $char) {
 			if ((!$intag) AND (!$skip) AND Font\Data::$uni_type[$char] == 'L') {
@@ -22153,7 +22156,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 			$txtarr = array_merge($txtarr, $this->hyphenateWord($word, $patterns, $dictionary, $leftmin, $rightmin, $charmin, $charmax));
 		}
 		// convert char array to string and return
-		return Fonts::UTF8ArrSubString($txtarr, '', '', $this->isunicode);
+		return $this->fontsObject->UTF8ArrSubString($txtarr, '', '', $this->isunicode);
 	}
 
 	/**

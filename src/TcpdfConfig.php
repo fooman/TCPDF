@@ -6,8 +6,10 @@ class TcpdfConfig
 {
     private $config = [];
 
-    public function __construct(array $config) 
-    {
+    public function __construct(
+        array $config,
+        Fonts $fonts
+    ) {
         $this->config = $config;
 
         $defaultConfig = [
@@ -45,8 +47,21 @@ class TcpdfConfig
         return $this->config['K_PATH_MAIN'];
     }
 
+    public function getKPathFonts()
+    {
+        if (isset($this->config['K_PATH_FONTS'])) {
+            return $this->config['K_PATH_FONTS'];
+        }
+
+        return $this->getKPathMain() . '../fonts/';
+    }
+
     public function getKPathUrl()
     {
+        if (isset($this->config['K_PATH_URL'])) {
+            return $this->config['K_PATH_URL'];
+        }
+
         return $this->getKPathMain();
     }
 

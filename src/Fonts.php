@@ -51,7 +51,14 @@ class Fonts {
 	 * Static cache used for speed up uniord performances
 	 * @protected
 	 */
-	protected static $cache_uniord = array();
+	protected $cache_uniord = array();
+
+	protected $config;
+
+	public function __construct(array $config)
+	{
+		$this->config = $config;
+    }
 
 	/**
 	 * Convert and add the selected TrueType or Type1 font to the fonts folder (that must be writeable).
@@ -67,9 +74,9 @@ class Fonts {
 	 * @return (string) TCPDF font name or boolean false in case of error.
 	 * @author Nicola Asuni
 	 * @since 5.9.123 (2010-09-30)
-	 * @public static
+	 * @public
 	 */
-	public static function addTTFfont($fontfile, $fonttype='', $enc='', $flags=32, $outpath='', $platid=3, $encid=1, $addcbbox=false, $link=false) {
+	public function addTTFfont($fontfile, $fonttype='', $enc='', $flags=32, $outpath='', $platid=3, $encid=1, $addcbbox=false, $link=false) {
 		if (!TcpdfStatic::file_exists($fontfile)) {
 			// Could not find file
 			return false;
@@ -92,7 +99,7 @@ class Fonts {
 		}
 		// set output path
 		if (empty($outpath)) {
-			$outpath = self::_getfontpath();
+			$outpath = $this->_getfontpath();
 		}
 		// check if this font already exist
 		if (@TcpdfStatic::file_exists($outpath.$font_name.'.php')) {
@@ -882,7 +889,7 @@ class Fonts {
 				// create CIDToGIDMap
 				$cidtogidmap = str_pad('', 131072, "\x00"); // (256 * 256 * 2) = 131072
 				foreach ($ctg as $cid => $gid) {
-					$cidtogidmap = self::updateCIDtoGIDmap($cidtogidmap, $cid, $ctg[$cid]);
+					$cidtogidmap = $this->updateCIDtoGIDmap($cidtogidmap, $cid, $ctg[$cid]);
 				}
 				// store compressed CIDToGIDMap
 				$fp = TcpdfStatic::fopenLocal($outpath.$fmetric['ctg'], 'wb');
@@ -925,9 +932,9 @@ class Fonts {
 	 * @return int checksum
 	 * @author Nicola Asuni
 	 * @since 5.2.000 (2010-06-02)
-	 * @public static
+	 * @public
 	 */
-	public static function _getTTFtableChecksum($table, $length) {
+	public function _getTTFtableChecksum($table, $length) {
 		$sum = 0;
 		$tlen = ($length / 4);
 		$offset = 0;
@@ -947,9 +954,9 @@ class Fonts {
 	 * @return (string) A subset of TrueType font data without the unused glyphs.
 	 * @author Nicola Asuni
 	 * @since 5.2.000 (2010-06-02)
-	 * @public static
+	 * @public
 	 */
-	public static function _getTrueTypeFontSubset($font, $subsetchars) {
+	public function _getTrueTypeFontSubset($font, $subsetchars) {
 		ksort($subsetchars);
 		$offset = 0; // offset position of the font data
 		if (TcpdfStatic::_getULONG($font, $offset) != 0x10000) {
@@ -1345,7 +1352,7 @@ class Fonts {
 			$table['loca']['data'] .= str_repeat("\x0", $pad);
 		}
 		$table['loca']['offset'] = $offset;
-		$table['loca']['checkSum'] = self::_getTTFtableChecksum($table['loca']['data'], $table['loca']['length']);
+		$table['loca']['checkSum'] = $this->_getTTFtableChecksum($table['loca']['data'], $table['loca']['length']);
 		$offset += $table['loca']['length'];
 		// add glyf
 		$table['glyf']['data'] = $glyf;
@@ -1357,7 +1364,7 @@ class Fonts {
 			$table['glyf']['data'] .= str_repeat("\x0", $pad);
 		}
 		$table['glyf']['offset'] = $offset;
-		$table['glyf']['checkSum'] = self::_getTTFtableChecksum($table['glyf']['data'], $table['glyf']['length']);
+		$table['glyf']['checkSum'] = $this->_getTTFtableChecksum($table['glyf']['data'], $table['glyf']['length']);
 		// rebuild font
 		$font = '';
 		$font .= pack('N', 0x10000); // sfnt version
@@ -1380,7 +1387,7 @@ class Fonts {
 			$font .= $data['data'];
 		}
 		// set checkSumAdjustment on head table
-		$checkSumAdjustment = 0xB1B0AFBA - self::_getTTFtableChecksum($font, strlen($font));
+		$checkSumAdjustment = 0xB1B0AFBA - $this->_getTTFtableChecksum($font, strlen($font));
 		$font = substr($font, 0, $table['head']['offset'] + 8).pack('N', $checkSumAdjustment).substr($font, $table['head']['offset'] + 12);
 		return $font;
 	}
@@ -1392,9 +1399,9 @@ class Fonts {
 	 * @return PDF command string for font widths
 	 * @author Nicola Asuni
 	 * @since 4.4.000 (2008-12-07)
-	 * @public static
+	 * @public
 	 */
-	public static function _putfontwidths($font, $cidoffset=0) {
+	public function _putfontwidths($font, $cidoffset=0) {
 		ksort($font['cw']);
 		$rangeid = 0;
 		$range = array();
@@ -1501,9 +1508,9 @@ class Fonts {
 	 * @return (string) CIDToGIDMap.
 	 * @author Nicola Asuni
 	 * @since 5.9.123 (2011-09-29)
-	 * @public static
+	 * @public
 	 */
-	public static function updateCIDtoGIDmap($map, $cid, $gid) {
+	public function updateCIDtoGIDmap($map, $cid, $gid) {
 		if (($cid >= 0) AND ($cid <= 0xFFFF) AND ($gid >= 0)) {
 			if ($gid > 0xFFFF) {
 				$gid -= 0x10000;
@@ -1517,19 +1524,20 @@ class Fonts {
 	/**
 	 * Return fonts path
 	 * @return string
-	 * @public static
+	 * @public
 	 */
-	public static function _getfontpath() {
-		if (!defined('K_PATH_FONTS') AND is_dir($fdir = realpath(dirname(__FILE__).'/../fonts'))) {
+	public function _getfontpath() {
+		$fontPath = $this->config->getKPathFonts();
+
+		if (!$fontPath AND is_dir($fdir = realpath(dirname(__FILE__).'/../fonts'))) {
 			if (substr($fdir, -1) != '/') {
 				$fdir .= '/';
 			}
-			define('K_PATH_FONTS', $fdir);
+
+			return $fdir;
 		}
-		return defined('K_PATH_FONTS') ? K_PATH_FONTS : '';
+		return $fontPath;
 	}
-
-
 
 	/**
 	 * Return font full path
@@ -1538,15 +1546,15 @@ class Fonts {
 	 * @return string Font full path or empty string
 	 * @author Nicola Asuni
 	 * @since 6.0.025
-	 * @public static
+	 * @public
 	 */
-	public static function getFontFullPath($file, $fontdir=false) {
+	public function getFontFullPath($file, $fontdir=false) {
 		$fontfile = '';
 		// search files on various directories
 		if (($fontdir !== false) AND @TcpdfStatic::file_exists($fontdir.$file)) {
 			$fontfile = $fontdir.$file;
-		} elseif (@TcpdfStatic::file_exists(self::_getfontpath().$file)) {
-			$fontfile = self::_getfontpath().$file;
+		} elseif (@TcpdfStatic::file_exists($this->_getfontpath().$file)) {
+			$fontfile = $this->_getfontpath().$file;
 		} elseif (@TcpdfStatic::file_exists($file)) {
 			$fontfile = $file;
 		}
@@ -1561,9 +1569,9 @@ class Fonts {
 	 * @param $size (string) String containing font size value.
 	 * @param $refsize (float) Reference font size in points.
 	 * @return float value in points
-	 * @public static
+	 * @public
 	 */
-	public static function getFontRefSize($size, $refsize=12) {
+	public function getFontRefSize($size, $refsize=12) {
 		switch ($size) {
 			case 'xx-small': {
 				$size = ($refsize - 4);
@@ -1661,9 +1669,9 @@ class Fonts {
 	 * @param $unicode (boolean) True if we are in unicode mode, false otherwise.
 	 * @return Returns the specified character.
 	 * @since 2.3.000 (2008-03-05)
-	 * @public static
+	 * @public
 	 */
-	public static function unichr($c, $unicode=true) {
+	public function unichr($c, $unicode=true) {
 		$c = intval($c);
 		if (!$unicode) {
 			return chr($c);
@@ -1688,20 +1696,20 @@ class Fonts {
 	 * Returns the unicode caracter specified by UTF-8 value
 	 * @param $c (int) UTF-8 value
 	 * @return Returns the specified character.
-	 * @public static
+	 * @public
 	 */
-	public static function unichrUnicode($c) {
-		return self::unichr($c, true);
+	public function unichrUnicode($c) {
+		return $this->unichr($c, true);
 	}
 
 	/**
 	 * Returns the unicode caracter specified by ASCII value
 	 * @param $c (int) UTF-8 value
 	 * @return Returns the specified character.
-	 * @public static
+	 * @public
 	 */
-	public static function unichrASCII($c) {
-		return self::unichr($c, false);
+	public function unichrASCII($c) {
+		return $this->unichr($c, false);
 	}
 
 	/**
@@ -1740,9 +1748,9 @@ class Fonts {
 	 * @protected
 	 * @author Nicola Asuni
 	 * @since 2.1.000 (2008-01-08)
-	 * @public static
+	 * @public
 	 */
-	public static function arrUTF8ToUTF16BE($unicode, $setbom=false) {
+	public function arrUTF8ToUTF16BE($unicode, $setbom=false) {
 		$outstr = ''; // string to be returned
 		if ($setbom) {
 			$outstr .= "\xFE\xFF"; // Byte Order Mark (BOM)
@@ -1774,9 +1782,9 @@ class Fonts {
 	 * @param $isunicode (boolean) True for Unicode mode, false otherwise.
 	 * @return Return array of unicode characters
 	 * @since 4.5.037 (2009-04-07)
-	 * @public static
+	 * @public
 	 */
-	public static function UTF8ArrayToUniArray($ta, $isunicode=true) {
+	public function UTF8ArrayToUniArray($ta, $isunicode=true) {
 		if ($isunicode) {
 			return array_map(array(__CLASS__, 'unichrUnicode'), $ta);
 		}
@@ -1790,9 +1798,9 @@ class Fonts {
 	 * @param $end (int) first element that will not be returned.
 	 * @param $unicode (boolean) True if we are in unicode mode, false otherwise.
 	 * @return Return part of a string
-	 * @public static
+	 * @public
 	 */
-	public static function UTF8ArrSubString($strarr, $start='', $end='', $unicode=true) {
+	public function UTF8ArrSubString($strarr, $start='', $end='', $unicode=true) {
 		if (strlen($start) == 0) {
 			$start = 0;
 		}
@@ -1801,7 +1809,7 @@ class Fonts {
 		}
 		$string = '';
 		for ($i = $start; $i < $end; ++$i) {
-			$string .= self::unichr($strarr[$i], $unicode);
+			$string .= $this->unichr($strarr[$i], $unicode);
 		}
 		return $string;
 	}
@@ -1813,9 +1821,9 @@ class Fonts {
 	 * @param $end (int) first element that will not be returned.
 	 * @return Return part of a string
 	 * @since 4.5.037 (2009-04-07)
-	 * @public static
+	 * @public
 	 */
-	public static function UniArrSubString($uniarr, $start='', $end='') {
+	public function UniArrSubString($uniarr, $start='', $end='') {
 		if (strlen($start) == 0) {
 			$start = 0;
 		}
@@ -1835,9 +1843,9 @@ class Fonts {
 	 * @return array
 	 * @author Nicola Asuni
 	 * @since 4.8.023 (2010-01-15)
-	 * @public static
+	 * @public
 	 */
-	public static function UTF8ArrToLatin1Arr($unicode) {
+	public function UTF8ArrToLatin1Arr($unicode) {
 		$outarr = array(); // array to be returned
 		foreach ($unicode as $char) {
 			if ($char < 256) {
@@ -1860,9 +1868,9 @@ class Fonts {
 	 * @return array
 	 * @author Nicola Asuni
 	 * @since 4.8.023 (2010-01-15)
-	 * @public static
+	 * @public
 	 */
-	public static function UTF8ArrToLatin1($unicode) {
+	public function UTF8ArrToLatin1($unicode) {
 		$outstr = ''; // string to be returned
 		foreach ($unicode as $char) {
 			if ($char < 256) {
@@ -1884,13 +1892,13 @@ class Fonts {
 	 * Uses the getUniord() method if the value is not cached.
 	 * @param $uch (string) character string to process.
 	 * @return integer Unicode value
-	 * @public static
+	 * @public
 	 */
-	public static function uniord($uch) {
-		if (!isset(self::$cache_uniord[$uch])) {
-			self::$cache_uniord[$uch] = self::getUniord($uch);
+	public function uniord($uch) {
+		if (!isset($this->cache_uniord[$uch])) {
+			$this->cache_uniord[$uch] = $this->getUniord($uch);
 		}
-		return self::$cache_uniord[$uch];
+		return $this->cache_uniord[$uch];
 	}
 
 	/**
@@ -1924,9 +1932,9 @@ class Fonts {
 	 * @param $uch (string) character string to process.
 	 * @return integer Unicode value
 	 * @author Nicola Asuni
-	 * @public static
+	 * @public
 	 */
-	public static function getUniord($uch) {
+	public function getUniord($uch) {
 		if (function_exists('mb_convert_encoding')) {
 			list(, $char) = @unpack('N', mb_convert_encoding($uch, 'UCS-4BE', 'UTF-8'));
 			if ($char >= 0) {
@@ -1993,9 +2001,9 @@ class Fonts {
 	 * @param $currentfont (array) Reference to current font array.
 	 * @return array containing codepoints (UTF-8 characters values)
 	 * @author Nicola Asuni
-	 * @public static
+	 * @public
 	 */
-	public static function UTF8StringToArray($str, $isunicode=true, &$currentfont) {
+	public function UTF8StringToArray($str, $isunicode=true, &$currentfont) {
 		if ($isunicode) {
 			// requires PCRE unicode support turned on
 			$chars = TcpdfStatic::pregSplit('//','u', $str, -1, PREG_SPLIT_NO_EMPTY);
@@ -2019,11 +2027,11 @@ class Fonts {
 	 * @param $currentfont (array) Reference to current font array.
 	 * @return string
 	 * @since 3.2.000 (2008-06-23)
-	 * @public static
+	 * @public
 	 */
-	public static function UTF8ToLatin1($str, $isunicode=true, &$currentfont) {
-		$unicode = self::UTF8StringToArray($str, $isunicode, $currentfont); // array containing UTF-8 unicode values
-		return self::UTF8ArrToLatin1($unicode);
+	public function UTF8ToLatin1($str, $isunicode=true, &$currentfont) {
+		$unicode = $this->UTF8StringToArray($str, $isunicode, $currentfont); // array containing UTF-8 unicode values
+		return $this->UTF8ArrToLatin1($unicode);
 	}
 
 	/**
@@ -2035,14 +2043,14 @@ class Fonts {
 	 * @return string
 	 * @author Nicola Asuni
 	 * @since 1.53.0.TC005 (2005-01-05)
-	 * @public static
+	 * @public
 	 */
-	public static function UTF8ToUTF16BE($str, $setbom=false, $isunicode=true, &$currentfont) {
+	public function UTF8ToUTF16BE($str, $setbom=false, $isunicode=true, &$currentfont) {
 		if (!$isunicode) {
 			return $str; // string is not in unicode
 		}
-		$unicode = self::UTF8StringToArray($str, $isunicode, $currentfont); // array containing UTF-8 unicode values
-		return self::arrUTF8ToUTF16BE($unicode, $setbom);
+		$unicode = $this->UTF8StringToArray($str, $isunicode, $currentfont); // array containing UTF-8 unicode values
+		return $this->arrUTF8ToUTF16BE($unicode, $setbom);
 	}
 
 	/**
@@ -2055,10 +2063,10 @@ class Fonts {
 	 * @return string
 	 * @author Nicola Asuni
 	 * @since 2.1.000 (2008-01-08)
-	 * @public static
+	 * @public
 	 */
-	public static function utf8StrRev($str, $setbom=false, $forcertl=false, $isunicode=true, &$currentfont) {
-		return self::utf8StrArrRev(self::UTF8StringToArray($str, $isunicode, $currentfont), $str, $setbom, $forcertl, $isunicode, $currentfont);
+	public function utf8StrRev($str, $setbom=false, $forcertl=false, $isunicode=true, &$currentfont) {
+		return $this->utf8StrArrRev($this->UTF8StringToArray($str, $isunicode, $currentfont), $str, $setbom, $forcertl, $isunicode, $currentfont);
 	}
 
 	/**
@@ -2072,10 +2080,10 @@ class Fonts {
 	 * @return string
 	 * @author Nicola Asuni
 	 * @since 4.9.000 (2010-03-27)
-	 * @public static
+	 * @public
 	 */
-	public static function utf8StrArrRev($arr, $str='', $setbom=false, $forcertl=false, $isunicode=true, &$currentfont) {
-		return self::arrUTF8ToUTF16BE(self::utf8Bidi($arr, $str, $forcertl, $isunicode, $currentfont), $setbom);
+	public function utf8StrArrRev($arr, $str='', $setbom=false, $forcertl=false, $isunicode=true, &$currentfont) {
+		return $this->arrUTF8ToUTF16BE($this->utf8Bidi($arr, $str, $forcertl, $isunicode, $currentfont), $setbom);
 	}
 
 	/**
@@ -2088,16 +2096,16 @@ class Fonts {
 	 * @return array of unicode chars
 	 * @author Nicola Asuni
 	 * @since 2.4.000 (2008-03-06)
-	 * @public static
+	 * @public
 	 */
-	public static function utf8Bidi($ta, $str='', $forcertl=false, $isunicode=true, &$currentfont) {
+	public function utf8Bidi($ta, $str='', $forcertl=false, $isunicode=true, &$currentfont) {
 		// paragraph embedding level
 		$pel = 0;
 		// max level
 		$maxlevel = 0;
 		if (TcpdfStatic::empty_string($str)) {
 			// create string from array
-			$str = self::UTF8ArrSubString($ta, '', '', $isunicode);
+			$str = $this->UTF8ArrSubString($ta, '', '', $isunicode);
 		}
 		// check if string contains arabic text
 		if (preg_match(Font\Data::$uni_RE_PATTERN_ARABIC, $str)) {
