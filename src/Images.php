@@ -54,9 +54,9 @@ class Images {
 	/**
 	 * Array of hinheritable SVG properties.
 	 * @since 5.0.000 (2010-05-02)
-	 * @public static
+	 * @public
 	 */
-	public static $svginheritprop = array('clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cursor', 'direction', 'display', 'fill', 'fill-opacity', 'fill-rule', 'font', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'glyph-orientation-horizontal', 'glyph-orientation-vertical', 'image-rendering', 'kerning', 'letter-spacing', 'marker', 'marker-end', 'marker-mid', 'marker-start', 'pointer-events', 'shape-rendering', 'stroke', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke-width', 'text-anchor', 'text-rendering', 'visibility', 'word-spacing', 'writing-mode');
+	public $svginheritprop = array('clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cursor', 'direction', 'display', 'fill', 'fill-opacity', 'fill-rule', 'font', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'glyph-orientation-horizontal', 'glyph-orientation-vertical', 'image-rendering', 'kerning', 'letter-spacing', 'marker', 'marker-end', 'marker-mid', 'marker-start', 'pointer-events', 'shape-rendering', 'stroke', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke-width', 'text-anchor', 'text-rendering', 'visibility', 'word-spacing', 'writing-mode');
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -66,9 +66,9 @@ class Images {
 	 * @param $iminfo (array) array of image information returned by getimagesize() function.
 	 * @return string image type
 	 * @since 4.8.017 (2009-11-27)
-	 * @public static
+	 * @public
 	 */
-	public static function getImageFileType($imgfile, $iminfo=array()) {
+	public function getImageFileType($imgfile, $iminfo=array()) {
 		$type = '';
 		if (isset($iminfo['mime']) AND !empty($iminfo['mime'])) {
 			$mime = explode('/', $iminfo['mime']);
@@ -94,9 +94,9 @@ class Images {
 	 * @param $image (image) GD image object.
 	 * return GD image object.
 	 * @since 4.9.016 (2010-04-20)
-	 * @public static
+	 * @public
 	 */
-	public static function setGDImageTransparency($new_image, $image) {
+	public function setGDImageTransparency($new_image, $image) {
 		// default transparency color (white)
 		$tcol = array('red' => 255, 'green' => 255, 'blue' => 255);
 		// transparency index
@@ -119,9 +119,9 @@ class Images {
 	 * @param $tempfile (string) Temporary file name.
 	 * return image PNG image object.
 	 * @since 4.9.016 (2010-04-20)
-	 * @public static
+	 * @public
 	 */
-	public static function _toPNG($image, $tempfile) {
+	public function _toPNG($image, $tempfile) {
 		// turn off interlaced mode
 		imageinterlace($image, 0);
 		// create temporary PNG image
@@ -142,9 +142,9 @@ class Images {
 	 * @param $quality (int) JPEG quality.
 	 * @param $tempfile (string) Temporary file name.
 	 * return image JPEG image object.
-	 * @public static
+	 * @public
 	 */
-	public static function _toJPEG($image, $quality, $tempfile) {
+	public function _toJPEG($image, $quality, $tempfile) {
 		imagejpeg($image, $tempfile, $quality);
 		imagedestroy($image);
 		$retvars = self::_parsejpeg($tempfile);
@@ -157,9 +157,9 @@ class Images {
 	 * Extract info from a JPEG file without using the GD library.
 	 * @param $file (string) image file to parse
 	 * @return array structure containing the image data
-	 * @public static
+	 * @public
 	 */
-	public static function _parsejpeg($file) {
+	public function _parsejpeg($file) {
 		// check if is a local file
 		if (!@TcpdfStatic::file_exists($file)) {
 			return false;
@@ -236,9 +236,9 @@ class Images {
 	 * Extract info from a PNG file without using the GD library.
 	 * @param $file (string) image file to parse
 	 * @return array structure containing the image data
-	 * @public static
+	 * @public
 	 */
-	public static function _parsepng($file) {
+	public function _parsepng($file) {
 		$f = @fopen($file, 'rb');
 		if ($f === false) {
 			// Can't open image file

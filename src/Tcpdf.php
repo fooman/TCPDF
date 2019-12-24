@@ -1849,6 +1849,7 @@ class Tcpdf {
 		// TCPDF configuration
 		$this->config = $config;
 		$this->fontsObject = new Fonts($config);
+		$this->imagesObject = new Images($config);
 
 		/* Set internal character encoding to ASCII */
 		if (function_exists('mb_internal_encoding') AND mb_internal_encoding()) {
@@ -3422,7 +3423,7 @@ class Tcpdf {
 				$this->x = $this->original_lMargin;
 			}
 			if (($headerdata['logo']) AND ($headerdata['logo'] != $this->config->getKBlankImage())) {
-				$imgtype = Images::getImageFileType($this->config->getKPathImages().$headerdata['logo']);
+				$imgtype = $this->imagesObject->getImageFileType($this->config->getKPathImages().$headerdata['logo']);
 				if (($imgtype == 'eps') OR ($imgtype == 'ai')) {
 					$this->ImageEps($this->config->getKPathImages().$headerdata['logo'], '', '', $headerdata['logo_width']);
 				} elseif ($imgtype == 'svg') {
@@ -7038,7 +7039,7 @@ class Tcpdf {
 			//First use of image, get info
 			$type = strtolower($type);
 			if ($type == '') {
-				$type = Images::getImageFileType($file, $imsize);
+				$type = $this->imagesObject->getImageFileType($file, $imsize);
 			} elseif ($type == 'jpg') {
 				$type = 'jpeg';
 			}
@@ -7051,7 +7052,7 @@ class Tcpdf {
 			$info = false;
 			if ((method_exists('Images', $mtd)) AND (!($resize AND (function_exists($gdfunction) OR extension_loaded('imagick'))))) {
 				// TCPDF image functions
-				$info = Images::$mtd($file);
+				$info = $this->imagesObject->$mtd($file);
 				if (($ismask === false) AND ($imgmask === false) AND (strpos($file, '__tcpdf_'.$this->file_id.'_imgmask_') === FALSE)
 					AND (($info === 'pngalpha') OR (isset($info['trns']) AND !empty($info['trns'])))) {
 					return $this->ImagePngAlpha($file, $x, $y, $pixw, $pixh, $w, $h, 'PNG', $link, $align, $resize, $dpi, $palign, $filehash);
@@ -7065,15 +7066,15 @@ class Tcpdf {
 						if ($resize) {
 							$imgr = imagecreatetruecolor($neww, $newh);
 							if (($type == 'gif') OR ($type == 'png')) {
-								$imgr = Images::setGDImageTransparency($imgr, $img);
+								$imgr = $this->imagesObject->setGDImageTransparency($imgr, $img);
 							}
 							imagecopyresampled($imgr, $img, 0, 0, 0, 0, $neww, $newh, $pixw, $pixh);
 							$img = $imgr;
 						}
 						if (($type == 'gif') OR ($type == 'png')) {
-							$info = Images::_toPNG($img, TcpdfStatic::getObjFilename('img', $this->file_id));
+							$info = $this->imagesObject->_toPNG($img, TcpdfStatic::getObjFilename('img', $this->file_id));
 						} else {
-							$info = Images::_toJPEG($img, $this->jpeg_quality, TcpdfStatic::getObjFilename('img', $this->file_id));
+							$info = $this->imagesObject->_toJPEG($img, $this->jpeg_quality, TcpdfStatic::getObjFilename('img', $this->file_id));
 						}
 					}
 				} catch(Exception $e) {
@@ -7134,7 +7135,7 @@ class Tcpdf {
 					$img->setImageFormat('jpeg');
 					$tempname = TcpdfStatic::getObjFilename('img', $this->file_id);
 					$img->writeImage($tempname);
-					$info = Images::_parsejpeg($tempname);
+					$info = $this->imagesObject->_parsejpeg($tempname);
 					unlink($tempname);
 					$img->destroy();
 				} catch(Exception $e) {
@@ -18901,7 +18902,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 						}
 					}
 					// get image type
-					$type = Images::getImageFileType($imgsrc);
+					$type = $this->imagesObject->getImageFileType($imgsrc);
 				}
 				if (!isset($tag['width'])) {
 					$tag['width'] = 0;
@@ -23816,7 +23817,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 			$attribs['style'] = ';'.$attribs['style'];
 		}
 		foreach ($prev_svgstyle as $key => $val) {
-			if (in_array($key, Images::$svginheritprop)) {
+			if (in_array($key, $this->imagesObject->svginheritprop)) {
 				// inherit previous value
 				$svgstyle[$key] = $val;
 			}
@@ -24281,7 +24282,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 						}
 					}
 					// get image type
-					$imgtype = Images::getImageFileType($img);
+					$imgtype = $this->imagesObject->getImageFileType($img);
 					if (($imgtype == 'eps') OR ($imgtype == 'ai')) {
 						$this->ImageEps($img, $x, $y, $w, $h);
 					} elseif ($imgtype == 'svg') {
