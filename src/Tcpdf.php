@@ -7796,7 +7796,7 @@ class Tcpdf {
 		if ($destroyall AND !$preserve_objcopy) {
 			self::$cleaned_ids[$this->file_id] = true;
 			// remove all temporary files
-			if (isset($this->config) && ($handle = opendir($this->config->getKPathCache()))) {
+			if ($handle = opendir($this->config->getKPathCache())) {
 				while ( false !== ( $file_name = readdir( $handle ) ) ) {
 					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0) {
 						unlink($this->config->getKPathCache().$file_name);
