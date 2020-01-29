@@ -1823,6 +1823,8 @@ class Tcpdf {
 
 	protected $config = null;
 
+	protected $kPathCache = null;
+
 	protected $fontsObject = null;
 
 	protected $imagesObject = null;
@@ -1852,6 +1854,7 @@ class Tcpdf {
 	public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false, $config = null) {
 		// TCPDF configuration
 		$this->config = $config;
+		$this->kPathCache = $config->getKPathCache();
 		$this->fontsObject = new Fonts($config);
 		$this->imagesObject = new Images($config);
 		$this->staticObject = new TcpdfStatic($config);
@@ -7021,9 +7024,9 @@ class Tcpdf {
 			}
 		} elseif (($ismask === false) AND ($imgmask === false) AND (strpos($file, '__tcpdf_'.$this->file_id.'_imgmask_') === FALSE)) {
 			// create temp image file (without alpha channel)
-			$tempfile_plain = $this->config->getKPathCache().'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
+			$tempfile_plain = $this->kPathCache.'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
 			// create temp alpha file
-			$tempfile_alpha = $this->config->getKPathCache().'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
+			$tempfile_alpha = $this->kPathCache.'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
 			// check for cached images
 			if (in_array($tempfile_plain, $this->imagekeys)) {
 				// get existing image data
@@ -7278,9 +7281,9 @@ class Tcpdf {
 			$filehash = md5($file);
 		}
 		// create temp image file (without alpha channel)
-		$tempfile_plain = $this->config->getKPathCache().'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
+		$tempfile_plain = $this->kPathCache.'__tcpdf_'.$this->file_id.'_imgmask_plain_'.$filehash;
 		// create temp alpha file
-		$tempfile_alpha = $this->config->getKPathCache().'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
+		$tempfile_alpha = $this->kPathCache.'__tcpdf_'.$this->file_id.'_imgmask_alpha_'.$filehash;
 		$parsed = false;
 		$parse_error = '';
 		// ImageMagick extension
@@ -7796,10 +7799,10 @@ class Tcpdf {
 		if ($destroyall AND !$preserve_objcopy) {
 			self::$cleaned_ids[$this->file_id] = true;
 			// remove all temporary files
-			if ($handle = opendir($this->config->getKPathCache())) {
+			if ($handle = opendir($this->kPathCache)) {
 				while ( false !== ( $file_name = readdir( $handle ) ) ) {
 					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0) {
-						unlink($this->config->getKPathCache().$file_name);
+						unlink($this->kPathCache.$file_name);
 					}
 				}
 				closedir($handle);
@@ -7824,6 +7827,7 @@ class Tcpdf {
 			'tsa_timestamp',
 			'tsa_data',
 			'config',
+			'kPathCache',
 			'fontsObject',
 			'imagesObject',
 			'staticObject'
