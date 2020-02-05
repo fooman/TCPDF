@@ -7835,7 +7835,7 @@ class Tcpdf {
 
 		foreach (array_keys(get_object_vars($this)) as $val) {
 			if ($destroyall OR !in_array($val, $preserve)) {
-				if ((!$preserve_objcopy OR ($val != 'objcopy')) AND ($val != 'file_id') AND isset($this->$val)) {
+				if ((!$preserve_objcopy OR ($val != 'objcopy')) AND ($val != 'file_id') AND ($val != 'kPathCache') AND isset($this->$val)) {
 					unset($this->$val);
 				}
 			}
