@@ -58,6 +58,13 @@ class Images {
 	 */
 	public $svginheritprop = array('clip-rule', 'color', 'color-interpolation', 'color-interpolation-filters', 'color-profile', 'color-rendering', 'cursor', 'direction', 'display', 'fill', 'fill-opacity', 'fill-rule', 'font', 'font-family', 'font-size', 'font-size-adjust', 'font-stretch', 'font-style', 'font-variant', 'font-weight', 'glyph-orientation-horizontal', 'glyph-orientation-vertical', 'image-rendering', 'kerning', 'letter-spacing', 'marker', 'marker-end', 'marker-mid', 'marker-start', 'pointer-events', 'shape-rendering', 'stroke', 'stroke-dasharray', 'stroke-dashoffset', 'stroke-linecap', 'stroke-linejoin', 'stroke-miterlimit', 'stroke-opacity', 'stroke-width', 'text-anchor', 'text-rendering', 'visibility', 'word-spacing', 'writing-mode');
 
+	protected $staticObject = null;
+
+	public function __construct(TcpdfStatic $staticObject)
+	{
+		$this->staticObject = $staticObject;
+    }
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 	/**
@@ -78,7 +85,7 @@ class Images {
 		}
 		if (empty($type)) {
 			$fileinfo = pathinfo($imgfile);
-			if (isset($fileinfo['extension']) AND (!TcpdfStatic::empty_string($fileinfo['extension']))) {
+			if (isset($fileinfo['extension']) AND (!$this->staticObject->empty_string($fileinfo['extension']))) {
 				$type = strtolower(trim($fileinfo['extension']));
 			}
 		}
@@ -161,7 +168,7 @@ class Images {
 	 */
 	public function _parsejpeg($file) {
 		// check if is a local file
-		if (!@TcpdfStatic::file_exists($file)) {
+		if (!@$this->staticObject->file_exists($file)) {
 			return false;
 		}
 		$a = getimagesize($file);
@@ -208,7 +215,7 @@ class Images {
 		$offset = 0;
 		while (($pos = strpos($data, "ICC_PROFILE\0", $offset)) !== false) {
 			// get ICC sequence length
-			$length = (TcpdfStatic::_getUSHORT($data, ($pos - 2)) - 16);
+			$length = ($this->staticObject->_getUSHORT($data, ($pos - 2)) - 16);
 			// marker sequence number
 			$msn = max(1, ord($data[($pos + 12)]));
 			// number of markers (total of APP2 used)
@@ -255,8 +262,8 @@ class Images {
 			//Incorrect PNG file
 			return false;
 		}
-		$w = TcpdfStatic::_freadint($f);
-		$h = TcpdfStatic::_freadint($f);
+		$w = $this->staticObject->_freadint($f);
+		$h = $this->staticObject->_freadint($f);
 		$bpc = ord(fread($f, 1));
 		$ct = ord(fread($f, 1));
 		if ($ct == 0) {
@@ -293,16 +300,16 @@ class Images {
 		$trns = '';
 		$data = '';
 		$icc = false;
-		$n = TcpdfStatic::_freadint($f);
+		$n = $this->staticObject->_freadint($f);
 		do {
 			$type = fread($f, 4);
 			if ($type == 'PLTE') {
 				// read palette
-				$pal = TcpdfStatic::rfread($f, $n);
+				$pal = $this->staticObject->rfread($f, $n);
 				fread($f, 4);
 			} elseif ($type == 'tRNS') {
 				// read transparency info
-				$t = TcpdfStatic::rfread($f, $n);
+				$t = $this->staticObject->rfread($f, $n);
 				if ($ct == 0) { // DeviceGray
 					$trns = array(ord($t[1]));
 				} elseif ($ct == 2) { // DeviceRGB
@@ -318,7 +325,7 @@ class Images {
 				fread($f, 4);
 			} elseif ($type == 'IDAT') {
 				// read image data block
-				$data .= TcpdfStatic::rfread($f, $n);
+				$data .= $this->staticObject->rfread($f, $n);
 				fread($f, 4);
 			} elseif ($type == 'iCCP') {
 				// skip profile name
@@ -333,16 +340,16 @@ class Images {
 					return false;
 				}
 				// read ICC Color Profile
-				$icc = TcpdfStatic::rfread($f, ($n - $len - 2));
+				$icc = $this->staticObject->rfread($f, ($n - $len - 2));
 				// decompress profile
 				$icc = gzuncompress($icc);
 				fread($f, 4);
 			} elseif ($type == 'IEND') {
 				break;
 			} else {
-				TcpdfStatic::rfread($f, $n + 4);
+				$this->staticObject->rfread($f, $n + 4);
 			}
-			$n = TcpdfStatic::_freadint($f);
+			$n = $this->staticObject->_freadint($f);
 		} while ($n);
 		if (($colspace == 'Indexed') AND (empty($pal))) {
 			// Missing palette

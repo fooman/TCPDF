@@ -1855,9 +1855,9 @@ class Tcpdf {
 		// TCPDF configuration
 		$this->config = $config;
 		$this->kPathCache = $config->getKPathCache();
-		$this->fontsObject = new Fonts($config);
-		$this->imagesObject = new Images($config);
 		$this->staticObject = new TcpdfStatic($config);
+		$this->fontsObject = new Fonts($config, $this->staticObject);
+		$this->imagesObject = new Images($this->staticObject);
 
 		/* Set internal character encoding to ASCII */
 		if (function_exists('mb_internal_encoding') AND mb_internal_encoding()) {

@@ -55,9 +55,12 @@ class Fonts {
 
 	protected $config;
 
-	public function __construct(TcpdfConfig $config)
+	protected $staticObject = null;
+
+	public function __construct(TcpdfConfig $config, TcpdfStatic $staticObject)
 	{
 		$this->config = $config;
+		$this->staticObject = $staticObject;
     }
 
 	/**
@@ -77,7 +80,7 @@ class Fonts {
 	 * @public
 	 */
 	public function addTTFfont($fontfile, $fonttype='', $enc='', $flags=32, $outpath='', $platid=3, $encid=1, $addcbbox=false, $link=false) {
-		if (!TcpdfStatic::file_exists($fontfile)) {
+		if (!$this->staticObject->file_exists($fontfile)) {
 			// Could not find file
 			return false;
 		}
@@ -102,7 +105,7 @@ class Fonts {
 			$outpath = $this->_getfontpath();
 		}
 		// check if this font already exist
-		if (@TcpdfStatic::file_exists($outpath.$font_name.'.php')) {
+		if (@$this->staticObject->file_exists($outpath.$font_name.'.php')) {
 			// this font already exist (delete it from fonts folder to rebuild it)
 			return $font_name;
 		}
@@ -113,7 +116,7 @@ class Fonts {
 		$fmetric['originalsize'] = strlen($font);
 		// autodetect font type
 		if (empty($fonttype)) {
-			if (TcpdfStatic::_getULONG($font, 0) == 0x10000) {
+			if ($this->staticObject->_getULONG($font, 0) == 0x10000) {
 				// True Type (Unicode or not)
 				$fonttype = 'TrueTypeUnicode';
 			} elseif (substr($font, 0, 4) == 'OTTO') {
@@ -193,7 +196,7 @@ class Fonts {
 			$data .= $encrypted;
 			// store compressed font
 			$fmetric['file'] .= '.z';
-			$fp = TcpdfStatic::fopenLocal($outpath.$fmetric['file'], 'wb');
+			$fp = $this->staticObject->fopenLocal($outpath.$fmetric['file'], 'wb');
 			fwrite($fp, gzcompress($data));
 			fclose($fp);
 			// get font info
@@ -362,7 +365,7 @@ class Fonts {
 		} else {
 			// ---------- TRUE TYPE ----------
 			$offset = 0; // offset position of the font data
-			if (TcpdfStatic::_getULONG($font, $offset) != 0x10000) {
+			if ($this->staticObject->_getULONG($font, $offset) != 0x10000) {
 				// sfnt version must be 0x00010000 for TrueType version 1.0.
 				return false;
 			}
@@ -373,14 +376,14 @@ class Fonts {
 				} else {
 					// store compressed font
 					$fmetric['file'] .= '.z';
-					$fp = TcpdfStatic::fopenLocal($outpath.$fmetric['file'], 'wb');
+					$fp = $this->staticObject->fopenLocal($outpath.$fmetric['file'], 'wb');
 					fwrite($fp, gzcompress($font));
 					fclose($fp);
 				}
 			}
 			$offset += 4;
 			// get number of tables
-			$numTables = TcpdfStatic::_getUSHORT($font, $offset);
+			$numTables = $this->staticObject->_getUSHORT($font, $offset);
 			$offset += 2;
 			// skip searchRange, entrySelector and rangeShift
 			$offset += 6;
@@ -392,37 +395,37 @@ class Fonts {
 				$tag = substr($font, $offset, 4);
 				$offset += 4;
 				$table[$tag] = array();
-				$table[$tag]['checkSum'] = TcpdfStatic::_getULONG($font, $offset);
+				$table[$tag]['checkSum'] = $this->staticObject->_getULONG($font, $offset);
 				$offset += 4;
-				$table[$tag]['offset'] = TcpdfStatic::_getULONG($font, $offset);
+				$table[$tag]['offset'] = $this->staticObject->_getULONG($font, $offset);
 				$offset += 4;
-				$table[$tag]['length'] = TcpdfStatic::_getULONG($font, $offset);
+				$table[$tag]['length'] = $this->staticObject->_getULONG($font, $offset);
 				$offset += 4;
 			}
 			// check magicNumber
 			$offset = $table['head']['offset'] + 12;
-			if (TcpdfStatic::_getULONG($font, $offset) != 0x5F0F3CF5) {
+			if ($this->staticObject->_getULONG($font, $offset) != 0x5F0F3CF5) {
 				// magicNumber must be 0x5F0F3CF5
 				return false;
 			}
 			$offset += 4;
 			$offset += 2; // skip flags
 			// get FUnits
-			$fmetric['unitsPerEm'] = TcpdfStatic::_getUSHORT($font, $offset);
+			$fmetric['unitsPerEm'] = $this->staticObject->_getUSHORT($font, $offset);
 			$offset += 2;
 			// units ratio constant
 			$urk = (1000 / $fmetric['unitsPerEm']);
 			$offset += 16; // skip created, modified
-			$xMin = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$xMin = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$yMin = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$yMin = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$xMax = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$xMax = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$yMax = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$yMax = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			$fmetric['bbox'] = ''.$xMin.' '.$yMin.' '.$xMax.' '.$yMax.'';
-			$macStyle = TcpdfStatic::_getUSHORT($font, $offset);
+			$macStyle = $this->staticObject->_getUSHORT($font, $offset);
 			$offset += 2;
 			// PDF font flags
 			$fmetric['Flags'] = $flags;
@@ -432,7 +435,7 @@ class Fonts {
 			}
 			// get offset mode (indexToLocFormat : 0 = short, 1 = long)
 			$offset = $table['head']['offset'] + 50;
-			$short_offset = (TcpdfStatic::_getSHORT($font, $offset) == 0);
+			$short_offset = ($this->staticObject->_getSHORT($font, $offset) == 0);
 			$offset += 2;
 			// get the offsets to the locations of the glyphs in the font, relative to the beginning of the glyphData table
 			$indexToLoc = array();
@@ -441,7 +444,7 @@ class Fonts {
 				// short version
 				$tot_num_glyphs = floor($table['loca']['length'] / 2); // numGlyphs + 1
 				for ($i = 0; $i < $tot_num_glyphs; ++$i) {
-					$indexToLoc[$i] = TcpdfStatic::_getUSHORT($font, $offset) * 2;
+					$indexToLoc[$i] = $this->staticObject->_getUSHORT($font, $offset) * 2;
 					if (isset($indexToLoc[($i - 1)]) && ($indexToLoc[$i] == $indexToLoc[($i - 1)])) {
 						// the last glyph didn't have an outline
 						unset($indexToLoc[($i - 1)]);
@@ -452,7 +455,7 @@ class Fonts {
 				// long version
 				$tot_num_glyphs = floor($table['loca']['length'] / 4); // numGlyphs + 1
 				for ($i = 0; $i < $tot_num_glyphs; ++$i) {
-					$indexToLoc[$i] = TcpdfStatic::_getULONG($font, $offset);
+					$indexToLoc[$i] = $this->staticObject->_getULONG($font, $offset);
 					if (isset($indexToLoc[($i - 1)]) && ($indexToLoc[$i] == $indexToLoc[($i - 1)])) {
 						// the last glyph didn't have an outline
 						unset($indexToLoc[($i - 1)]);
@@ -462,31 +465,31 @@ class Fonts {
 			}
 			// get glyphs indexes of chars from cmap table
 			$offset = $table['cmap']['offset'] + 2;
-			$numEncodingTables = TcpdfStatic::_getUSHORT($font, $offset);
+			$numEncodingTables = $this->staticObject->_getUSHORT($font, $offset);
 			$offset += 2;
 			$encodingTables = array();
 			for ($i = 0; $i < $numEncodingTables; ++$i) {
-				$encodingTables[$i]['platformID'] = TcpdfStatic::_getUSHORT($font, $offset);
+				$encodingTables[$i]['platformID'] = $this->staticObject->_getUSHORT($font, $offset);
 				$offset += 2;
-				$encodingTables[$i]['encodingID'] = TcpdfStatic::_getUSHORT($font, $offset);
+				$encodingTables[$i]['encodingID'] = $this->staticObject->_getUSHORT($font, $offset);
 				$offset += 2;
-				$encodingTables[$i]['offset'] = TcpdfStatic::_getULONG($font, $offset);
+				$encodingTables[$i]['offset'] = $this->staticObject->_getULONG($font, $offset);
 				$offset += 4;
 			}
 			// ---------- get os/2 metrics ----------
 			$offset = $table['OS/2']['offset'];
 			$offset += 2; // skip version
 			// xAvgCharWidth
-			$fmetric['AvgWidth'] = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$fmetric['AvgWidth'] = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			// usWeightClass
-			$usWeightClass = round(TcpdfStatic::_getUFWORD($font, $offset) * $urk);
+			$usWeightClass = round($this->staticObject->_getUFWORD($font, $offset) * $urk);
 			// estimate StemV and StemH (400 = usWeightClass for Normal - Regular font)
 			$fmetric['StemV'] = round((70 * $usWeightClass) / 400);
 			$fmetric['StemH'] = round((30 * $usWeightClass) / 400);
 			$offset += 2;
 			$offset += 2; // usWidthClass
-			$fsType = TcpdfStatic::_getSHORT($font, $offset);
+			$fsType = $this->staticObject->_getSHORT($font, $offset);
 			$offset += 2;
 			if ($fsType == 2) {
 				// This Font cannot be modified, embedded or exchanged in any manner without first obtaining permission of the legal owner.
@@ -497,22 +500,22 @@ class Fonts {
 			$offset = $table['name']['offset'];
 			$offset += 2; // skip Format selector (=0).
 			// Number of NameRecords that follow n.
-			$numNameRecords = TcpdfStatic::_getUSHORT($font, $offset);
+			$numNameRecords = $this->staticObject->_getUSHORT($font, $offset);
 			$offset += 2;
 			// Offset to start of string storage (from start of table).
-			$stringStorageOffset = TcpdfStatic::_getUSHORT($font, $offset);
+			$stringStorageOffset = $this->staticObject->_getUSHORT($font, $offset);
 			$offset += 2;
 			for ($i = 0; $i < $numNameRecords; ++$i) {
 				$offset += 6; // skip Platform ID, Platform-specific encoding ID, Language ID.
 				// Name ID.
-				$nameID = TcpdfStatic::_getUSHORT($font, $offset);
+				$nameID = $this->staticObject->_getUSHORT($font, $offset);
 				$offset += 2;
 				if ($nameID == 6) {
 					// String length (in bytes).
-					$stringLength = TcpdfStatic::_getUSHORT($font, $offset);
+					$stringLength = $this->staticObject->_getUSHORT($font, $offset);
 					$offset += 2;
 					// String offset from start of storage area (in bytes).
-					$stringOffset = TcpdfStatic::_getUSHORT($font, $offset);
+					$stringOffset = $this->staticObject->_getUSHORT($font, $offset);
 					$offset += 2;
 					$offset = ($table['name']['offset'] + $stringStorageOffset + $stringOffset);
 					$fmetric['name'] = substr($font, $offset, $stringLength);
@@ -528,13 +531,13 @@ class Fonts {
 			// ---------- get post data ----------
 			$offset = $table['post']['offset'];
 			$offset += 4; // skip Format Type
-			$fmetric['italicAngle'] = TcpdfStatic::_getFIXED($font, $offset);
+			$fmetric['italicAngle'] = $this->staticObject->_getFIXED($font, $offset);
 			$offset += 4;
-			$fmetric['underlinePosition'] = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$fmetric['underlinePosition'] = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$fmetric['underlineThickness'] = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$fmetric['underlineThickness'] = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
-			$isFixedPitch = (TcpdfStatic::_getULONG($font, $offset) == 0) ? false : true;
+			$isFixedPitch = ($this->staticObject->_getULONG($font, $offset) == 0) ? false : true;
 			$offset += 2;
 			if ($isFixedPitch) {
 				$fmetric['Flags'] |= 1;
@@ -543,38 +546,38 @@ class Fonts {
 			$offset = $table['hhea']['offset'];
 			$offset += 4; // skip Table version number
 			// Ascender
-			$fmetric['Ascent'] = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$fmetric['Ascent'] = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			// Descender
-			$fmetric['Descent'] = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$fmetric['Descent'] = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			// LineGap
-			$fmetric['Leading'] = round(TcpdfStatic::_getFWORD($font, $offset) * $urk);
+			$fmetric['Leading'] = round($this->staticObject->_getFWORD($font, $offset) * $urk);
 			$offset += 2;
 			// advanceWidthMax
-			$fmetric['MaxWidth'] = round(TcpdfStatic::_getUFWORD($font, $offset) * $urk);
+			$fmetric['MaxWidth'] = round($this->staticObject->_getUFWORD($font, $offset) * $urk);
 			$offset += 2;
 			$offset += 22; // skip some values
 			// get the number of hMetric entries in hmtx table
-			$numberOfHMetrics = TcpdfStatic::_getUSHORT($font, $offset);
+			$numberOfHMetrics = $this->staticObject->_getUSHORT($font, $offset);
 			// ---------- get maxp data ----------
 			$offset = $table['maxp']['offset'];
 			$offset += 4; // skip Table version number
 			// get the the number of glyphs in the font.
-			$numGlyphs = TcpdfStatic::_getUSHORT($font, $offset);
+			$numGlyphs = $this->staticObject->_getUSHORT($font, $offset);
 			// ---------- get CIDToGIDMap ----------
 			$ctg = array();
 			foreach ($encodingTables as $enctable) {
 				// get only specified Platform ID and Encoding ID
 				if (($enctable['platformID'] == $platid) AND ($enctable['encodingID'] == $encid)) {
 					$offset = $table['cmap']['offset'] + $enctable['offset'];
-					$format = TcpdfStatic::_getUSHORT($font, $offset);
+					$format = $this->staticObject->_getUSHORT($font, $offset);
 					$offset += 2;
 					switch ($format) {
 						case 0: { // Format 0: Byte encoding table
 							$offset += 4; // skip length and version/language
 							for ($c = 0; $c < 256; ++$c) {
-								$g = TcpdfStatic::_getBYTE($font, $offset);
+								$g = $this->staticObject->_getBYTE($font, $offset);
 								$ctg[$c] = $g;
 								++$offset;
 							}
@@ -585,7 +588,7 @@ class Fonts {
 							$numSubHeaders = 0;
 							for ($i = 0; $i < 256; ++$i) {
 								// Array that maps high bytes to subHeaders: value is subHeader index * 8.
-								$subHeaderKeys[$i] = (TcpdfStatic::_getUSHORT($font, $offset) / 8);
+								$subHeaderKeys[$i] = ($this->staticObject->_getUSHORT($font, $offset) / 8);
 								$offset += 2;
 								if ($numSubHeaders < $subHeaderKeys[$i]) {
 									$numSubHeaders = $subHeaderKeys[$i];
@@ -597,20 +600,20 @@ class Fonts {
 							$subHeaders = array();
 							$numGlyphIndexArray = 0;
 							for ($k = 0; $k < $numSubHeaders; ++$k) {
-								$subHeaders[$k]['firstCode'] = TcpdfStatic::_getUSHORT($font, $offset);
+								$subHeaders[$k]['firstCode'] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
-								$subHeaders[$k]['entryCount'] = TcpdfStatic::_getUSHORT($font, $offset);
+								$subHeaders[$k]['entryCount'] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
-								$subHeaders[$k]['idDelta'] = TcpdfStatic::_getUSHORT($font, $offset);
+								$subHeaders[$k]['idDelta'] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
-								$subHeaders[$k]['idRangeOffset'] = TcpdfStatic::_getUSHORT($font, $offset);
+								$subHeaders[$k]['idRangeOffset'] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
 								$subHeaders[$k]['idRangeOffset'] -= (2 + (($numSubHeaders - $k - 1) * 8));
 								$subHeaders[$k]['idRangeOffset'] /= 2;
 								$numGlyphIndexArray += $subHeaders[$k]['entryCount'];
 							}
 							for ($k = 0; $k < $numGlyphIndexArray; ++$k) {
-								$glyphIndexArray[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+								$glyphIndexArray[$k] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							for ($i = 0; $i < 256; ++$i) {
@@ -639,37 +642,37 @@ class Fonts {
 							break;
 						}
 						case 4: { // Format 4: Segment mapping to delta values
-							$length = TcpdfStatic::_getUSHORT($font, $offset);
+							$length = $this->staticObject->_getUSHORT($font, $offset);
 							$offset += 2;
 							$offset += 2; // skip version/language
-							$segCount = floor(TcpdfStatic::_getUSHORT($font, $offset) / 2);
+							$segCount = floor($this->staticObject->_getUSHORT($font, $offset) / 2);
 							$offset += 2;
 							$offset += 6; // skip searchRange, entrySelector, rangeShift
 							$endCount = array(); // array of end character codes for each segment
 							for ($k = 0; $k < $segCount; ++$k) {
-								$endCount[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+								$endCount[$k] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							$offset += 2; // skip reservedPad
 							$startCount = array(); // array of start character codes for each segment
 							for ($k = 0; $k < $segCount; ++$k) {
-								$startCount[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+								$startCount[$k] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							$idDelta = array(); // delta for all character codes in segment
 							for ($k = 0; $k < $segCount; ++$k) {
-								$idDelta[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+								$idDelta[$k] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							$idRangeOffset = array(); // Offsets into glyphIdArray or 0
 							for ($k = 0; $k < $segCount; ++$k) {
-								$idRangeOffset[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+								$idRangeOffset[$k] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							$gidlen = (floor($length / 2) - 8 - (4 * $segCount));
 							$glyphIdArray = array(); // glyph index array
 							for ($k = 0; $k < $gidlen; ++$k) {
-								$glyphIdArray[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+								$glyphIdArray[$k] = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
 							}
 							for ($k = 0; $k < $segCount - 1; ++$k) {
@@ -690,13 +693,13 @@ class Fonts {
 						}
 						case 6: { // Format 6: Trimmed table mapping
 							$offset += 4; // skip length and version/language
-							$firstCode = TcpdfStatic::_getUSHORT($font, $offset);
+							$firstCode = $this->staticObject->_getUSHORT($font, $offset);
 							$offset += 2;
-							$entryCount = TcpdfStatic::_getUSHORT($font, $offset);
+							$entryCount = $this->staticObject->_getUSHORT($font, $offset);
 							$offset += 2;
 							for ($k = 0; $k < $entryCount; ++$k) {
 								$c = ($k + $firstCode);
-								$g = TcpdfStatic::_getUSHORT($font, $offset);
+								$g = $this->staticObject->_getUSHORT($font, $offset);
 								$offset += 2;
 								$ctg[$c] = $g;
 							}
@@ -705,17 +708,17 @@ class Fonts {
 						case 8: { // Format 8: Mixed 16-bit and 32-bit coverage
 							$offset += 10; // skip reserved, length and version/language
 							for ($k = 0; $k < 8192; ++$k) {
-								$is32[$k] = TcpdfStatic::_getBYTE($font, $offset);
+								$is32[$k] = $this->staticObject->_getBYTE($font, $offset);
 								++$offset;
 							}
-							$nGroups = TcpdfStatic::_getULONG($font, $offset);
+							$nGroups = $this->staticObject->_getULONG($font, $offset);
 							$offset += 4;
 							for ($i = 0; $i < $nGroups; ++$i) {
-								$startCharCode = TcpdfStatic::_getULONG($font, $offset);
+								$startCharCode = $this->staticObject->_getULONG($font, $offset);
 								$offset += 4;
-								$endCharCode = TcpdfStatic::_getULONG($font, $offset);
+								$endCharCode = $this->staticObject->_getULONG($font, $offset);
 								$offset += 4;
-								$startGlyphID = TcpdfStatic::_getULONG($font, $offset);
+								$startGlyphID = $this->staticObject->_getULONG($font, $offset);
 								$offset += 4;
 								for ($k = $startCharCode; $k <= $endCharCode; ++$k) {
 									$is32idx = floor($c / 8);
@@ -736,13 +739,13 @@ class Fonts {
 						}
 						case 10: { // Format 10: Trimmed array
 							$offset += 10; // skip reserved, length and version/language
-							$startCharCode = TcpdfStatic::_getULONG($font, $offset);
+							$startCharCode = $this->staticObject->_getULONG($font, $offset);
 							$offset += 4;
-							$numChars = TcpdfStatic::_getULONG($font, $offset);
+							$numChars = $this->staticObject->_getULONG($font, $offset);
 							$offset += 4;
 							for ($k = 0; $k < $numChars; ++$k) {
 								$c = ($k + $startCharCode);
-								$g = TcpdfStatic::_getUSHORT($font, $offset);
+								$g = $this->staticObject->_getUSHORT($font, $offset);
 								$ctg[$c] = $g;
 								$offset += 2;
 							}
@@ -750,14 +753,14 @@ class Fonts {
 						}
 						case 12: { // Format 12: Segmented coverage
 							$offset += 10; // skip length and version/language
-							$nGroups = TcpdfStatic::_getULONG($font, $offset);
+							$nGroups = $this->staticObject->_getULONG($font, $offset);
 							$offset += 4;
 							for ($k = 0; $k < $nGroups; ++$k) {
-								$startCharCode = TcpdfStatic::_getULONG($font, $offset);
+								$startCharCode = $this->staticObject->_getULONG($font, $offset);
 								$offset += 4;
-								$endCharCode = TcpdfStatic::_getULONG($font, $offset);
+								$endCharCode = $this->staticObject->_getULONG($font, $offset);
 								$offset += 4;
-								$startGlyphCode = TcpdfStatic::_getULONG($font, $offset);
+								$startGlyphCode = $this->staticObject->_getULONG($font, $offset);
 								$offset += 4;
 								for ($c = $startCharCode; $c <= $endCharCode; ++$c) {
 									$ctg[$c] = $startGlyphCode;
@@ -782,23 +785,23 @@ class Fonts {
 			}
 			// get xHeight (height of x)
 			$offset = ($table['glyf']['offset'] + $indexToLoc[$ctg[120]] + 4);
-			$yMin = TcpdfStatic::_getFWORD($font, $offset);
+			$yMin = $this->staticObject->_getFWORD($font, $offset);
 			$offset += 4;
-			$yMax = TcpdfStatic::_getFWORD($font, $offset);
+			$yMax = $this->staticObject->_getFWORD($font, $offset);
 			$offset += 2;
 			$fmetric['XHeight'] = round(($yMax - $yMin) * $urk);
 			// get CapHeight (height of H)
 			$offset = ($table['glyf']['offset'] + $indexToLoc[$ctg[72]] + 4);
-			$yMin = TcpdfStatic::_getFWORD($font, $offset);
+			$yMin = $this->staticObject->_getFWORD($font, $offset);
 			$offset += 4;
-			$yMax = TcpdfStatic::_getFWORD($font, $offset);
+			$yMax = $this->staticObject->_getFWORD($font, $offset);
 			$offset += 2;
 			$fmetric['CapHeight'] = round(($yMax - $yMin) * $urk);
 			// ceate widths array
 			$cw = array();
 			$offset = $table['hmtx']['offset'];
 			for ($i = 0 ; $i < $numberOfHMetrics; ++$i) {
-				$cw[$i] = round(TcpdfStatic::_getUFWORD($font, $offset) * $urk);
+				$cw[$i] = round($this->staticObject->_getUFWORD($font, $offset) * $urk);
 				$offset += 4; // skip lsb
 			}
 			if ($numberOfHMetrics < $numGlyphs) {
@@ -815,10 +818,10 @@ class Fonts {
 					}
 					if ($addcbbox AND isset($indexToLoc[$ctg[$cid]])) {
 						$offset = ($table['glyf']['offset'] + $indexToLoc[$ctg[$cid]]);
-						$xMin = round(TcpdfStatic::_getFWORD($font, $offset + 2) * $urk);
-						$yMin = round(TcpdfStatic::_getFWORD($font, $offset + 4) * $urk);
-						$xMax = round(TcpdfStatic::_getFWORD($font, $offset + 6) * $urk);
-						$yMax = round(TcpdfStatic::_getFWORD($font, $offset + 8) * $urk);
+						$xMin = round($this->staticObject->_getFWORD($font, $offset + 2) * $urk);
+						$yMin = round($this->staticObject->_getFWORD($font, $offset + 4) * $urk);
+						$xMax = round($this->staticObject->_getFWORD($font, $offset + 6) * $urk);
+						$yMax = round($this->staticObject->_getFWORD($font, $offset + 8) * $urk);
 						$fmetric['cbbox'] .= ','.$cid.'=>array('.$xMin.','.$yMin.','.$xMax.','.$yMax.')';
 					}
 				}
@@ -892,7 +895,7 @@ class Fonts {
 					$cidtogidmap = $this->updateCIDtoGIDmap($cidtogidmap, $cid, $ctg[$cid]);
 				}
 				// store compressed CIDToGIDMap
-				$fp = TcpdfStatic::fopenLocal($outpath.$fmetric['ctg'], 'wb');
+				$fp = $this->staticObject->fopenLocal($outpath.$fmetric['ctg'], 'wb');
 				fwrite($fp, gzcompress($cidtogidmap));
 				fclose($fp);
 			}
@@ -918,7 +921,7 @@ class Fonts {
 		$pfile .= '$cw=array('.substr($fmetric['cw'], 1).');'."\n";
 		$pfile .= '// --- EOF ---'."\n";
 		// store file
-		$fp = TcpdfStatic::fopenLocal($outpath.$font_name.'.php', 'w');
+		$fp = $this->staticObject->fopenLocal($outpath.$font_name.'.php', 'w');
 		fwrite($fp, $pfile);
 		fclose($fp);
 		// return TCPDF font name
@@ -959,13 +962,13 @@ class Fonts {
 	public function _getTrueTypeFontSubset($font, $subsetchars) {
 		ksort($subsetchars);
 		$offset = 0; // offset position of the font data
-		if (TcpdfStatic::_getULONG($font, $offset) != 0x10000) {
+		if ($this->staticObject->_getULONG($font, $offset) != 0x10000) {
 			// sfnt version must be 0x00010000 for TrueType version 1.0.
 			return $font;
 		}
 		$offset += 4;
 		// get number of tables
-		$numTables = TcpdfStatic::_getUSHORT($font, $offset);
+		$numTables = $this->staticObject->_getUSHORT($font, $offset);
 		$offset += 2;
 		// skip searchRange, entrySelector and rangeShift
 		$offset += 6;
@@ -977,23 +980,23 @@ class Fonts {
 			$tag = substr($font, $offset, 4);
 			$offset += 4;
 			$table[$tag] = array();
-			$table[$tag]['checkSum'] = TcpdfStatic::_getULONG($font, $offset);
+			$table[$tag]['checkSum'] = $this->staticObject->_getULONG($font, $offset);
 			$offset += 4;
-			$table[$tag]['offset'] = TcpdfStatic::_getULONG($font, $offset);
+			$table[$tag]['offset'] = $this->staticObject->_getULONG($font, $offset);
 			$offset += 4;
-			$table[$tag]['length'] = TcpdfStatic::_getULONG($font, $offset);
+			$table[$tag]['length'] = $this->staticObject->_getULONG($font, $offset);
 			$offset += 4;
 		}
 		// check magicNumber
 		$offset = $table['head']['offset'] + 12;
-		if (TcpdfStatic::_getULONG($font, $offset) != 0x5F0F3CF5) {
+		if ($this->staticObject->_getULONG($font, $offset) != 0x5F0F3CF5) {
 			// magicNumber must be 0x5F0F3CF5
 			return $font;
 		}
 		$offset += 4;
 		// get offset mode (indexToLocFormat : 0 = short, 1 = long)
 		$offset = $table['head']['offset'] + 50;
-		$short_offset = (TcpdfStatic::_getSHORT($font, $offset) == 0);
+		$short_offset = ($this->staticObject->_getSHORT($font, $offset) == 0);
 		$offset += 2;
 		// get the offsets to the locations of the glyphs in the font, relative to the beginning of the glyphData table
 		$indexToLoc = array();
@@ -1002,14 +1005,14 @@ class Fonts {
 			// short version
 			$tot_num_glyphs = floor($table['loca']['length'] / 2); // numGlyphs + 1
 			for ($i = 0; $i < $tot_num_glyphs; ++$i) {
-				$indexToLoc[$i] = TcpdfStatic::_getUSHORT($font, $offset) * 2;
+				$indexToLoc[$i] = $this->staticObject->_getUSHORT($font, $offset) * 2;
 				$offset += 2;
 			}
 		} else {
 			// long version
 			$tot_num_glyphs = ($table['loca']['length'] / 4); // numGlyphs + 1
 			for ($i = 0; $i < $tot_num_glyphs; ++$i) {
-				$indexToLoc[$i] = TcpdfStatic::_getULONG($font, $offset);
+				$indexToLoc[$i] = $this->staticObject->_getULONG($font, $offset);
 				$offset += 4;
 			}
 		}
@@ -1017,28 +1020,28 @@ class Fonts {
 		$subsetglyphs = array(); // glyph IDs on key
 		$subsetglyphs[0] = true; // character codes that do not correspond to any glyph in the font should be mapped to glyph index 0
 		$offset = $table['cmap']['offset'] + 2;
-		$numEncodingTables = TcpdfStatic::_getUSHORT($font, $offset);
+		$numEncodingTables = $this->staticObject->_getUSHORT($font, $offset);
 		$offset += 2;
 		$encodingTables = array();
 		for ($i = 0; $i < $numEncodingTables; ++$i) {
-			$encodingTables[$i]['platformID'] = TcpdfStatic::_getUSHORT($font, $offset);
+			$encodingTables[$i]['platformID'] = $this->staticObject->_getUSHORT($font, $offset);
 			$offset += 2;
-			$encodingTables[$i]['encodingID'] = TcpdfStatic::_getUSHORT($font, $offset);
+			$encodingTables[$i]['encodingID'] = $this->staticObject->_getUSHORT($font, $offset);
 			$offset += 2;
-			$encodingTables[$i]['offset'] = TcpdfStatic::_getULONG($font, $offset);
+			$encodingTables[$i]['offset'] = $this->staticObject->_getULONG($font, $offset);
 			$offset += 4;
 		}
 		foreach ($encodingTables as $enctable) {
 			// get all platforms and encodings
 			$offset = $table['cmap']['offset'] + $enctable['offset'];
-			$format = TcpdfStatic::_getUSHORT($font, $offset);
+			$format = $this->staticObject->_getUSHORT($font, $offset);
 			$offset += 2;
 			switch ($format) {
 				case 0: { // Format 0: Byte encoding table
 					$offset += 4; // skip length and version/language
 					for ($c = 0; $c < 256; ++$c) {
 						if (isset($subsetchars[$c])) {
-							$g = TcpdfStatic::_getBYTE($font, $offset);
+							$g = $this->staticObject->_getBYTE($font, $offset);
 							$subsetglyphs[$g] = true;
 						}
 						++$offset;
@@ -1050,7 +1053,7 @@ class Fonts {
 					$numSubHeaders = 0;
 					for ($i = 0; $i < 256; ++$i) {
 						// Array that maps high bytes to subHeaders: value is subHeader index * 8.
-						$subHeaderKeys[$i] = (TcpdfStatic::_getUSHORT($font, $offset) / 8);
+						$subHeaderKeys[$i] = ($this->staticObject->_getUSHORT($font, $offset) / 8);
 						$offset += 2;
 						if ($numSubHeaders < $subHeaderKeys[$i]) {
 							$numSubHeaders = $subHeaderKeys[$i];
@@ -1062,20 +1065,20 @@ class Fonts {
 					$subHeaders = array();
 					$numGlyphIndexArray = 0;
 					for ($k = 0; $k < $numSubHeaders; ++$k) {
-						$subHeaders[$k]['firstCode'] = TcpdfStatic::_getUSHORT($font, $offset);
+						$subHeaders[$k]['firstCode'] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
-						$subHeaders[$k]['entryCount'] = TcpdfStatic::_getUSHORT($font, $offset);
+						$subHeaders[$k]['entryCount'] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
-						$subHeaders[$k]['idDelta'] = TcpdfStatic::_getUSHORT($font, $offset);
+						$subHeaders[$k]['idDelta'] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
-						$subHeaders[$k]['idRangeOffset'] = TcpdfStatic::_getUSHORT($font, $offset);
+						$subHeaders[$k]['idRangeOffset'] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
 						$subHeaders[$k]['idRangeOffset'] -= (2 + (($numSubHeaders - $k - 1) * 8));
 						$subHeaders[$k]['idRangeOffset'] /= 2;
 						$numGlyphIndexArray += $subHeaders[$k]['entryCount'];
 					}
 					for ($k = 0; $k < $numGlyphIndexArray; ++$k) {
-						$glyphIndexArray[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+						$glyphIndexArray[$k] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					for ($i = 0; $i < 256; ++$i) {
@@ -1108,37 +1111,37 @@ class Fonts {
 					break;
 				}
 				case 4: { // Format 4: Segment mapping to delta values
-					$length = TcpdfStatic::_getUSHORT($font, $offset);
+					$length = $this->staticObject->_getUSHORT($font, $offset);
 					$offset += 2;
 					$offset += 2; // skip version/language
-					$segCount = floor(TcpdfStatic::_getUSHORT($font, $offset) / 2);
+					$segCount = floor($this->staticObject->_getUSHORT($font, $offset) / 2);
 					$offset += 2;
 					$offset += 6; // skip searchRange, entrySelector, rangeShift
 					$endCount = array(); // array of end character codes for each segment
 					for ($k = 0; $k < $segCount; ++$k) {
-						$endCount[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+						$endCount[$k] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					$offset += 2; // skip reservedPad
 					$startCount = array(); // array of start character codes for each segment
 					for ($k = 0; $k < $segCount; ++$k) {
-						$startCount[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+						$startCount[$k] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					$idDelta = array(); // delta for all character codes in segment
 					for ($k = 0; $k < $segCount; ++$k) {
-						$idDelta[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+						$idDelta[$k] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					$idRangeOffset = array(); // Offsets into glyphIdArray or 0
 					for ($k = 0; $k < $segCount; ++$k) {
-						$idRangeOffset[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+						$idRangeOffset[$k] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					$gidlen = (floor($length / 2) - 8 - (4 * $segCount));
 					$glyphIdArray = array(); // glyph index array
 					for ($k = 0; $k < $gidlen; ++$k) {
-						$glyphIdArray[$k] = TcpdfStatic::_getUSHORT($font, $offset);
+						$glyphIdArray[$k] = $this->staticObject->_getUSHORT($font, $offset);
 						$offset += 2;
 					}
 					for ($k = 0; $k < $segCount; ++$k) {
@@ -1161,14 +1164,14 @@ class Fonts {
 				}
 				case 6: { // Format 6: Trimmed table mapping
 					$offset += 4; // skip length and version/language
-					$firstCode = TcpdfStatic::_getUSHORT($font, $offset);
+					$firstCode = $this->staticObject->_getUSHORT($font, $offset);
 					$offset += 2;
-					$entryCount = TcpdfStatic::_getUSHORT($font, $offset);
+					$entryCount = $this->staticObject->_getUSHORT($font, $offset);
 					$offset += 2;
 					for ($k = 0; $k < $entryCount; ++$k) {
 						$c = ($k + $firstCode);
 						if (isset($subsetchars[$c])) {
-							$g = TcpdfStatic::_getUSHORT($font, $offset);
+							$g = $this->staticObject->_getUSHORT($font, $offset);
 							$subsetglyphs[$g] = true;
 						}
 						$offset += 2;
@@ -1178,17 +1181,17 @@ class Fonts {
 				case 8: { // Format 8: Mixed 16-bit and 32-bit coverage
 					$offset += 10; // skip reserved, length and version/language
 					for ($k = 0; $k < 8192; ++$k) {
-						$is32[$k] = TcpdfStatic::_getBYTE($font, $offset);
+						$is32[$k] = $this->staticObject->_getBYTE($font, $offset);
 						++$offset;
 					}
-					$nGroups = TcpdfStatic::_getULONG($font, $offset);
+					$nGroups = $this->staticObject->_getULONG($font, $offset);
 					$offset += 4;
 					for ($i = 0; $i < $nGroups; ++$i) {
-						$startCharCode = TcpdfStatic::_getULONG($font, $offset);
+						$startCharCode = $this->staticObject->_getULONG($font, $offset);
 						$offset += 4;
-						$endCharCode = TcpdfStatic::_getULONG($font, $offset);
+						$endCharCode = $this->staticObject->_getULONG($font, $offset);
 						$offset += 4;
-						$startGlyphID = TcpdfStatic::_getULONG($font, $offset);
+						$startGlyphID = $this->staticObject->_getULONG($font, $offset);
 						$offset += 4;
 						for ($k = $startCharCode; $k <= $endCharCode; ++$k) {
 							$is32idx = floor($c / 8);
@@ -1211,14 +1214,14 @@ class Fonts {
 				}
 				case 10: { // Format 10: Trimmed array
 					$offset += 10; // skip reserved, length and version/language
-					$startCharCode = TcpdfStatic::_getULONG($font, $offset);
+					$startCharCode = $this->staticObject->_getULONG($font, $offset);
 					$offset += 4;
-					$numChars = TcpdfStatic::_getULONG($font, $offset);
+					$numChars = $this->staticObject->_getULONG($font, $offset);
 					$offset += 4;
 					for ($k = 0; $k < $numChars; ++$k) {
 						$c = ($k + $startCharCode);
 						if (isset($subsetchars[$c])) {
-							$g = TcpdfStatic::_getUSHORT($font, $offset);
+							$g = $this->staticObject->_getUSHORT($font, $offset);
 							$subsetglyphs[$g] = true;
 						}
 						$offset += 2;
@@ -1227,14 +1230,14 @@ class Fonts {
 				}
 				case 12: { // Format 12: Segmented coverage
 					$offset += 10; // skip length and version/language
-					$nGroups = TcpdfStatic::_getULONG($font, $offset);
+					$nGroups = $this->staticObject->_getULONG($font, $offset);
 					$offset += 4;
 					for ($k = 0; $k < $nGroups; ++$k) {
-						$startCharCode = TcpdfStatic::_getULONG($font, $offset);
+						$startCharCode = $this->staticObject->_getULONG($font, $offset);
 						$offset += 4;
-						$endCharCode = TcpdfStatic::_getULONG($font, $offset);
+						$endCharCode = $this->staticObject->_getULONG($font, $offset);
 						$offset += 4;
-						$startGlyphCode = TcpdfStatic::_getULONG($font, $offset);
+						$startGlyphCode = $this->staticObject->_getULONG($font, $offset);
 						$offset += 4;
 						for ($c = $startCharCode; $c <= $endCharCode; ++$c) {
 							if (isset($subsetchars[$c])) {
@@ -1263,14 +1266,14 @@ class Fonts {
 			foreach ($sga as $key => $val) {
 				if (isset($indexToLoc[$key])) {
 					$offset = ($table['glyf']['offset'] + $indexToLoc[$key]);
-					$numberOfContours = TcpdfStatic::_getSHORT($font, $offset);
+					$numberOfContours = $this->staticObject->_getSHORT($font, $offset);
 					$offset += 2;
 					if ($numberOfContours < 0) { // composite glyph
 						$offset += 8; // skip xMin, yMin, xMax, yMax
 						do {
-							$flags = TcpdfStatic::_getUSHORT($font, $offset);
+							$flags = $this->staticObject->_getUSHORT($font, $offset);
 							$offset += 2;
-							$glyphIndex = TcpdfStatic::_getUSHORT($font, $offset);
+							$glyphIndex = $this->staticObject->_getUSHORT($font, $offset);
 							$offset += 2;
 							if (!isset($subsetglyphs[$glyphIndex])) {
 								// add missing glyphs
@@ -1551,11 +1554,11 @@ class Fonts {
 	public function getFontFullPath($file, $fontdir=false) {
 		$fontfile = '';
 		// search files on various directories
-		if (($fontdir !== false) AND @TcpdfStatic::file_exists($fontdir.$file)) {
+		if (($fontdir !== false) AND @$this->staticObject->file_exists($fontdir.$file)) {
 			$fontfile = $fontdir.$file;
-		} elseif (@TcpdfStatic::file_exists($this->_getfontpath().$file)) {
+		} elseif (@$this->staticObject->file_exists($this->_getfontpath().$file)) {
 			$fontfile = $this->_getfontpath().$file;
-		} elseif (@TcpdfStatic::file_exists($file)) {
+		} elseif (@$this->staticObject->file_exists($file)) {
 			$fontfile = $file;
 		}
 		return $fontfile;
@@ -2006,7 +2009,7 @@ class Fonts {
 	public function UTF8StringToArray($str, $isunicode=true, &$currentfont) {
 		if ($isunicode) {
 			// requires PCRE unicode support turned on
-			$chars = TcpdfStatic::pregSplit('//','u', $str, -1, PREG_SPLIT_NO_EMPTY);
+			$chars = $this->staticObject->pregSplit('//','u', $str, -1, PREG_SPLIT_NO_EMPTY);
 			$carr = array_map(array(__CLASS__, 'uniord'), $chars);
 		} else {
 			$chars = str_split($str);
@@ -2103,7 +2106,7 @@ class Fonts {
 		$pel = 0;
 		// max level
 		$maxlevel = 0;
-		if (TcpdfStatic::empty_string($str)) {
+		if ($this->staticObject->empty_string($str)) {
 			// create string from array
 			$str = $this->UTF8ArrSubString($ta, '', '', $isunicode);
 		}
