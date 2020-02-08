@@ -6,8 +6,7 @@ class Example001Test extends Common
     const EXAMPLE_NR = '001';
 
     public function testPdfOutput()
-    {      
-        var_dump($this->config);
+    {
         // create new PDF document
         $pdf = new Fooman\Tcpdf\Tcpdf(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, true, 'UTF-8', false, false, $this->config);
 
