@@ -7,6 +7,7 @@ class Example001Test extends Common
 
     public function testPdfOutput()
     {      
+        var_dump($this->config);
         // create new PDF document
         $pdf = new Fooman\Tcpdf\Tcpdf(self::PDF_PAGE_ORIENTATION, self::PDF_UNIT, self::PDF_PAGE_FORMAT, true, 'UTF-8', false, false, $this->config);
 
@@ -18,7 +19,7 @@ class Example001Test extends Common
         $pdf->SetKeywords('TCPDF, PDF, example, test, guide');
 
         // set default header data
-        $pdf->SetHeaderData(self::PDF_HEADER_LOGO, self::PDF_HEADER_LOGO_WIDTH, self::PDF_HEADER_TITLE.' 001', self::PDF_HEADER_STRING, array(0,64,255), array(0,64,128));
+        $pdf->SetHeaderData($this->config->getPdfHeaderLogo(), $this->config->getPdfHeaderLogoWidth(), self::PDF_HEADER_TITLE.' 001', self::PDF_HEADER_STRING, array(0,64,255), array(0,64,128));
         $pdf->setFooterData(array(0,64,0), array(0,64,128));
 
         // set header and footer fonts

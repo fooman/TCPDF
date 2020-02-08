@@ -40,6 +40,16 @@ class TcpdfConfig
         return $this->config['PDF_FONT_NAME_MAIN'];
     }
 
+    public function getPdfHeaderLogo()
+    {
+        return $this->config['PDF_HEADER_LOGO'];
+    }
+
+    public function getPdfHeaderLogoWidth()
+    {
+        return $this->config['PDF_HEADER_LOGO_WIDTH'];
+    }
+
     public function getKPathMain()
     {
         return $this->config['K_PATH_MAIN'];

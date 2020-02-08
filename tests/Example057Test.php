@@ -20,7 +20,7 @@ class Example057Test extends Common
         $pdf->SetKeywords('TCPDF, PDF, example, test, guide');
 
 // set default header data
-        $pdf->SetHeaderData(self::PDF_HEADER_LOGO, self::PDF_HEADER_LOGO_WIDTH, self::PDF_HEADER_TITLE.' 057', self::PDF_HEADER_STRING);
+        $pdf->SetHeaderData($this->config->getPdfHeaderLogo(), $this->config->getPdfHeaderLogoWidth(), self::PDF_HEADER_TITLE.' 057', self::PDF_HEADER_STRING);
 
 // set header and footer fonts
         $pdf->setHeaderFont(Array(self::PDF_FONT_NAME_MAIN, '', self::PDF_FONT_SIZE_MAIN));
