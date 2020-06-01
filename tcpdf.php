@@ -7770,9 +7770,9 @@ class TCPDF {
 			if ($handle = @opendir(K_PATH_CACHE)) {
 				while ( false !== ( $file_name = readdir( $handle ) ) ) {
 					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0) {
-                        if(file_exists(K_PATH_CACHE.$file_name)) {
-                            @unlink(K_PATH_CACHE . $file_name);
-                        }
+						if(file_exists(K_PATH_CACHE.$file_name)) {
+							@unlink(K_PATH_CACHE . $file_name);
+						}
 					}
 				}
 				closedir($handle);
