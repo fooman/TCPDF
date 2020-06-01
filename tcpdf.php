@@ -7770,14 +7770,16 @@ class TCPDF {
 			if ($handle = @opendir(K_PATH_CACHE)) {
 				while ( false !== ( $file_name = readdir( $handle ) ) ) {
 					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0) {
-						unlink(K_PATH_CACHE.$file_name);
+                        if(file_exists(K_PATH_CACHE.$file_name)) {
+                            @unlink(K_PATH_CACHE . $file_name);
+                        }
 					}
 				}
 				closedir($handle);
 			}
 			if (isset($this->imagekeys)) {
 				foreach($this->imagekeys as $file) {
-					if (strpos($file, K_PATH_CACHE) === 0) {
+					if (strpos($file, K_PATH_CACHE) === 0 && file_exists($file)) {
 						@unlink($file);
 					}
 				}
