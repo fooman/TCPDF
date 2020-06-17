@@ -7769,7 +7769,7 @@ class TCPDF {
 			// remove all temporary files
 			if ($handle = @opendir(K_PATH_CACHE)) {
 				while ( false !== ( $file_name = readdir( $handle ) ) ) {
-					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0) {
+					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0 && @TCPDF_STATIC::file_exists(K_PATH_CACHE . $file_name)) {
 						@unlink(K_PATH_CACHE . $file_name);
 					}
 				}
@@ -7777,7 +7777,7 @@ class TCPDF {
 			}
 			if (isset($this->imagekeys)) {
 				foreach($this->imagekeys as $file) {
-					if (strpos($file, K_PATH_CACHE) === 0) {
+					if (strpos($file, K_PATH_CACHE) === 0 && @TCPDF_STATIC::file_exists($file)) {
 						@unlink($file);
 					}
 				}
