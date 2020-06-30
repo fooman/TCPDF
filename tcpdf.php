@@ -18123,14 +18123,16 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 							$colspan = 1;
 						}
 						$old_cell_padding = $this->cell_padding;
-						if (isset($dom[($dom[$trid]['parent'])]['attribute']['cellpadding'])) {
-							$crclpd = $this->getHTMLUnitToUnits($dom[($dom[$trid]['parent'])]['attribute']['cellpadding'], 1, 'px');
-							$current_cell_padding = array('L' => $crclpd, 'T' => $crclpd, 'R' => $crclpd, 'B' => $crclpd);
-						} elseif (isset($dom[($dom[$trid]['parent'])]['padding'])) {
-							$current_cell_padding = $dom[($dom[$trid]['parent'])]['padding'];
-						} else {
-							$current_cell_padding = array('L' => 0, 'T' => 0, 'R' => 0, 'B' => 0);
-						}
+                        if (isset($dom[$trid]['padding'])) {
+                            $current_cell_padding = $dom[$trid]['padding'];
+                        } elseif (isset($dom[($dom[$trid]['parent'])]['attribute']['cellpadding'])) {
+                            $crclpd = $this->getHTMLUnitToUnits($dom[($dom[$trid]['parent'])]['attribute']['cellpadding'], 1, 'px');
+                            $current_cell_padding = array('L' => $crclpd, 'T' => $crclpd, 'R' => $crclpd, 'B' => $crclpd);
+                        } elseif (isset($dom[($dom[$trid]['parent'])]['padding'])) {
+                            $current_cell_padding = $dom[($dom[$trid]['parent'])]['padding'];
+                        } else {
+                            $current_cell_padding = array('L' => 0, 'T' => 0, 'R' => 0, 'B' => 0);
+                        }
 						$this->cell_padding = $current_cell_padding;
 						if (isset($dom[$key]['height'])) {
 							// minimum cell height
