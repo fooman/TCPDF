@@ -18123,7 +18123,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 							$colspan = 1;
 						}
 						$old_cell_padding = $this->cell_padding;
-                        if (isset($dom[$trid]['padding'])) {
+                        if (isset($dom[$trid]['attribute']['style']) && strpos($dom[$trid]['attribute']['style'], 'padding') !== false) {
                             $current_cell_padding = $dom[$trid]['padding'];
                         } elseif (isset($dom[($dom[$trid]['parent'])]['attribute']['cellpadding'])) {
                             $crclpd = $this->getHTMLUnitToUnits($dom[($dom[$trid]['parent'])]['attribute']['cellpadding'], 1, 'px');
