@@ -5,7 +5,7 @@ class Example064Test extends Common
 
     const EXAMPLE_NR = '064';
     const NR_PDF_PAGES = 2;
-
+    const MEAN_SQUARE_ALLOWED_DIFF = 0.004; //lots of images
 
     public function testPdfOutput()
     {

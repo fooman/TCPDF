@@ -5,7 +5,7 @@ class Example009Test extends Common
 
     const EXAMPLE_NR = '009';
 
-    const MEAN_SQUARE_ALLOWED_DIFF = 0.00008; //lots of images
+    const MEAN_SQUARE_ALLOWED_DIFF = 0.004; //lots of images
 
     public function testPdfOutput()
     {
