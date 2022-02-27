@@ -45,6 +45,6 @@ jobs:
               run: sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
             - if: matrix.php-version == '7.0'
               name: Adjust tests for php 7.0
-              run: sed -e "s/: void//g" -i ./tests/Common.php
+              run: 'sed -e "s/: void//g" -i ./tests/Common.php'
             - name: Run php tests
               run: ./vendor/bin/phpunit
