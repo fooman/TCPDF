@@ -41,5 +41,7 @@ jobs:
                   key: composer-cache
             - name: Install dependencies
               run: composer install --no-interaction
+            - name: Ghostscript version
+              run: gs --version
             - name: Run php tests
               run: ./vendor/bin/phpunit
