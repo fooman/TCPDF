@@ -17,7 +17,7 @@ class Common extends \PHPUnit\Framework\TestCase
             'w_page'          => 'page'
         ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->tmpFileName = sprintf(__DIR__ . '/example_%s_%s.pdf', static::EXAMPLE_NR, uniqid());
         $this->expectedPdf = sprintf(__DIR__ . '/_expected_pdfs/example_%s.pdf', static::EXAMPLE_NR);
@@ -64,7 +64,7 @@ class Common extends \PHPUnit\Framework\TestCase
         }
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         //$this->removeTmpFile();
     }

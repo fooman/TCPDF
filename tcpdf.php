@@ -11693,7 +11693,7 @@ class TCPDF {
 		if ($this->state != 2) {
 			return;
 		}
-		if (!(false === strpos($style, 'F')) AND isset($fill_color)) {
+		if (!(false === strpos(is_null($style) ? '' : $style, 'F')) AND isset($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
 		$op = TCPDF_STATIC::getPathPaintOperator($style);
@@ -11766,7 +11766,7 @@ class TCPDF {
 		if (TCPDF_STATIC::empty_string($ry) OR ($ry == 0)) {
 			$ry = $rx;
 		}
-		if (!(false === strpos($style, 'F')) AND isset($fill_color)) {
+		if (!(false === strpos(is_null($style) ? '' : $style, 'F')) AND isset($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
 		$op = TCPDF_STATIC::getPathPaintOperator($style);
@@ -11985,7 +11985,7 @@ class TCPDF {
 			}
 			$nc += 4;
 		}
-		if (!(false === strpos($style, 'F')) AND isset($fill_color)) {
+		if (!(false === strpos(is_null($style) ? '' : $style, 'F')) AND isset($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
 		$op = TCPDF_STATIC::getPathPaintOperator($style);
@@ -12188,7 +12188,7 @@ class TCPDF {
 			return;
 		}
 		// Rounded
-		if (!(false === strpos($style, 'F')) AND isset($fill_color)) {
+		if (!(false === strpos(is_null($style) ? '' : $style, 'F')) AND isset($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
 		$op = TCPDF_STATIC::getPathPaintOperator($style);
