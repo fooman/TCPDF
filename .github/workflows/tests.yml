@@ -22,7 +22,7 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Install pdfinfo
-              run: sudo apt-get install -y poppler-utils
+              run: sudo apt-get install -y poppler-utils ghostscript
             - name: Use php ${{ matrix.php-version }}
               uses: shivammathur/setup-php@v2
               with:
