@@ -1,3 +1,6 @@
-/vendor
-/build
 .idea
+.phpdoc
+*.bak
+/vendor/
+/build/
+/composer.lock
