@@ -41,7 +41,7 @@ jobs:
                   key: composer-cache
             - name: Install dependencies
               run: composer install --no-interaction
-            - name: Ghostscript version
-              run: gs --version
+            - name: Disable ImageMagick Ghostscript workaround
+              run: sudo sed -i '/disable ghostscript format types/,+6d' /etc/ImageMagick-6/policy.xml
             - name: Run php tests
               run: ./vendor/bin/phpunit
