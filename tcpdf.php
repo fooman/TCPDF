@@ -1,7 +1,7 @@
 <?php
 //============================================================+
 // File name   : tcpdf.php
-// Version     : 6.4.4
+// Version     : 6.4.4.1
 // Begin       : 2002-08-03
 // Last Update : 2021-12-31
 // Author      : Nicola Asuni - Tecnick.com LTD - www.tecnick.com - info@tecnick.com
