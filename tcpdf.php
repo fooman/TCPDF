@@ -18992,7 +18992,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
                     $imgsrc = substr($imgsrc, 7);
                     $type = TCPDF_IMAGES::getImageFileType($imgsrc);
                 } else {
-					if (($imgsrc[0] === '/') AND !empty($_SERVER['DOCUMENT_ROOT']) AND ($_SERVER['DOCUMENT_ROOT'] != '/')) {
+                    if (($imgsrc[0] === '/') AND !empty($_SERVER['DOCUMENT_ROOT']) AND ($_SERVER['DOCUMENT_ROOT'] != '/')
+                        AND !@TCPDF_STATIC::file_exists($imgsrc)
+                    ) {
 						// fix image path
 						$findroot = strpos($imgsrc, $_SERVER['DOCUMENT_ROOT']);
 						if (($findroot === false) OR ($findroot > 1)) {
