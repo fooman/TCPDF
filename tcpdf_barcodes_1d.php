@@ -2179,7 +2179,7 @@ class TCPDFBarcode {
 		if (!preg_match('/^[fadtFADT]{65}$/', $code) == 1) {
 			return false;
 		}
-		$characters = str_split(strtolower($code), 1);
+		$characters = mb_str_split(strtolower($code), 1);
 		// build bars
 		$k = 0;
 		$bararray = array('code' => $code, 'maxw' => 0, 'maxh' => 3, 'bcode' => array());
