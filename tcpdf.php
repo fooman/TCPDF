@@ -1843,6 +1843,8 @@ class TCPDF {
 	 */
 	protected $allowLocalFiles = false;
 
+    protected $internal_encoding;
+
 	//------------------------------------------------------------
 	// METHODS
 	//------------------------------------------------------------

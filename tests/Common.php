@@ -4,6 +4,7 @@ class Common extends \PHPUnit\Framework\TestCase
 {
 
     protected $tmpFileName = false;
+    protected $expectedPdf;
 
     const MEAN_SQUARE_ALLOWED_DIFF = 0.00003;
 
