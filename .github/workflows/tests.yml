@@ -19,7 +19,7 @@ jobs:
         php-version: ["7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2"]
         os: [macos-latest, windows-latest]
         experimental: [false]
-        php-extensions: ["bcmath, imagick, gd", "mbstring"]
+        php-extensions: ["bcmath, imagick, gd"]
         coverage-extension: ["none"]
         exclude:
           # Somehow some tests fail under Windows and PHP 7.0,
@@ -27,16 +27,16 @@ jobs:
           - { php-version: '7.0', os: windows-latest }
         include:
           # Specify coverage extension for Ubuntu runs
-          - { php-version: '7.0', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd, mbstring', coverage-extension: 'xdebug' }
+          - { php-version: '7.0', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'xdebug' }
           # pcov is available from PHP 7.1
-          - { php-version: '7.1', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd, mbstring', coverage-extension: 'pcov' }
-          - { php-version: '7.2', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd, mbstring', coverage-extension: 'pcov' }
-          - { php-version: '7.3', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd, mbstring', coverage-extension: 'pcov' }
-          - { php-version: '7.4', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd, mbstring', coverage-extension: 'pcov' }
-          - { php-version: '8.0', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd, mbstring', coverage-extension: 'pcov' }
-          - { php-version: '8.1', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd, mbstring', coverage-extension: 'pcov' }
-          - { php-version: '8.2', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd, mbstring', coverage-extension: 'pcov' }
-          - { php-version: 'nightly', os: ubuntu-latest, experimental: true, php-extensions: 'bcmath, imagick, gd, mbstring', coverage-extension: 'pcov' }
+          - { php-version: '7.1', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'pcov' }
+          - { php-version: '7.2', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'pcov' }
+          - { php-version: '7.3', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'pcov' }
+          - { php-version: '7.4', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'pcov' }
+          - { php-version: '8.0', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'pcov' }
+          - { php-version: '8.1', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'pcov' }
+          - { php-version: '8.2', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'pcov' }
+          - { php-version: 'nightly', os: ubuntu-latest, experimental: true, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'pcov' }
     env:
       PDFINFO_BINARY: ${{ (matrix.os == 'ubuntu-latest') && '/usr/bin/pdfinfo' || ((matrix.os == 'macos-latest') && '/usr/local/bin/pdfinfo' || 'C:\ProgramData\Chocolatey\bin\pdfinfo.exe') }}
     steps:
