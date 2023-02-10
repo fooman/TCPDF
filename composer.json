@@ -23,7 +23,8 @@
     ],
     "require": {
         "php": ">=7.0.0",
-        "ext-bcmath": "*"
+        "ext-bcmath": "*",
+        "ext-mbstring": "*"
     },
     "autoload": {
         "classmap": [
