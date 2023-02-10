@@ -30,6 +30,7 @@
 
 // Include the main TCPDF library (search for installation path).
 require_once(__DIR__.'/../vendor/autoload.php');
+require_once (__DIR__ .'./config/tcpdf_config_alt.php');
 
 // create new PDF document
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
