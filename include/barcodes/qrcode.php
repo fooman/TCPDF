@@ -638,7 +638,7 @@ class QRcode {
 		$barcode_array['bcode'] = array();
 		foreach ($qrTab as $line) {
 			$arrAdd = array();
-			foreach (mb_str_split($line) as $char) {
+			foreach (str_split($line) as $char) {
 				$arrAdd[] = ($char=='1')?1:0;
 			}
 			$barcode_array['bcode'][] = $arrAdd;
@@ -1307,7 +1307,7 @@ class QRcode {
 				return $this->eatAn();
 			}
 		}
-		$this->items = $this->appendNewInputItem($this->items, QR_MODE_NM, $run, mb_str_split($this->dataStr));
+		$this->items = $this->appendNewInputItem($this->items, QR_MODE_NM, $run, str_split($this->dataStr));
 		return $run;
 	}
 
@@ -1346,7 +1346,7 @@ class QRcode {
 				return $this->eat8();
 			}
 		}
-		$this->items = $this->appendNewInputItem($this->items, QR_MODE_AN, $run, mb_str_split($this->dataStr));
+		$this->items = $this->appendNewInputItem($this->items, QR_MODE_AN, $run, str_split($this->dataStr));
 		return $run;
 	}
 
@@ -1359,7 +1359,7 @@ class QRcode {
 		while($this->identifyMode($p) == QR_MODE_KJ) {
 			$p += 2;
 		}
-		$this->items = $this->appendNewInputItem($this->items, QR_MODE_KJ, $p, mb_str_split($this->dataStr));
+		$this->items = $this->appendNewInputItem($this->items, QR_MODE_KJ, $p, str_split($this->dataStr));
 		$run = $p;
 		return $run;
 	}
@@ -1409,7 +1409,7 @@ class QRcode {
 			}
 		}
 		$run = $p;
-		$this->items = $this->appendNewInputItem($this->items, QR_MODE_8B, $run, mb_str_split($this->dataStr));
+		$this->items = $this->appendNewInputItem($this->items, QR_MODE_8B, $run, str_split($this->dataStr));
 		return $run;
 	}
 
