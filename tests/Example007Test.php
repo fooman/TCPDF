@@ -1,4 +1,32 @@
 <?php
+//============================================================+
+// File name   : example_007.php
+// Begin       : 2008-03-04
+// Last Update : 2013-05-14
+//
+// Description : Example 007 for TCPDF class
+//               Two independent columns with WriteHTMLCell()
+//
+// Author: Nicola Asuni
+//
+// (c) Copyright:
+//               Nicola Asuni
+//               Tecnick.com LTD
+//               www.tecnick.com
+//               info@tecnick.com
+//============================================================+
+
+/**
+ * Creates an example PDF TEST document using TCPDF
+ * @package com.tecnick.tcpdf
+ * @abstract TCPDF - Example: Two independent columns with WriteHTMLCell()
+ * @author Nicola Asuni
+ * @since 2008-03-04
+ * @group column
+ * @group cell
+ * @group html
+ * @group pdf
+ */
 
 class Example007Test extends Common
 {

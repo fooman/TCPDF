@@ -1,9 +1,9 @@
 <?php
 //============================================================+
 // File name   : tcpdf.php
-// Version     : 6.4.4.1
+// Version     : 6.6.2
 // Begin       : 2002-08-03
-// Last Update : 2022-08-12
+// Last Update : 2022-12-06
 // Author      : Nicola Asuni - Tecnick.com LTD - www.tecnick.com - info@tecnick.com
 // License     : GNU-LGPL v3 (http://www.gnu.org/copyleft/lesser.html)
 // -------------------------------------------------------------------
@@ -104,7 +104,7 @@
  * Tools to encode your unicode fonts are on fonts/utils directory.</p>
  * @package com.tecnick.tcpdf
  * @author Nicola Asuni
- * @version 6.5.0
+ * @version 6.6.2
  */
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -115,7 +115,7 @@
  * TCPDF project (http://www.tcpdf.org) has been originally derived in 2002 from the Public Domain FPDF class by Olivier Plathey (http://www.fpdf.org), but now is almost entirely rewritten.<br>
  * @package com.tecnick.tcpdf
  * @brief PHP class for generating PDF documents without requiring external extensions.
- * @version 6.3.2
+ * @version 6.6.2
  * @author Nicola Asuni - info@tecnick.com
  * @IgnoreAnnotation("protected")
  * @IgnoreAnnotation("public")
@@ -2021,9 +2021,6 @@ class TCPDF {
 		$this->header_xobj_autoreset = false;
 		$this->custom_xmp = '';
 		$this->custom_xmp_rdf = '';
-		// Call cleanup method after script execution finishes or exit() is called.
-		// NOTE: This will not be executed if the process is killed with a SIGTERM or SIGKILL signal.
-		register_shutdown_function(array($this, '_destroy'), true);
 	}
 
 	/**
@@ -4280,7 +4277,7 @@ class TCPDF {
 			// all fonts must be embedded
 			$family = 'pdfa'.$family;
 		}
-		$tempstyle = strtoupper($style);
+		$tempstyle = strtoupper($style === null ? '' : $style);
 		$style = '';
 		// underline
 		if (strpos($tempstyle, 'U') !== false) {
@@ -4347,6 +4344,22 @@ class TCPDF {
 		}
 		// include font file
 		if (!TCPDF_STATIC::empty_string($fontfile) AND (@TCPDF_STATIC::file_exists($fontfile))) {
+			$type=null;
+			$name=null;
+			$desc=null;
+			$up=-null;
+			$ut=null;
+			$cw=null;
+			$cbbox=null;
+			$dw=null;
+			$enc=null;
+			$cidinfo=null;
+			$file=null;
+			$ctg=null;
+			$diff=null;
+			$originalsize=null;
+			$size1=null;
+			$size2=null;
 			include($fontfile);
 		} else {
 			$this->Error('Could not include font definition file: '.$family.'');
@@ -5524,12 +5537,12 @@ class TCPDF {
 			$xdk = $xdx * $k;
 			// print text
 			$s .= sprintf('BT %F %F Td [(%s)] TJ ET', $xdk, (($this->h - $basefonty) * $k), $txt2);
-			if (isset($uniblock)) {
+			if (isset($uniblock)) { // @phpstan-ignore-line
 				// print overlapping characters as separate string
 				$xshift = 0; // horizontal shift
 				$ty = (($this->h - $basefonty + (0.2 * $this->FontSize)) * $k);
 				$spw = (($w - $txwidth - $this->cell_padding['L'] - $this->cell_padding['R']) / ($ns?$ns:1));
-				foreach ($uniblock as $uk => $uniarr) {
+				foreach ($uniblock as $uk => $uniarr) { // @phpstan-ignore-line
 					if (($uk % 2) == 0) {
 						// x space to skip
 						if ($spacewidth != 0) {
@@ -7101,8 +7114,6 @@ class TCPDF {
 			} elseif ($type == 'jpg') {
 				$type = 'jpeg';
 			}
-			$mqr = TCPDF_STATIC::get_mqr();
-			TCPDF_STATIC::set_mqr(false);
 			// Specific image handlers (defined on TCPDF_IMAGES CLASS)
 			$mtd = '_parse'.$type;
 			// GD image handler function
@@ -7204,7 +7215,6 @@ class TCPDF {
 				// unable to process image
 				return false;
 			}
-			TCPDF_STATIC::set_mqr($mqr);
 			if ($ismask) {
 				// force grayscale
 				$info['cs'] = 'DeviceGray';
@@ -7232,7 +7242,7 @@ class TCPDF {
 		} elseif ($palign == 'R') {
 			$ximg = $this->w - $this->rMargin - $w;
 		} else {
-			$ximg = $x;
+			$ximg = $this->rtl ? $x - $w : $x;
 		}
 
 		if ($ismask OR $hidden) {
@@ -7616,7 +7626,7 @@ class TCPDF {
 	 * Send the document to a given destination: string, local file or browser.
 	 * In the last case, the plug-in may be used (if present) or a download ("Save as" dialog box) may be forced.<br />
 	 * The method first calls Close() if necessary to terminate the document.
-	 * @param string $name The name of the file when saved. Note that special characters are removed and blanks characters are replaced with the underscore character.
+	 * @param string $name The name of the file when saved
 	 * @param string $dest Destination where to send the document. It can take one of the following values:<ul><li>I: send the file inline to the browser (default). The plug-in is used if available. The name given by name is used when one selects the "Save as" option on the link generating the PDF.</li><li>D: send to the browser and force a file download with the name given by name.</li><li>F: save to a local server file with the name given by name.</li><li>S: return the document as a string (name is ignored).</li><li>FI: equivalent to F + I option</li><li>FD: equivalent to F + D option</li><li>E: return the document as base64 mime multi-part email attachment (RFC 2045)</li></ul>
 	 * @return string
 	 * @public
@@ -7634,10 +7644,7 @@ class TCPDF {
 			$dest = $dest ? 'D' : 'F';
 		}
 		$dest = strtoupper($dest);
-		if ($dest[0] != 'F' && $name !== null) {
-			$name = preg_replace('/[\s]+/', '_', $name);
-			$name = preg_replace('/[^a-zA-Z0-9_\.-]/', '', $name);
-		}
+
 		if ($this->sign) {
 			// *** apply digital signature to the document ***
 			// get the document content
@@ -7708,7 +7715,8 @@ class TCPDF {
 					header('Pragma: public');
 					header('Expires: Sat, 26 Jul 1997 05:00:00 GMT'); // Date in the past
 					header('Last-Modified: '.gmdate('D, d M Y H:i:s').' GMT');
-					header('Content-Disposition: inline; filename="'.basename($name).'"');
+					header('Content-Disposition: inline; filename="' . rawurlencode(basename($name)) . '"; ' .
+						'filename*=UTF-8\'\'' . rawurlencode(basename($name)));
 					TCPDF_STATIC::sendOutputData($this->getBuffer(), $this->bufferlen);
 				} else {
 					echo $this->getBuffer();
@@ -7739,7 +7747,8 @@ class TCPDF {
 					header('Content-Type: application/pdf');
 				}
 				// use the Content-Disposition header to supply a recommended filename
-				header('Content-Disposition: attachment; filename="'.basename($name).'"');
+				header('Content-Disposition: attachment; filename="' . rawurlencode(basename($name)) . '"; ' .
+					'filename*=UTF-8\'\'' . rawurlencode(basename($name)));
 				header('Content-Transfer-Encoding: binary');
 				TCPDF_STATIC::sendOutputData($this->getBuffer(), $this->bufferlen);
 				break;
@@ -8869,8 +8878,6 @@ class TCPDF {
 			$this->_newobj();
 			$this->_out('<< /Type /Encoding /BaseEncoding /WinAnsiEncoding /Differences ['.$diff.'] >>'."\n".'endobj');
 		}
-		$mqr = TCPDF_STATIC::get_mqr();
-		TCPDF_STATIC::set_mqr(false);
 		foreach ($this->FontFiles as $file => $info) {
 			// search and get font file to embedd
 			$fontfile = TCPDF_FONTS::getFontFullPath($file, $info['fontdir']);
@@ -8924,7 +8931,6 @@ class TCPDF {
 				$this->_out($out);
 			}
 		}
-		TCPDF_STATIC::set_mqr($mqr);
 		foreach ($this->fontkeys as $k) {
 			//Font objects
 			$font = $this->getFontBuffer($k);
@@ -9193,6 +9199,7 @@ class TCPDF {
 		foreach ($this->imagekeys as $file) {
 			$info = $this->getImageBuffer($file);
 			// set object for alternate images array
+			$altoid = null;
 			if ((!$this->pdfa_mode) AND isset($info['altimgs']) AND !empty($info['altimgs'])) {
 				$altoid = $this->_newobj();
 				$out = '[';
@@ -9240,7 +9247,7 @@ class TCPDF {
 				$out .= ' /Decode [1 0 1 0 1 0 1 0]';
 			}
 			$out .= ' /BitsPerComponent '.$info['bpc'];
-			if (isset($altoid) AND ($altoid > 0)) {
+			if ($altoid > 0) {
 				// reference to alternate images dictionary
 				$out .= ' /Alternates '.$altoid.' 0 R';
 			}
@@ -11730,7 +11737,7 @@ class TCPDF {
 		if ($this->state != 2) {
 			return;
 		}
-		if (!(false === strpos($style, 'F')) AND isset($fill_color)) {
+		if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
 		$op = TCPDF_STATIC::getPathPaintOperator($style);
@@ -15074,9 +15081,7 @@ class TCPDF {
 		// translate
 		$this->_out(sprintf('%F %F %F %F %F %F cm', 1, 0, 0, 1, $dx, $dy + ($this->hPt - (2 * $y * $k) - ($y2 - $y1))));
 		// scale
-		if (isset($scale_x)) {
-			$this->_out(sprintf('%F %F %F %F %F %F cm', $scale_x, 0, 0, $scale_y, $x1 * (1 - $scale_x), $y2 * (1 - $scale_y)));
-		}
+		$this->_out(sprintf('%F %F %F %F %F %F cm', $scale_x, 0, 0, $scale_y, $x1 * (1 - $scale_x), $y2 * (1 - $scale_y)));
 		// handle pc/unix/mac line endings
 		$lines = preg_split('/[\r\n]+/si', $data, -1, PREG_SPLIT_NO_EMPTY);
 		$u=0;
@@ -16360,6 +16365,7 @@ class TCPDF {
 				break;
 			}
 			default: {
+				$parentSize = $this->getHTMLUnitToUnits($parent_size, $refsize, $defaultunit, true);
 				$size = $this->getHTMLUnitToUnits($val, $parent_size, $defaultunit, true);
 			}
 		}
@@ -17741,7 +17747,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 							$pend = '';
 						}
 					}
-					if ((isset($plalign) AND ((($plalign == 'C') OR ($plalign == 'J') OR (($plalign == 'R') AND (!$this->rtl)) OR (($plalign == 'L') AND ($this->rtl)))))) {
+					if ((((($plalign == 'C') OR ($plalign == 'J') OR (($plalign == 'R') AND (!$this->rtl)) OR (($plalign == 'L') AND ($this->rtl)))))) {
 						// calculate shifting amount
 						$tw = $w;
 						if (($plalign == 'J') AND $this->isRTLTextDir() AND ($this->num_columns > 1)) {
@@ -18349,7 +18355,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 							$dom[$trid]['cellpos'][($cellid - 1)]['bgcolor'] = $dom[$parentid]['bgcolor'];
 						}
 						// store border info
-						if (isset($tdborder) AND !empty($tdborder)) {
+						if (!empty($tdborder)) {
 							$dom[$trid]['cellpos'][($cellid - 1)]['border'] = $tdborder;
 						}
 						$prevLastH = $this->lasth;
@@ -18585,7 +18591,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 						$strrest = $this->Write($this->lasth, $dom[$key]['value'], '', $wfill, '', false, 0, true, $firstblock, 0, $wadj);
 						// restore default direction
 						if ($reverse_dir AND ($wadj == 0)) {
-							$this->x = $xws;
+							$this->x = $xws; // @phpstan-ignore-line
 							$this->rtl = !$this->rtl;
 							$reverse_dir = false;
 						}
@@ -18694,7 +18700,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 					$pend = '';
 				}
 			}
-			if ((isset($plalign) AND ((($plalign == 'C') OR (($plalign == 'R') AND (!$this->rtl)) OR (($plalign == 'L') AND ($this->rtl)))))) {
+			if ((((($plalign == 'C') OR (($plalign == 'R') AND (!$this->rtl)) OR (($plalign == 'L') AND ($this->rtl)))))) {
 				// calculate shifting amount
 				$tw = $w;
 				if ($this->lMargin != $prevlMargin) {
@@ -19001,6 +19007,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 					// data stream
 					$imgsrc = '@'.base64_decode(substr($imgsrc, 1));
 					$type = '';
+				} else if (preg_match('@^data:image/([^;]*);base64,(.*)@', $imgsrc, $reg)) {
+					$imgsrc = '@'.base64_decode($reg[2]);
+					$type = $reg[1];
 				} elseif ( $this->allowLocalFiles && substr($imgsrc, 0, 7) === 'file://') {
                     // get image type from a local file path
                     $imgsrc = substr($imgsrc, 7);
@@ -19716,7 +19725,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 					$table_el = $dom[($dom[$key]['parent'])];
 				}
 				// for each row
-				if (count($table_el['trids']) > 0) {
+				if (!empty($table_el['trids'])) {
 					unset($xmax);
 				}
 				foreach ($table_el['trids'] as $j => $trkey) {
@@ -23896,9 +23905,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 			}
 			$firstcmd = false;
 		} // end foreach
-		if (!empty($op)) {
-			$this->_out($op);
-		}
+		$this->_out($op);
 		return array($xmin, $ymin, ($xmax - $xmin), ($ymax - $ymin));
 	}
 

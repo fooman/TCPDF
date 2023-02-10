@@ -1,4 +1,31 @@
 <?php
+//============================================================+
+// File name   : example_061.php
+// Begin       : 2010-05-24
+// Last Update : 2014-01-25
+//
+// Description : Example 061 for TCPDF class
+//               XHTML + CSS
+//
+// Author: Nicola Asuni
+//
+// (c) Copyright:
+//               Nicola Asuni
+//               Tecnick.com LTD
+//               www.tecnick.com
+//               info@tecnick.com
+//============================================================+
+
+/**
+ * Creates an example PDF TEST document using TCPDF
+ * @package com.tecnick.tcpdf
+ * @abstract TCPDF - Example: XHTML + CSS
+ * @author Nicola Asuni
+ * @since 2010-05-25
+ * @group html
+ * @group css
+ * @group pdf
+ */
 
 class Example061Test extends Common
 {
