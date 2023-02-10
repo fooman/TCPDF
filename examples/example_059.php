@@ -29,7 +29,7 @@
 
 // Include the main TCPDF library (search for installation path).
 require_once(__DIR__.'/../vendor/autoload.php');
-require_once (__DIR__ .'./config/tcpdf_config_alt.php');
+require_once (__DIR__ .'/config/tcpdf_config_alt.php');
 
 /**
  * TCPDF class extension with custom header and footer for TOC page
