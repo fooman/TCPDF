@@ -16,31 +16,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ["5.3", "5.4", "5.5", "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2"]
+        php-version: ["7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1", "8.2"]
         os: [macos-latest, windows-latest]
         experimental: [false]
         php-extensions: ["bcmath, imagick, gd"]
         coverage-extension: ["none"]
         exclude:
-          # For now, we do not know how to run workflow on Windows
-          # with imagick PHP extension for PHP 5.3 - 5.6
-          - { php-version: '5.3', os: windows-latest }
-          - { php-version: '5.4', os: windows-latest }
-          - { php-version: '5.5', os: windows-latest }
-          - { php-version: '5.6', os: windows-latest }
           # Somehow some tests fail under Windows and PHP 7.0,
           # so we disable that run for now
           - { php-version: '7.0', os: windows-latest }
         include:
-          - { php-version: '5.3', os: windows-latest, experimental: false, php-extensions: 'bcmath, gd', coverage-extension: 'none' }
-          - { php-version: '5.4', os: windows-latest, experimental: false, php-extensions: 'bcmath, gd', coverage-extension: 'none' }
-          - { php-version: '5.5', os: windows-latest, experimental: false, php-extensions: 'bcmath, gd', coverage-extension: 'none' }
-          - { php-version: '5.6', os: windows-latest, experimental: false, php-extensions: 'bcmath, gd', coverage-extension: 'none' }
           # Specify coverage extension for Ubuntu runs
-          - { php-version: '5.3', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'xdebug' }
-          - { php-version: '5.4', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'xdebug' }
-          - { php-version: '5.5', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'xdebug' }
-          - { php-version: '5.6', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'xdebug' }
           - { php-version: '7.0', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'xdebug' }
           # pcov is available from PHP 7.1
           - { php-version: '7.1', os: ubuntu-latest, experimental: false, php-extensions: 'bcmath, imagick, gd', coverage-extension: 'pcov' }
