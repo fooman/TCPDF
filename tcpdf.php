@@ -18633,7 +18633,7 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 			++$key;
 			if (isset($dom[$key]['tag']) AND $dom[$key]['tag'] AND (!isset($dom[$key]['opening']) OR !$dom[$key]['opening']) AND isset($dom[($dom[$key]['parent'])]['attribute']['nobr']) AND ($dom[($dom[$key]['parent'])]['attribute']['nobr'] == 'true')) {
 				// check if we are on a new page or on a new column
-				if ((!$undo) AND (($this->y < $this->start_transaction_y) OR (($dom[$key]['value'] == 'tr') AND ($dom[($dom[$key]['parent'])]['endy'] < $this->start_transaction_y)))) {
+                if ((!$undo) AND (($this->getPage() > $this->start_transaction_page) OR ($this->y < $this->start_transaction_y) OR (($dom[$key]['value'] == 'tr') AND ($dom[($dom[$key]['parent'])]['endy'] < $this->start_transaction_y)))) {
 					// we are on a new page or on a new column and the total object height is less than the available vertical space.
 					// restore previous object
 					$this->rollbackTransaction(true);
