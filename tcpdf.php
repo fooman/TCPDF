@@ -19599,11 +19599,11 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 		switch($tag['value']) {
 			case 'tr': {
 				$table_el = $dom[($dom[$key]['parent'])]['parent'];
-				if (!isset($parent['endy'])) {
+				if (!isset($parent['endy']) || $parent['endpage'] != $this->page) {
 					$dom[($dom[$key]['parent'])]['endy'] = $this->y;
 					$parent['endy'] = $this->y;
 				}
-				if (!isset($parent['endpage'])) {
+                if (!isset($parent['endpage']) || $parent['endpage'] != $this->page) {
 					$dom[($dom[$key]['parent'])]['endpage'] = $this->page;
 					$parent['endpage'] = $this->page;
 				}
