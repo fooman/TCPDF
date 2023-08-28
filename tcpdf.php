@@ -18255,8 +18255,6 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 						}
 						if (!isset($dom[$trid]['startpage'])) {
 							$dom[$trid]['startpage'] = $this->page;
-						} else {
-							$this->setPage($dom[$trid]['startpage']);
 						}
 						if (!isset($dom[$trid]['startcolumn'])) {
 							$dom[$trid]['startcolumn'] = $this->current_column;
@@ -18269,6 +18267,9 @@ Putting 1 is equivalent to putting 0 and calling Ln() just after. Default value:
 							$dom[$trid]['starty'] = $this->y;
 						} else {
 							$this->y = $dom[$trid]['starty'];
+						}
+						if ($dom[$trid]['startpage'] != $this->page) {
+							$this->y = $this->tMargin;
 						}
 						if (!isset($dom[$trid]['startx'])) {
 							$dom[$trid]['startx'] = $this->x;
