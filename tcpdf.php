@@ -7114,7 +7114,7 @@ class TCPDF {
 		}
 		if ($newimage) {
 			//First use of image, get info
-            $type = strtolower($type);
+            $type = strtolower($type ?? '');
 			if ($type == '') {
 				$type = TCPDF_IMAGES::getImageFileType($file, $imsize);
 			} elseif ($type == 'jpg') {
@@ -11713,7 +11713,7 @@ class TCPDF {
 		if ($this->state != 2) {
 			return;
 		}
-        if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
+        if (!(false === strpos($style ?? '', 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
 		$op = TCPDF_STATIC::getPathPaintOperator($style);
@@ -11786,7 +11786,7 @@ class TCPDF {
 		if (TCPDF_STATIC::empty_string($ry) OR ($ry == 0)) {
 			$ry = $rx;
 		}
-        if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
+        if (!(false === strpos($style ?? '', 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
 		$op = TCPDF_STATIC::getPathPaintOperator($style);
@@ -12005,7 +12005,7 @@ class TCPDF {
 			}
 			$nc += 4;
 		}
-        if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
+        if (!(false === strpos($style ?? '', 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
 		$op = TCPDF_STATIC::getPathPaintOperator($style);
@@ -12208,7 +12208,7 @@ class TCPDF {
 			return;
 		}
 		// Rounded
-        if (!(false === strpos($style, 'F')) AND is_array($fill_color)) {
+        if (!(false === strpos($style ?? '', 'F')) AND is_array($fill_color)) {
 			$this->setFillColorArray($fill_color);
 		}
 		$op = TCPDF_STATIC::getPathPaintOperator($style);
