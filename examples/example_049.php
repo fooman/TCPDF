@@ -110,6 +110,8 @@ $html .= '<tcpdf method="SetDrawColor" params="'.$params.'" />';
 $params = $pdf->serializeTCPDFtagParameters(array(50, 50, 40, 10, 'DF', array(), array(0,128,255)));
 $html .= '<tcpdf method="Rect" params="'.$params.'" />';
 
+$params = $pdf->serializeTCPDFtagParameters(array('images/image_demo.jpg', 200, 100, 54, 80, null, null, null, true));
+$html .= '<tcpdf method="Image" params="'.$params.'" />';
 
 // output the HTML content
 $pdf->writeHTML($html, true, 0, true, 0);
