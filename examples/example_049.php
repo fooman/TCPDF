@@ -83,7 +83,7 @@ If you are printing user-generated content, the tcpdf tag should be considered u
 This tag is disabled by default by the K_TCPDF_CALLS_IN_HTML constant on TCPDF configuration file.
 Please use this feature only if you are in control of the HTML content and you are sure that it does not contain any harmful code.
 
-For security reasons, the parameters for the 'params' attribute of TCPDF 
+For security reasons, the parameters for the 'params' attribute of TCPDF
 tag must be prepared as an array and encoded with the
 serializeTCPDFtagParameters() method (see the example below).
 
@@ -112,8 +112,6 @@ $html .= '<tcpdf data="'.$data.'" />';
 $data = $pdf->serializeTCPDFtag('Rect', array(50, 50, 40, 10, 'DF', array(), array(0,128,255)));
 $html .= '<tcpdf data="'.$data.'" />';
 
-$params = $pdf->serializeTCPDFtagParameters(array('images/image_demo.jpg', 200, 100, 54, 80, null, null, null, true));
-$html .= '<tcpdf method="Image" params="'.$params.'" />';
 
 // output the HTML content
 $pdf->writeHTML($html, true, 0, true, 0);
