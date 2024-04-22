@@ -1,7 +1,7 @@
 <?php
 //============================================================+
 // File name   : tcpdf.php
-// Version     : 6.7.3
+// Version     : 6.7.5
 // Begin       : 2002-08-03
 // Last Update : 2024-03-18
 // Author      : Nicola Asuni - Tecnick.com LTD - www.tecnick.com - info@tecnick.com
@@ -115,7 +115,7 @@
  * TCPDF project (http://www.tcpdf.org) has been originally derived in 2002 from the Public Domain FPDF class by Olivier Plathey (http://www.fpdf.org), but now is almost entirely rewritten.<br>
  * @package com.tecnick.tcpdf
  * @brief PHP class for generating PDF documents without requiring external extensions.
- * @version 6.7.3
+ * @version 6.7.5
  * @author Nicola Asuni - info@tecnick.com
  * @IgnoreAnnotation("protected")
  * @IgnoreAnnotation("public")
@@ -824,6 +824,13 @@ class TCPDF {
 	 * @since 5.0.005 (2010-05-12)
 	 */
 	protected $file_id;
+
+	/**
+	 * Internal secret used to encrypt data.
+	 * @protected
+	 * @since 6.7.5 (2024-03-21)
+	 */
+	protected $hash_key;
 
 	// --- bookmark ---
 
@@ -1877,10 +1884,10 @@ class TCPDF {
 		// set file ID for trailer
 		$serformat = (is_array($format) ? json_encode($format) : $format);
 		$this->file_id = md5(TCPDF_STATIC::getRandomSeed('TCPDF'.$orientation.$unit.$serformat.$encoding));
+		$this->hash_key = hash_hmac('sha256', TCPDF_STATIC::getRandomSeed($this->file_id), TCPDF_STATIC::getRandomSeed('TCPDF'), false);
 		$this->font_obj_ids = array();
 		$this->page_obj_id = array();
 		$this->form_obj_id = array();
-
 		// set pdf/a mode
 		if ($pdfa != false) {
 			$this->pdfa_mode = true;
@@ -17215,6 +17222,16 @@ class TCPDF {
 	}
 
 	/**
+	 * Calculates the hash value of the given data.
+	 *
+	 * @param string $data The data to be hashed.
+	 * @return string The hashed value of the data.
+	 */
+	protected function hashTCPDFtag($data) {
+		return hash_hmac('sha256', $data, $this->hash_key, false);
+	}
+
+	/**
 	 * Serialize data to be used with TCPDF tag in HTML code.
 	 * @param string $method TCPDF method name
 	 * @param array $params Method parameters
@@ -17224,7 +17241,7 @@ class TCPDF {
 	public function serializeTCPDFtag($method, $params=array()) {
 		$data = array('m' => $method, 'p' => $params);
 		$encoded = urlencode(json_encode($data));
-		$hash = password_hash($encoded.'+'.$this->file_id, PASSWORD_DEFAULT);
+		$hash = $this->hashTCPDFtag($encoded);
 		return strlen($hash).'+'.$hash.'+'.$encoded;
 	}
 
@@ -17239,7 +17256,7 @@ class TCPDF {
 		$hlen = intval(substr($data, 0, $hpos));
 		$hash = substr($data, $hpos + 1, $hlen);
 		$encoded = substr($data, $hpos + 2 + $hlen);
-		if (!password_verify($encoded.'+'.$this->file_id, $hash)) {
+		if ($hash != $this->hashTCPDFtag($encoded)) {
 			$this->Error('Invalid parameters');
 		}
 		return json_decode(urldecode($encoded), true);
