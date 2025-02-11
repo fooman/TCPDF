@@ -133,25 +133,6 @@ class TestExecutor
         return $this->pdfTools->isPdf($outputFile);
     }
 
-    public function assertIsPdfStandardValidFile($file)
-    {
-        $exec = implode(' ', array(
-            'docker',
-            'run',
-            '-v $(pwd):/data',
-            '--rm ',
-            '-w /data/',
-            'pdfix/validation:latest',
-            'validate',
-            '-i ' . escapeshellarg($file),
-        ));
-        if ($this->verbose) {
-            echo $exec . PHP_EOL;
-        }
-        exec($exec, $output, $resultCode);
-        return (0 === $resultCode);
-    }
-
     /**
      * @param string $outputFile Path to output file
      * @param string $outputFileError Path to error file

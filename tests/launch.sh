@@ -125,6 +125,12 @@ for file in $EXAMPLE_FILES; do
             FAILED_FLAG=1
             echo "Generated-invalid-file: $file"
         fi
+
+        docker run -v $(pwd):/data --rm -w /data/ pdfix/validation:latest validate -i "${OUTPUT_FILE}"
+        if [ $? -gt 0 ]; then
+            FAILED_FLAG=1
+            echo "Generated pdf file failed validation: $file"
+        fi
     else
         FAILED_FLAG=1
         echo "File-run-failed: $file"

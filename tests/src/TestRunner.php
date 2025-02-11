@@ -236,16 +236,6 @@ class TestRunner
             }
             echo '    Lint: PASSED' . PHP_EOL;
 
-            if (!$this->testExecutor->assertIsPhpValidFile($this->exampleDir . $file)) {
-                echo '    VALIDATION: FAILED' . PHP_EOL;
-                $this->failed[] = $file;
-                if ($this->shouldStopOn('failure')) {
-                    break;
-                }
-                continue;
-            }
-            echo '    VALIDATION: PASSED' . PHP_EOL;
-
             if (!$this->preserveFiles) {
                 $outputFile = $outputFolder . 'output.pdf';
                 $outputFileError = $outputFolder . 'errors.txt';
