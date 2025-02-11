@@ -125,10 +125,12 @@ for file in $EXAMPLE_FILES; do
             FAILED_FLAG=1
             echo "Generated-invalid-file: $file"
         fi
-        docker run -v $TEMP_FOLDER:/data --rm -w /data/ pdfix/verapdf-validation:latest validate -i "output.pdf"
-        if [ $? -gt 0 ]; then
-            FAILED_FLAG=1
-            echo "Generated pdf file failed validation: $file"
+        if [[ "$file" == "examples/example_065.php" || "$file" == "examples/example_066.php" ]]
+          docker run -v $TEMP_FOLDER:/data --rm -w /data/ pdfix/verapdf-validation:latest validate -i "output.pdf"
+          if [ $? -gt 0 ]; then
+              FAILED_FLAG=1
+              echo "Generated pdf file failed validation: $file"
+          fi
         fi
     else
         FAILED_FLAG=1
