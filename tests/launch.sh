@@ -132,6 +132,9 @@ for file in $EXAMPLE_FILES; do
               FAILED_FLAG=1
               echo "Generated pdf file failed validation: $file"
               echo $VALIDATION_OUTPUT
+          else
+            VALIDATION_PROFILE="$(echo $VALIDATION_OUTPUT |  jq '.report.jobs[0].validationResult[0].profileName')"
+            echo "Pdf validated with $VALIDATION_PROFILE: $file"
           fi
         fi
     else
