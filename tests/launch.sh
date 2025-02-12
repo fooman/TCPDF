@@ -126,8 +126,8 @@ for file in $EXAMPLE_FILES; do
             echo "Generated-invalid-file: $file"
         fi
         if [ "$file" = "examples/example_065.php" ] || [ "$file" = "examples/example_066.php" ]; then
-          VALIDATION_OUTPUT = "$(docker run -v $TEMP_FOLDER:/data --rm -w /data/ pdfix/verapdf-validation:latest validate --format 'json' -i 'output.pdf')"
-          VALIDATION_RESULT = "$(echo $VALIDATION_OUTPUT |  jq '.report.jobs[0].validationResult[0].compliant')"
+          VALIDATION_OUTPUT="$(docker run -v $TEMP_FOLDER:/data --rm -w /data/ pdfix/verapdf-validation:latest validate --format 'json' -i 'output.pdf')"
+          VALIDATION_RESULT="$(echo $VALIDATION_OUTPUT |  jq '.report.jobs[0].validationResult[0].compliant')"
           if [ "$VALIDATION_RESULT" = "false" ]; then
               FAILED_FLAG=1
               echo "Generated pdf file failed validation: $file"
