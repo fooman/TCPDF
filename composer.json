@@ -12,7 +12,7 @@
         "barcodes"
     ],
     "homepage": "http://www.tcpdf.org/",
-    "version": "6.8.2-p1",
+    "version": "6.9.1-p1",
     "license": "LGPL-3.0-or-later",
     "authors": [
         {
@@ -30,8 +30,6 @@
         "classmap": [
             "include",
             "tcpdf.php",
-            "tcpdf_parser.php",
-            "tcpdf_import.php",
             "tcpdf_barcodes_1d.php",
             "tcpdf_barcodes_2d.php",
             "include/tcpdf_colors.php",
@@ -50,5 +48,10 @@
     },
     "conflict": {
         "fooman/pdfcore-m2": "<22.0.0"
+    },
+    "archive": {
+        "exclude": [
+            "/examples"
+        ]
     }
 }
