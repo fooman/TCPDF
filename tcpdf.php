@@ -1,9 +1,9 @@
 <?php
 //============================================================+
 // File name   : tcpdf.php
-// Version     : 6.9.1
+// Version     : 6.9.3
 // Begin       : 2002-08-03
-// Last Update : 2025-04-03
+// Last Update : 2025-04-18
 // Author      : Nicola Asuni - Tecnick.com LTD - www.tecnick.com - info@tecnick.com
 // License     : GNU-LGPL v3 (http://www.gnu.org/copyleft/lesser.html)
 // -------------------------------------------------------------------
@@ -104,7 +104,7 @@
  * Tools to encode your unicode fonts are on fonts/utils directory.</p>
  * @package com.tecnick.tcpdf
  * @author Nicola Asuni
- * @version 6.9.1
+ * @version 6.9.3
  */
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -115,7 +115,7 @@
  * TCPDF project (http://www.tcpdf.org) has been originally derived in 2002 from the Public Domain FPDF class by Olivier Plathey (http://www.fpdf.org), but now is almost entirely rewritten.<br>
  * @package com.tecnick.tcpdf
  * @brief PHP class for generating PDF documents without requiring external extensions.
- * @version 6.9.1
+ * @version 6.9.3
  * @author Nicola Asuni - info@tecnick.com
  * @IgnoreAnnotation("protected")
  * @IgnoreAnnotation("public")
@@ -7024,7 +7024,7 @@ class TCPDF {
 			unset($imgdata);
 			$imsize = @getimagesize($file);
 			if ($imsize === FALSE) {
-				unlink($file);
+				$this->_unlink($file);
 				$file = $original_file;
 			}
 		}
@@ -7257,7 +7257,7 @@ class TCPDF {
 					$tempname = TCPDF_STATIC::getObjFilename('img', $this->file_id);
 					$img->writeImage($tempname);
 					$info = TCPDF_IMAGES::_parsejpeg($tempname);
-					unlink($tempname);
+					$this->_unlink($tempname);
 					$img->destroy();
 				} catch(Exception $e) {
 					$info = false;
@@ -7892,16 +7892,17 @@ class TCPDF {
 			// remove all temporary files
 			if ($handle = @opendir(K_PATH_CACHE)) {
 				while ( false !== ( $file_name = readdir( $handle ) ) ) {
-					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0 && @TCPDF_STATIC::file_exists(K_PATH_CACHE . $file_name)) {
-						@unlink(K_PATH_CACHE . $file_name);
+					if (strpos($file_name, '__tcpdf_'.$this->file_id.'_') === 0) {
+						$this->_unlink(K_PATH_CACHE.$file_name);
 					}
 				}
 				closedir($handle);
 			}
 			if (isset($this->imagekeys)) {
 				foreach($this->imagekeys as $file) {
-					if (strpos($file, K_PATH_CACHE) === 0 && TCPDF_STATIC::file_exists($file)) {
-						@unlink($file);
+					if ((strpos($file,  K_PATH_CACHE.'__tcpdf_'.$this->file_id.'_') === 0)
+						&& TCPDF_STATIC::file_exists($file)) {
+							$this->_unlink($file);
 					}
 				}
 			}
@@ -18929,8 +18930,20 @@ class TCPDF {
 	 * @protected
 	 * @since 6.9.1
 	 */
-	 protected function isRelativePath($path) {
+	protected function isRelativePath($path) {
 		return (strpos(str_ireplace('%2E', '.', $this->unhtmlentities($path)), '..') !== false);
+	}
+
+	/**
+	 * Check if it contains a non-allowed external protocol.
+	 * @param string $path path to check
+	 * @return boolean true if the protocol is not allowed.
+	 * @protected
+	 * @since 6.9.3
+	 */
+	protected function hasExtForbiddenProtocol($path) {
+		return ((strpos($path, '://') !== false)
+			&& (preg_match('|^https?://|', $path) !== 1));
 	}
 
 	/**
@@ -19129,11 +19142,13 @@ class TCPDF {
 					// accessing parent folders is not allowed
 					break;
 				} elseif ( $this->allowLocalFiles && substr($imgsrc, 0, 7) === 'file://') {
-                    // get image type from a local file path
-                    $imgsrc = substr($imgsrc, 7);
-                    $type = TCPDF_IMAGES::getImageFileType($imgsrc);
-                } else {
-                    if (($imgsrc[0] === '/') AND !empty($_SERVER['DOCUMENT_ROOT']) AND ($_SERVER['DOCUMENT_ROOT'] != '/')
+					// get image type from a local file path
+					$imgsrc = substr($imgsrc, 7);
+					$type = TCPDF_IMAGES::getImageFileType($imgsrc);
+				} elseif ($this->hasExtForbiddenProtocol($imgsrc)) {
+					break;
+				} else {
+					if (($imgsrc[0] === '/') AND !empty($_SERVER['DOCUMENT_ROOT']) AND ($_SERVER['DOCUMENT_ROOT'] != '/')
                         AND !@TCPDF_STATIC::file_exists($imgsrc)
                     ) {
 						// fix image path
@@ -24534,8 +24549,7 @@ class TCPDF {
 						$img = '@'.base64_decode(substr($img, strlen($m[0])));
 					} else {
 						// fix image path
-						if ($this->isRelativePath($img)) {
-							// accessing parent folders is not allowed
+						if ($this->isRelativePath($img) || $this->hasExtForbiddenProtocol($img)) {
 							break;
 						}
 						if (!TCPDF_STATIC::empty_string($this->svgdir) AND (($img[0] == '.') OR (basename($img) == $img))) {
@@ -24847,6 +24861,20 @@ class TCPDF {
 
         return TCPDF_STATIC::file_exists($file);
     }
+
+	/**
+	 * Wrapper for unlink with disabled protocols.
+	 * @param string $file
+	 * @return bool
+	 */
+	protected function _unlink($file)
+	{
+		if ((strpos($file, '://') !== false) && ((substr($file, 0, 7) !== 'file://') || (!$this->allowLocalFiles))) {
+			// forbidden protocol
+			return false;
+		}
+		return @unlink($file);
+	}
 
 } // END OF TCPDF CLASS
 
