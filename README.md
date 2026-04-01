@@ -1,13 +1,13 @@
 # TCPDF
 *PHP PDF Library*
 
-[![Donate via PayPal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&currency_code=GBP&business=paypal@tecnick.com&item_name=donation%20for%20TCPDF%20project)
-*Please consider supporting this project by making a donation via [PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&currency_code=GBP&business=paypal@tecnick.com&item_name=donation%20for%20TCPDF%20project)*
+[![Donate via PayPal](https://img.shields.io/badge/donate-paypal-87ceeb.svg)](https://www.paypal.com/donate/?hosted_button_id=NZUEC5XS8MFBJ)
+*Please consider supporting this project by making a donation via [PayPal](https://www.paypal.com/donate/?hosted_button_id=NZUEC5XS8MFBJ)*
 
 * **category**    Library
 * **author**      Nicola Asuni <info@tecnick.com>
-* **copyright**   2002-2025 Nicola Asuni - Tecnick.com LTD
-* **license**     http://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
+* **copyright**   2002-2026 Nicola Asuni - Tecnick.com LTD
+* **license**     https://www.gnu.org/copyleft/lesser.html GNU-LGPL v3 (see LICENSE.TXT)
 * **link**        http://www.tcpdf.org
 * **source**      https://github.com/tecnickcom/TCPDF
 
@@ -71,4 +71,4 @@ https://packages.debian.org/source/stable/icc-profiles-free
 
 ## Developer(s) Contact
 
-* Nicola Asuni <info@tecnick.com>
+*2026 Nicola Asuni <info@tecnick.com>
